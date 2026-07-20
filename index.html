@@ -595,11 +595,24 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
 
 /* ============ V3.4 ============ */
-/* Theme accent variables */
-[data-accent="orange"]{--work:#ff9124;--work-ink:#2a1400}
-[data-accent="blue"]  {--work:#4aa8ff;--work-ink:#01162a}
-[data-accent="red"]   {--work:#ff5478;--work-ink:#2a020a}
-[data-accent="pink"]  {--work:#ff5ac8;--work-ink:#2a0421}
+/* Theme accent variables - explizit --accent & --accent-ink setzen,
+   damit ALLE Elemente (nicht nur --work-basierte) die Akzentfarbe übernehmen */
+[data-accent="green"] {--work:#c6f135;--work-ink:#12200a;--accent:#c6f135;--accent-ink:#12200a}
+[data-accent="orange"]{--work:#ff9124;--work-ink:#2a1400;--accent:#ff9124;--accent-ink:#2a1400}
+[data-accent="blue"]  {--work:#4aa8ff;--work-ink:#01162a;--accent:#4aa8ff;--accent-ink:#01162a}
+[data-accent="red"]   {--work:#ff5478;--work-ink:#2a020a;--accent:#ff5478;--accent-ink:#2a020a}
+[data-accent="pink"]  {--work:#ff5ac8;--work-ink:#2a0421;--accent:#ff5ac8;--accent-ink:#2a0421}
+/* Zusätzliche Akzent-Highlights in den Einstellungen */
+#settings-main .set-note{color:var(--accent);opacity:.85}
+#settings-main .set-ic:not(.danger){color:color-mix(in srgb,var(--accent) 55%,var(--muted))}
+#settings-main .theme-seg button.on,
+#settings-main .rpe-btn.on,
+#settings-main .sync-pill.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.section-label{color:color-mix(in srgb,var(--accent) 45%,var(--muted2))}
+.brand-title{color:var(--chalk)}
+.brand-sub{color:color-mix(in srgb,var(--accent) 40%,var(--muted))}
+.wk-round{color:var(--accent)}
+.hist-ic{color:var(--accent)}
 
 /* Compact plan cards */
 body[data-compact="1"] .plan-list{gap:8px}
@@ -1282,7 +1295,7 @@ const DEFAULTS={
   favorites:[], prs:{}, skills:{},
   flags:{ homeHintDismissed:false },
   settings:{ sound:true, vibrate:true, wakeLock:true, beeps:true, prepare:5,
-             theme:'dark', accent:'green', compact:false,
+             theme:'dark', accent:'green', compact:false, defaultPlanColor:'none',
              defaultRestEx:30, defaultRestCycle:120,
              trackReps:true, askRpe:true, askNotes:true, voice:false, weeklyGoal:3,
              reminderEnabled:false, reminderTime:'18:00', reminderDays:[1,2,3,4,5],
@@ -2092,7 +2105,10 @@ function planCardHTML(p){
   const est=Math.round(estimate(p)/60);
   const restLabel = p.restBetweenExercises+'s / '+fmt(p.restBetweenCycles);
   const fav=isFavorite(p.id);
-  return `<article class="plan-card" data-id="${esc(p.id)}"${p.color?' data-color="'+esc(p.color)+'"':''}>
+  /* Effektive Farbe: Plan-eigene Farbe > Standardfarbe aus Einstellungen > Akzent */
+  const dfl=DB.settings.defaultPlanColor||'none';
+  const effColor = p.color || (dfl!=='none' ? dfl : null);
+  return `<article class="plan-card" data-id="${esc(p.id)}"${effColor?' data-color="'+esc(effColor)+'"':''}>
     <div class="pc-top">
       <div style="min-width:0">
         <div class="pc-name">${esc(p.name||'Ohne Titel')}</div>
@@ -2993,6 +3009,13 @@ function renderSettings(){
           <div class="theme-accent ${s.accent==='pink'?'on':''}"   data-a="pink"></div>
         </div></div>
       ${switchRow('compact','Kompakter Modus','Kleinere Plan-Karten in der Übersicht',s.compact)}
+      <div class="set-row"><div class="grow"><div class="st-title">Standardfarbe für alle Pläne</div><div class="st-sub">Gilt für Pläne ohne eigene Farbmarkierung</div></div></div>
+      <div class="set-row"><div class="color-picker" id="def-plan-color" style="width:100%">
+        ${['none','red','orange','yellow','green','blue','purple','pink'].map(c=>{
+          const sel=(s.defaultPlanColor||'none')===c;
+          return `<div class="color-swatch ${sel?'on':''}" data-defcol="${c}">${c==='none'?'×':''}</div>`;
+        }).join('')}
+      </div></div>
     </div>
     <div class="set-note">Erinnerungen</div>
     <div class="set-group">
@@ -3051,7 +3074,11 @@ function renderSettings(){
   bindNum('set-goal','weeklyGoal',0,14);
   // theme
   $$('#theme-seg [data-theme-opt]').forEach(b=> b.addEventListener('click',()=>{ setTheme(b.dataset.themeOpt); renderSettings(); }));
-  $$('#accent-picker [data-a]').forEach(b=> b.addEventListener('click',()=>{ DB.settings.accent=b.dataset.a; document.body.dataset.accent=b.dataset.a; save(); renderSettings(); }));
+  $$('#accent-picker [data-a]').forEach(b=> b.addEventListener('click',()=>{ DB.settings.accent=b.dataset.a; document.body.dataset.accent=b.dataset.a; save(); renderSettings(); toast('Akzentfarbe geändert'); }));
+  $$('#def-plan-color [data-defcol]').forEach(el=>el.addEventListener('click',()=>{
+    DB.settings.defaultPlanColor = el.dataset.defcol;
+    save(); renderSettings(); toast('Standardfarbe gespeichert');
+  }));
   const rt=$('#set-remtime'); if(rt) rt.addEventListener('change',()=>{ s.reminderTime=rt.value||'18:00'; save(); scheduleNextReminder(); });
   $$('#days-picker [data-remday]').forEach(b=> b.addEventListener('click',()=>{
     const day=+b.dataset.remday;
