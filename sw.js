@@ -1,5 +1,5 @@
 /* BARWORK Service Worker – Offline-Cache & Updates */
-const VERSION = 'barwork-v1';
+const VERSION = 'barwork-v2-login';
 const FONT_CACHE = 'barwork-fonts-v1';
 const CORE = [
   './',

@@ -15,3 +15,25 @@ Offline-Betrieb und Installation auf dem Home-Bildschirm.
 - **iPhone/Safari:** Teilen-Symbol → „Zum Home-Bildschirm“.
 
 Alle Daten (eigene Pläne, Verlauf) bleiben lokal auf dem Gerät.
+
+
+### Firebase Login & Fortschrittsspeicherung
+Diese Version enthält Firebase Authentication mit E-Mail/Passwort sowie Firestore-Sync pro Benutzerkonto.
+
+Vor dem produktiven Einsatz bitte in Firebase kontrollieren:
+- Authentication → Sign-in method → E-Mail/Passwort aktivieren.
+- Firestore Database anlegen.
+- Firestore Rules für die App setzen, z. B. nur Zugriff auf die eigenen User-Daten zulassen:
+
+```js
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/barwork/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+Die App kann weiterhin ohne Login lokal genutzt werden. Beim Login werden lokale Daten mit Cloud-Daten zusammengeführt.

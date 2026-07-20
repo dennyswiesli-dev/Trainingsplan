@@ -352,9 +352,56 @@ input,select,textarea{font-family:inherit;font-size:16px}
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.001ms !important;transition-duration:.05ms !important}
 }
+
+/* ============ AUTH / LOGIN ============ */
+.auth-main{flex:1;display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 22px) 16px calc(env(safe-area-inset-bottom) + 24px)}
+.auth-card{width:100%;max-width:430px;background:var(--panel);border:1px solid var(--line);border-radius:26px;padding:24px;box-shadow:var(--shadow)}
+.auth-logo{width:86px;height:86px;border-radius:22px;display:block;margin:0 auto 14px;box-shadow:0 8px 26px rgba(0,0,0,.45)}
+.auth-title{font-family:var(--font-d);font-size:38px;letter-spacing:1.2px;text-align:center;line-height:1;margin-bottom:5px}
+.auth-sub{text-align:center;color:var(--muted);font-size:13.5px;font-weight:700;margin-bottom:22px}
+.auth-status{display:none;margin:0 0 14px;padding:10px 12px;border-radius:12px;font-size:13px;font-weight:700;background:color-mix(in srgb,var(--danger) 12%,var(--panel2));border:1px solid color-mix(in srgb,var(--danger) 38%,transparent);color:var(--danger)}
+.auth-status.ok{background:color-mix(in srgb,var(--work) 13%,var(--panel2));border-color:color-mix(in srgb,var(--work) 35%,transparent);color:var(--work)}
+.auth-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--muted2);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--line);flex:1}
+.auth-small{color:var(--muted2);font-size:12px;font-weight:600;text-align:center;margin-top:12px}
+.sync-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:800}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted2)}
+.sync-pill.on .sync-dot{background:var(--work)}
+.sync-pill.err .sync-dot{background:var(--danger)}
+
 </style>
 </head>
 <body data-theme="dark" data-view="home">
+
+
+<!-- ===================== LOGIN ===================== -->
+<section id="view-auth" class="view">
+  <main class="auth-main">
+    <div class="auth-card">
+      <img class="auth-logo" src="icon-192.png" alt="BARWORK Logo">
+      <div class="auth-title">BARWORK</div>
+      <div class="auth-sub">Login aktivieren und Trainingsfortschritt geräteübergreifend speichern</div>
+      <div id="auth-status" class="auth-status"></div>
+      <div class="field">
+        <label for="auth-email">E-Mail</label>
+        <input class="input" id="auth-email" type="email" autocomplete="email" placeholder="name@example.com">
+      </div>
+      <div class="field">
+        <label for="auth-pass">Passwort</label>
+        <input class="input" id="auth-pass" type="password" autocomplete="current-password" placeholder="Mind. 6 Zeichen">
+      </div>
+      <div class="auth-actions">
+        <button class="btn btn-primary" id="auth-login">Einloggen</button>
+        <button class="btn btn-ghost" id="auth-register">Registrieren</button>
+      </div>
+      <button class="btn btn-soft btn-block" id="auth-reset" style="margin-top:10px">Passwort zurücksetzen</button>
+      <div class="auth-divider">oder</div>
+      <button class="btn btn-ghost btn-block" id="auth-local">Ohne Login lokal weiter</button>
+      <div class="auth-small">Mit Login werden Pläne, Verlauf und Einstellungen in Firebase Firestore je Benutzerkonto gespeichert. Ohne Login bleibt alles wie bisher nur auf diesem Gerät.</div>
+    </div>
+  </main>
+</section>
 
 <!-- ===================== HOME ===================== -->
 <section id="view-home" class="view active">
@@ -637,7 +684,139 @@ function load(){
     DB.flags = Object.assign({}, DEFAULTS.flags, DB.flags||{});
   }catch(e){ DB = structuredClone(DEFAULTS); }
 }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
+  cloudScheduleSave();
+}
+/* ========================= FIREBASE LOGIN / CLOUD SYNC ========================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyDjzQd2HOos5Wim4G4Ze34Zwul_PE1xWvo",
+  authDomain: "training-madbarz.firebaseapp.com",
+  projectId: "training-madbarz",
+  storageBucket: "training-madbarz.firebasestorage.app",
+  messagingSenderId: "409722949417",
+  appId: "1:409722949417:web:f55e8bebaad6ac44d0b138",
+  measurementId: "G-WD8Z1Y4WD7"
+};
+let FB={ ready:false, user:null, auth:null, db:null, lastError:'', syncing:false, localMode:false, saveTimer:null };
+let FIRE=null;
+function cloudMsg(){
+  if(FB.lastError) return 'Sync-Fehler';
+  if(FB.user && FB.ready) return 'Cloud-Sync aktiv';
+  if(FB.localMode) return 'Lokaler Modus';
+  return 'Nicht eingeloggt';
+}
+function authStatus(msg, ok){
+  const el=$('#auth-status'); if(!el) return;
+  el.textContent=msg||''; el.style.display=msg?'block':'none'; el.classList.toggle('ok',!!ok);
+}
+function cleanForCloud(obj){ return JSON.parse(JSON.stringify(obj||{})); }
+function mergeUniqueById(a,b){
+  const m=new Map(); (a||[]).concat(b||[]).forEach(x=>{ if(x&&x.id) m.set(x.id,x); }); return Array.from(m.values());
+}
+function mergeHistory(a,b){
+  const m=new Map(); (a||[]).concat(b||[]).forEach(x=>{
+    if(!x||!x.date) return; const k=[x.date,x.planId,x.durationSec,x.completed].join('|'); if(!m.has(k)) m.set(k,x);
+  });
+  return Array.from(m.values()).sort((x,y)=>(y.date||0)-(x.date||0)).slice(0,200);
+}
+function mergeDb(local, remote){
+  if(!remote) return local;
+  const l=structuredClone(local||DEFAULTS), r=structuredClone(remote||{});
+  return {
+    customPlans: mergeUniqueById(l.customPlans, r.customPlans),
+    overrides: Object.assign({}, r.overrides||{}, l.overrides||{}),
+    hidden: Array.from(new Set([...(r.hidden||[]),...(l.hidden||[])])),
+    history: mergeHistory(l.history, r.history),
+    flags: Object.assign({}, DEFAULTS.flags, r.flags||{}, l.flags||{}),
+    settings: Object.assign({}, DEFAULTS.settings, r.settings||{}, l.settings||{})
+  };
+}
+async function initFirebase(){
+  try{
+    const appMod = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js');
+    const authMod = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js');
+    const fsMod = await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+    FIRE={...appMod,...authMod,...fsMod};
+    const app=FIRE.initializeApp(firebaseConfig);
+    FB.auth=FIRE.getAuth(app); FB.db=FIRE.getFirestore(app); FB.ready=true;
+    FIRE.onAuthStateChanged(FB.auth, async (user)=>{
+      FB.user=user; FB.lastError='';
+      if(user){ await loadCloudDb(); show('home', true); toast('Eingeloggt: '+(user.email||'Benutzer')); }
+      else if(!FB.localMode){ show('auth', false); renderAuth(); }
+      renderSettings();
+    });
+  }catch(err){
+    FB.lastError=err.message||String(err);
+    authStatus('Firebase konnte nicht geladen werden. Du kannst lokal weitertrainieren.', false);
+    renderAuth();
+  }
+}
+function userDocRef(){ return FIRE.doc(FB.db,'users',FB.user.uid,'barwork','state'); }
+async function loadCloudDb(){
+  if(!FB.ready || !FB.user) return;
+  try{
+    const snap=await FIRE.getDoc(userDocRef());
+    if(snap.exists()){
+      DB=mergeDb(DB, snap.data().db);
+      try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
+    }
+    await cloudSaveNow(true);
+  }catch(err){ FB.lastError=err.message||String(err); toast('Cloud-Sync fehlgeschlagen'); }
+}
+function cloudScheduleSave(){
+  if(!FB.ready || !FB.user || FB.syncing) return;
+  clearTimeout(FB.saveTimer);
+  FB.saveTimer=setTimeout(()=>cloudSaveNow(false),900);
+}
+async function cloudSaveNow(silent){
+  if(!FB.ready || !FB.user) return;
+  FB.syncing=true; FB.lastError=''; renderSettings();
+  try{
+    await FIRE.setDoc(userDocRef(), { db: cleanForCloud(DB), updatedAt: FIRE.serverTimestamp(), app:'BARWORK' }, { merge:true });
+    if(!silent) toast('Fortschritt synchronisiert');
+  }catch(err){ FB.lastError=err.message||String(err); if(!silent) toast('Cloud-Sync fehlgeschlagen'); }
+  finally{ FB.syncing=false; renderSettings(); }
+}
+async function doAuth(mode){
+  const email=$('#auth-email').value.trim(); const pass=$('#auth-pass').value;
+  if(!email || !pass){ authStatus('Bitte E-Mail und Passwort eingeben.', false); return; }
+  if(pass.length<6){ authStatus('Das Passwort muss mindestens 6 Zeichen haben.', false); return; }
+  authStatus(mode==='register'?'Konto wird erstellt...':'Login läuft...', true);
+  try{
+    if(mode==='register') await FIRE.createUserWithEmailAndPassword(FB.auth,email,pass);
+    else await FIRE.signInWithEmailAndPassword(FB.auth,email,pass);
+    FB.localMode=false; authStatus('', true);
+  }catch(err){ authStatus(firebaseErrorText(err), false); }
+}
+async function doPasswordReset(){
+  const email=$('#auth-email').value.trim();
+  if(!email){ authStatus('Bitte zuerst die E-Mail-Adresse eingeben.', false); return; }
+  try{ await FIRE.sendPasswordResetEmail(FB.auth,email); authStatus('Passwort-E-Mail wurde gesendet.', true); }
+  catch(err){ authStatus(firebaseErrorText(err), false); }
+}
+async function logout(){
+  try{ await cloudSaveNow(true); if(FB.auth) await FIRE.signOut(FB.auth); FB.localMode=false; show('auth',true); }
+  catch(err){ toast('Logout fehlgeschlagen'); }
+}
+function firebaseErrorText(err){
+  const c=(err&&err.code)||'';
+  const map={
+    'auth/invalid-email':'Die E-Mail-Adresse ist ungültig.',
+    'auth/user-not-found':'Kein Konto mit dieser E-Mail gefunden.',
+    'auth/wrong-password':'Passwort ist nicht korrekt.',
+    'auth/invalid-credential':'Login-Daten sind ungültig.',
+    'auth/email-already-in-use':'Für diese E-Mail existiert bereits ein Konto.',
+    'auth/weak-password':'Das Passwort ist zu schwach. Bitte mindestens 6 Zeichen verwenden.',
+    'auth/network-request-failed':'Netzwerkfehler. Bitte Internetverbindung prüfen.'
+  };
+  return map[c] || ('Firebase-Fehler: '+(err.message||c||'unbekannt'));
+}
+function renderAuth(){
+  authStatus(FB.lastError && !FB.ready ? 'Firebase konnte nicht geladen werden. Du kannst lokal weitertrainieren.' : '', false);
+  ['auth-login','auth-register','auth-reset'].forEach(id=>{ const b=$('#'+id); if(b) b.disabled=!FB.ready; });
+}
+
 
 /* ========================= HELPERS ========================= */
 const $=(s,r=document)=>r.querySelector(s);
@@ -671,6 +850,7 @@ function show(view, push=true){
   $$('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+view));
   document.body.dataset.view=view;
   const prev=currentView; currentView=view;
+  if(view==='auth') renderAuth();
   if(view==='home') renderHome();
   if(view==='history') renderHistory();
   if(view==='settings') renderSettings();
@@ -1202,6 +1382,12 @@ function renderSettings(){
   const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   const m=$('#settings-main');
   m.innerHTML=`
+    <div class="set-note">Konto & Sync</div>
+    <div class="set-group">
+      <div class="set-row"><div class="grow"><div class="st-title">${FB.user ? esc(FB.user.email||'Eingeloggt') : 'Nicht eingeloggt'}</div><div class="st-sub">${cloudMsg()}</div></div>
+        <span class="sync-pill ${FB.user&&FB.ready&&!FB.lastError?'on':(FB.lastError?'err':'')}"><i class="sync-dot"></i>${FB.syncing?'Synchronisiert...':(FB.user?'Firebase':'Lokal')}</span></div>
+      ${FB.user?`<div class="set-row"><button class="btn btn-soft btn-block" id="btn-sync-now">${svg('save')} Jetzt synchronisieren</button></div><div class="set-row"><button class="btn btn-danger btn-block" id="btn-logout">Abmelden</button></div>`:`<div class="set-row"><button class="btn btn-primary btn-block" id="btn-go-login">Einloggen / registrieren</button></div>`}
+    </div>
     ${standalone?'':`<div class="set-note">App</div>
     <div class="set-group">
       <div class="set-row"><div class="grow"><div class="st-title">Zum Home-Bildschirm</div><div class="st-sub" id="install-sub">Als App installieren – offline & Vollbild</div></div><span id="install-slot"></span></div>
@@ -1246,7 +1432,7 @@ function renderSettings(){
       <div class="set-row" data-action="import"><div class="grow"><div class="st-title">Daten importieren</div><div class="st-sub">Aus einer Sicherung laden</div></div>${svg('copy')}</div>
       <div class="set-row" data-action="reset"><div class="grow"><div class="st-title" style="color:var(--danger)">Alles zurücksetzen</div><div class="st-sub">Eigene Pläne, Verlauf & Einstellungen löschen</div></div><span style="color:var(--danger)">${svg('trash')}</span></div>
     </div>
-    <div class="app-foot">BARWORK v1.0 · Deine Daten bleiben nur auf diesem Gerät.</div>
+    <div class="app-foot">BARWORK v1.1 · Login mit Firebase · lokale Nutzung weiterhin möglich.</div>
     <input type="file" id="import-file" accept="application/json,.json" style="display:none">
   `;
   // wire switches
@@ -1271,6 +1457,9 @@ function renderSettings(){
   $('#import-file').addEventListener('change',importData);
   // install
   renderInstallSlot();
+  const lo=$('#btn-logout'); if(lo) lo.addEventListener('click', logout);
+  const sn=$('#btn-sync-now'); if(sn) sn.addEventListener('click', ()=>cloudSaveNow(false));
+  const gl=$('#btn-go-login'); if(gl) gl.addEventListener('click', ()=>show('auth',true));
 }
 function switchRow(key,title,sub,on){
   return `<div class="set-row"><div class="grow"><div class="st-title">${esc(title)}</div><div class="st-sub">${esc(sub)}</div></div>
@@ -1389,13 +1578,20 @@ $('#done-again').addEventListener('click',()=>{ const id=W.plan.id; W=null; star
 $('#scrim').addEventListener('click',closeSheet);
 $('#sheet-x').addEventListener('click',closeSheet);
 
+// auth controls
+$('#auth-login').addEventListener('click',()=>doAuth('login'));
+$('#auth-register').addEventListener('click',()=>doAuth('register'));
+$('#auth-reset').addEventListener('click',doPasswordReset);
+$('#auth-local').addEventListener('click',()=>{ FB.localMode=true; show('home',true); toast('Lokaler Modus aktiv'); });
+$('#auth-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doAuth('login'); });
 /* ========================= INIT ========================= */
 function init(){
   load();
   document.body.dataset.theme=DB.settings.theme||'dark';
   const m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', DB.settings.theme==='light'?'#eef1f5':'#0B0E13');
-  history.replaceState({view:'home'},'');
-  show('home',false);
+  history.replaceState({view:'auth'},'');
+  show('auth',false);
+  initFirebase();
   // service worker
   if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
 }
