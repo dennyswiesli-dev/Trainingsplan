@@ -1009,9 +1009,6 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
     </div>
     <div class="progress"><i id="wk-progress"></i></div>
     <div class="dots" id="wk-dots"></div>
-    <button class="wk-live-note-btn" id="wk-live-note" style="display:none">
-      <span id="wk-live-note-ic"></span><span id="wk-live-note-txt">Notiz</span>
-    </button>
 
     <div class="stage" id="wk-stage">
       <div class="ring" id="wk-ring">
@@ -1189,7 +1186,7 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
 <section id="view-wc-editor" class="view">
   <div class="wrap">
     <div class="view-head">
-      <button class="back-btn" data-nav="settings"><span id="wc-back-ic"></span>Zurück</button>
+      <button class="back-btn" id="wc-back-btn"><span id="wc-back-ic"></span>Zurück</button>
       <h2 id="wc-editor-title">Aufwärm-Plan</h2>
       <span style="width:44px"></span>
     </div>
@@ -2517,7 +2514,7 @@ function openWcEditor(kind){
   $('#wc-btn-add-ex').innerHTML=svg('plus')+' Übung hinzufügen';
   $('#wc-btn-delete').style.display = stored ? '' : 'none';
   renderWcExEditor();
-  show('wc-editor');
+  show('wc-editor', true);
 }
 function renderWcExEditor(){
   const c=$('#wc-ex-editor'); if(!c||!_editingWc) return;
@@ -2569,14 +2566,14 @@ function saveWcPlan(){
   if(!_editingWc.plan.exercises.length){ toast('Mindestens eine Übung nötig'); return; }
   if(_editingWc.kind==='warmup') DB.warmupPlan = _editingWc.plan;
   else DB.cooldownPlan = _editingWc.plan;
-  save(); _editingWc=null; show('settings'); toast('Gespeichert');
+  save(); _editingWc=null; history.back(); toast('Gespeichert');
 }
 function deleteWcPlan(){
   if(!_editingWc) return;
   const kind=_editingWc.kind;
   confirmSheet('Auf Standard zurücksetzen?','Deine Anpassungen gehen verloren.','Zurücksetzen',()=>{
     if(kind==='warmup') DB.warmupPlan=null; else DB.cooldownPlan=null;
-    save(); _editingWc=null; show('settings'); toast('Auf Standard zurückgesetzt');
+    save(); _editingWc=null; history.back(); toast('Auf Standard zurückgesetzt');
   });
 }
 /* ========================= CHALLENGES RENDER ========================= */
@@ -3455,7 +3452,7 @@ function renderStep(){
       adjust.style.display='none';
       primary.classList.remove('paused');
       primary.innerHTML= W.paused? svgFill('play')+' Weiter' : svgFill('pause')+' Pause';
-      hintEl.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="wk-alt-btn" id="wk-alt-btn">'+svg('swap')+' Alternative</button><a class="yt-btn-workout" href="'+ytUrl(e.name)+'" target="_blank" rel="noopener">'+svg('play')+' YouTube</a></div>';
+      hintEl.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="wk-alt-btn" id="wk-alt-btn">'+svg('swap')+' Alternative</button><a class="yt-btn-workout" href="'+ytUrl(e.name)+'" target="_blank" rel="noopener">'+svg('play')+' YouTube</a>'+liveNoteBtnHtml()+'</div>';
     } else {
       bigEl.textContent=e.reps;
       unitEl.textContent='Wiederholungen';
@@ -3479,6 +3476,7 @@ function renderStep(){
           + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
           +   '<button class="wk-alt-btn" id="wk-alt-btn">'+svg('swap')+' Alternative</button>'
           +   '<a class="yt-btn-workout" href="'+ytUrl(e.name)+'" target="_blank" rel="noopener">'+svg('play')+' YouTube</a>'
+          +   liveNoteBtnHtml()
           + '</div>'
           + '</div>';
         /* Superset badge */
@@ -4114,6 +4112,7 @@ $('#btn-save-plan').addEventListener('click',savePlan);
 $('#wc-btn-save').addEventListener('click',saveWcPlan);
 $('#wc-btn-delete').addEventListener('click',deleteWcPlan);
 $('#wc-btn-add-ex').addEventListener('click',()=>{ syncWcEditor(); _editingWc.plan.exercises.push({name:'',duration:30}); renderWcExEditor(); });
+$('#wc-back-btn').addEventListener('click',()=>{ _editingWc=null; history.back(); });
 $('#wc-ex-editor').addEventListener('click',e=>{
   const pick=e.target.closest('[data-pickopen]');
   if(pick){ e.stopPropagation(); syncWcEditor(); openWcExercisePicker(+pick.dataset.pickopen); return; }
@@ -4131,27 +4130,89 @@ $('#wc-ex-editor').addEventListener('click',e=>{
     $('[data-unit]',row).textContent = seg.dataset.type==='time'?'Sek.':'Wdh.';
   }
 });
+/* Spezielle Übungs-Bibliothek für Warm-up (dynamisch) und Stretching (statisch) */
+const WARMUP_LIB = [
+  {id:'wu_arm_circles',   name:'Arm Circles',        de:'Arm-Kreisen',                type:'time', defDur:30},
+  {id:'wu_shoulder_rolls',name:'Shoulder Rolls',     de:'Schulter-Kreisen',           type:'time', defDur:30},
+  {id:'wu_neck_rolls',    name:'Neck Rolls',         de:'Nacken-Kreisen',             type:'time', defDur:20},
+  {id:'wu_jumping_jacks', name:'Jumping Jacks',      de:'Hampelmänner',               type:'time', defDur:45},
+  {id:'wu_high_knees',    name:'High Knees',         de:'Hohe Knie',                  type:'time', defDur:30},
+  {id:'wu_butt_kicks',    name:'Butt Kicks',         de:'Anfersen',                   type:'time', defDur:30},
+  {id:'wu_bw_squats',     name:'Bodyweight Squats',  de:'Kniebeugen (leicht)',        type:'time', defDur:30},
+  {id:'wu_leg_swings',    name:'Leg Swings',         de:'Beinschwünge',               type:'reps', defReps:10},
+  {id:'wu_hip_circles',   name:'Hip Circles',        de:'Hüft-Kreisen',               type:'reps', defReps:10},
+  {id:'wu_lunges_walk',   name:'Walking Lunges',     de:'Ausfallschritte (gehend)',   type:'reps', defReps:10},
+  {id:'wu_inchworms',     name:'Inchworms',          de:'Inchworms (Raupe)',          type:'reps', defReps:8},
+  {id:'wu_worlds_greatest',name:"World's Greatest Stretch",de:'Kombinierte Mobilisation',type:'reps',defReps:6},
+  {id:'wu_bird_dog',      name:'Bird Dog',           de:'Vierfüßler-Streckung',       type:'reps', defReps:8},
+  {id:'wu_scap_pulls',    name:'Scapular Pulls',     de:'Schulterblatt-Aktivierung',  type:'reps', defReps:8},
+  {id:'wu_dead_hang',     name:'Dead Hang',          de:'Passives Hängen',            type:'time', defDur:20},
+  {id:'wu_wrist_rolls',   name:'Wrist Rolls',        de:'Handgelenks-Kreisen',        type:'time', defDur:20},
+  {id:'wu_ankle_rolls',   name:'Ankle Rolls',        de:'Fußgelenks-Kreisen',         type:'time', defDur:20},
+  {id:'wu_cat_cow_dyn',   name:'Cat-Cow (dynamisch)',de:'Katze-Kuh dynamisch',        type:'reps', defReps:10},
+  {id:'wu_torso_twist',   name:'Standing Torso Twist',de:'Standrumpf-Drehung',        type:'reps', defReps:10},
+  {id:'wu_side_bends',    name:'Side Bends',         de:'Seitliche Neigung',          type:'reps', defReps:10}
+];
+const STRETCH_LIB = [
+  {id:'st_chest',         name:'Chest Stretch',      de:'Brust dehnen',               type:'time', defDur:30},
+  {id:'st_shoulder',      name:'Shoulder Stretch',   de:'Schulter dehnen',            type:'time', defDur:30},
+  {id:'st_cross_arm',     name:'Cross-Body Stretch', de:'Schulter (kreuz) dehnen',    type:'time', defDur:30},
+  {id:'st_triceps',       name:'Triceps Stretch',    de:'Trizeps dehnen',             type:'time', defDur:30},
+  {id:'st_biceps',        name:'Biceps Stretch',     de:'Bizeps dehnen',              type:'time', defDur:30},
+  {id:'st_wrist_flex',    name:'Wrist Flexor Stretch',de:'Handgelenk-Beuger dehnen',  type:'time', defDur:25},
+  {id:'st_wrist_ext',     name:'Wrist Extensor Stretch',de:'Handgelenk-Strecker dehnen',type:'time',defDur:25},
+  {id:'st_upper_back',    name:'Upper Back Stretch', de:'Oberer Rücken dehnen',       type:'time', defDur:30},
+  {id:'st_child_pose',    name:"Child's Pose",       de:'Kindsstellung',              type:'time', defDur:45},
+  {id:'st_cat_cow',       name:'Cat-Cow',            de:'Katze-Kuh (statisch)',       type:'time', defDur:30},
+  {id:'st_cobra',         name:'Cobra Stretch',      de:'Kobra',                      type:'time', defDur:30},
+  {id:'st_hamstring',     name:'Hamstring Stretch',  de:'Beinrückseite dehnen',       type:'time', defDur:45},
+  {id:'st_quad',          name:'Quad Stretch',       de:'Vorderer Oberschenkel dehnen',type:'time',defDur:30},
+  {id:'st_calf',          name:'Calf Stretch',       de:'Wade dehnen',                type:'time', defDur:30},
+  {id:'st_pigeon',        name:'Pigeon Pose',        de:'Taube (Hüftöffner)',         type:'time', defDur:45},
+  {id:'st_butterfly',     name:'Butterfly Stretch',  de:'Schmetterling (Adduktoren)', type:'time', defDur:45},
+  {id:'st_hip_flexor',    name:'Hip Flexor Stretch', de:'Hüftbeuger dehnen',          type:'time', defDur:30},
+  {id:'st_seated_twist',  name:'Seated Spinal Twist',de:'Sitzende Wirbelsäulen-Drehung',type:'time',defDur:30},
+  {id:'st_lying_twist',   name:'Lying Spinal Twist', de:'Liegende Wirbelsäulen-Drehung',type:'time',defDur:30},
+  {id:'st_downward_dog',  name:'Downward Dog',       de:'Herabschauender Hund',       type:'time', defDur:30},
+  {id:'st_forward_fold',  name:'Standing Forward Fold',de:'Stehende Vorwärtsbeuge',   type:'time', defDur:30},
+  {id:'st_neck_side',     name:'Neck Side Stretch',  de:'Nacken seitlich dehnen',     type:'time', defDur:20},
+  {id:'st_figure_four',   name:'Figure 4 Stretch',   de:'Vier-Stellung (Gesäß)',      type:'time', defDur:30},
+  {id:'st_savasana',      name:'Savasana',           de:'Totenstellung (Entspannung)',type:'time', defDur:60}
+];
 function openWcExercisePicker(targetIdx){
-  const cats=['all','shoulders','back','core','legs','cardio','full'];
-  const cb=cats.map(c=>`<button data-pcat="${c}" class="${c==='all'?'on':''}">${esc(CAT_LABEL[c])}</button>`).join('');
+  /* Vorschlag basierend auf Editor-Typ */
+  const suggested = _editingWc && _editingWc.kind==='warmup' ? 'warmup' : 'stretch';
+  const cats=[
+    {v:'warmup', label:'🌡️ Aufwärmen'},
+    {v:'stretch',label:'🧘 Stretching'},
+    {v:'all',    label:'Alle'},
+    {v:'shoulders',label:'Schultern'},
+    {v:'back',   label:'Rücken'},
+    {v:'core',   label:'Bauch'},
+    {v:'legs',   label:'Beine'},
+    {v:'cardio', label:'Ausdauer'}
+  ];
+  const cb=cats.map(c=>`<button data-pcat="${c.v}" class="${c.v===suggested?'on':''}">${esc(c.label)}</button>`).join('');
   const body=`<div class="picker-search"><input class="input" id="wcpick-q" placeholder="Suche..." autocomplete="off"></div>
     <div class="picker-cat" id="wcpick-cats">${cb}</div>
     <div class="picker-list" id="wcpick-list"></div>`;
   openSheet('Übung auswählen', body);
-  let state={q:'',cat:'all'};
+  let state={q:'', cat:suggested};
   const render=()=>{
     const q=state.q.toLowerCase().trim();
-    const items=EX_LIB.filter(x=>{
-      if(state.cat!=='all' && !(x.muscle||[]).includes(state.cat)) return false;
-      if(!q) return true;
-      return (x.name+' '+x.de+' '+(x.aliases||[]).join(' ')).toLowerCase().includes(q);
-    });
+    let items;
+    if(state.cat==='warmup'){ items = WARMUP_LIB.slice(); }
+    else if(state.cat==='stretch'){ items = STRETCH_LIB.slice(); }
+    else if(state.cat==='all'){ items = WARMUP_LIB.concat(STRETCH_LIB, EX_LIB); }
+    else { items = EX_LIB.filter(x=>(x.muscle||[]).includes(state.cat)); }
+    if(q){ items = items.filter(x=>(x.name+' '+(x.de||'')+' '+((x.aliases||[]).join(' '))).toLowerCase().includes(q)); }
     $('#wcpick-list').innerHTML = items.map(x=>{
       const def=x.type==='time'?`${x.defDur}<small>Sek.</small>`:`${x.defReps}<small>Wdh.</small>`;
       return `<button class="picker-item" data-wcpid="${esc(x.id)}"><div class="pi-info"><div class="pi-nm">${esc(x.name)}</div><div class="pi-de">${esc(x.de||'')}</div></div><div class="pi-def">${def}</div></button>`;
     }).join('') || '<div class="empty" style="padding:20px 0">Keine Treffer</div>';
     $$('#wcpick-list [data-wcpid]').forEach(b=>b.addEventListener('click',()=>{
-      const x=libGet(b.dataset.wcpid);
+      const id=b.dataset.wcpid;
+      let x = WARMUP_LIB.find(e=>e.id===id) || STRETCH_LIB.find(e=>e.id===id) || libGet(id);
       const ex=_editingWc.plan.exercises[targetIdx];
       if(ex && x){ ex.name=x.name; ex.de=x.de; ex.libId=x.id;
         if(x.type==='time'){ ex.duration=x.defDur; delete ex.reps; } else { ex.reps=x.defReps; delete ex.duration; }
@@ -4223,7 +4284,11 @@ $('#f-restcy').addEventListener('input',()=>{ $('#restcy-hint').textContent='= '
 // workout controls
 $('#wk-close').addEventListener('click',closeWorkout);
 $('#wk-sound').addEventListener('click',()=>{ DB.settings.sound=!DB.settings.sound; save(); updateSoundBtn(); if(DB.settings.sound) beep(880,0.08,0.14); });
-/* Live workout notes */
+/* Live workout notes - inline button HTML für Button-Zeile */
+function liveNoteBtnHtml(){
+  const has = W && W.liveNote && W.liveNote.length>0;
+  return '<button class="wk-alt-btn" id="wk-note-btn" style="'+(has?'color:var(--work);border-color:color-mix(in srgb,var(--work) 40%,var(--line))':'')+'">'+svg('note')+' '+(has?'Notiz ✓':'Notiz')+'</button>';
+}
 function openLiveNoteSheet(){
   if(!W) return;
   const cur = W.liveNote || '';
@@ -4243,16 +4308,7 @@ function openLiveNoteSheet(){
   });
   $('#live-note-cancel').addEventListener('click',closeSheet);
 }
-function updateLiveNoteBtn(){
-  const btn=$('#wk-live-note'); if(!btn) return;
-  if(!W || W.done){ btn.style.display='none'; return; }
-  btn.style.display='';
-  const has = W.liveNote && W.liveNote.length>0;
-  btn.classList.toggle('has', has);
-  $('#wk-live-note-ic').innerHTML = svg('note');
-  $('#wk-live-note-txt').textContent = has ? 'Notiz ✓' : 'Notiz';
-}
-$('#wk-live-note').addEventListener('click', openLiveNoteSheet);
+function updateLiveNoteBtn(){ /* No-op: Button ist jetzt inline und wird bei renderStep neu erzeugt */ }
 $('#wk-primary').addEventListener('click',togglePause);
 $('#wk-prev').addEventListener('click',prevStep);
 $('#wk-skip').addEventListener('click',skipStep);
@@ -4273,6 +4329,8 @@ $('#wk-overview').addEventListener('click',e=>{ if(e.target.id==='wk-overview') 
 $('#wk-hint').addEventListener('click',e=>{
   const alt=e.target.closest('#wk-alt-btn');
   if(alt){ e.stopPropagation(); openAltPicker(); return; }
+  const noteBtn=e.target.closest('#wk-note-btn');
+  if(noteBtn){ e.stopPropagation(); openLiveNoteSheet(); return; }
   const b=e.target.closest('[data-repadj]'); if(!b) return;
   e.stopPropagation();
   const delta=+b.dataset.repadj;
