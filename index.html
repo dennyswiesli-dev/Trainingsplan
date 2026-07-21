@@ -845,6 +845,56 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .buddy-code-display .lbl{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
 .buddy-code-display .code{font-family:var(--font-d);font-size:36px;letter-spacing:8px;color:var(--chalk);line-height:1;user-select:all}
 .buddy-code-display .hint{color:var(--muted);font-size:11px;font-weight:600;margin-top:8px}
+/* ========= PHASE D ========= */
+/* Ladder input */
+.ladder-viz{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-family:var(--font-d);font-size:14px;letter-spacing:1px;color:var(--accent);text-align:center;word-break:break-all}
+/* Body metrics */
+.bm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bm-item{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.bm-item label{color:var(--muted2);font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;display:block;margin-bottom:4px}
+.bm-item input{width:100%;background:transparent;border:none;color:var(--chalk);font-family:var(--font-d);font-size:20px;letter-spacing:.5px}
+.bm-item input:focus{outline:none}
+.bm-hist{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.bm-hist-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12.5px;font-weight:700;border-bottom:1px dashed var(--line)}
+.bm-hist-row:last-child{border-bottom:none}
+.bm-hist-row .date{color:var(--muted)}
+.bm-hist-row .vals{color:var(--chalk);font-family:var(--font-d);letter-spacing:.5px}
+/* Recovery score */
+.recov-slider{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.recov-slider .lbl{color:var(--chalk);font-size:13.5px;font-weight:800;margin-bottom:6px;display:flex;justify-content:space-between}
+.recov-slider .lbl b{color:var(--accent);font-family:var(--font-d);font-size:18px;letter-spacing:.5px}
+.recov-slider input[type="range"]{width:100%;accent-color:var(--accent)}
+.recov-slider .scale{display:flex;justify-content:space-between;color:var(--muted2);font-size:10px;font-weight:700;margin-top:2px}
+.recov-result{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 20%,var(--panel)),var(--panel));border:2px solid var(--accent);border-radius:14px;padding:14px;text-align:center;margin-top:10px}
+.recov-result .score{font-family:var(--font-d);font-size:48px;letter-spacing:1px;color:var(--accent);line-height:1}
+.recov-result .verdict{color:var(--chalk);font-weight:800;font-size:14px;margin-top:6px}
+.recov-result .tip{color:var(--muted);font-size:12px;font-weight:600;margin-top:4px}
+/* Photo progress */
+.photo-slot{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.photo-slot .slot{position:relative;aspect-ratio:3/4;background:var(--panel2);border:2px dashed var(--line2);border-radius:12px;overflow:hidden;display:grid;place-items:center;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer}
+.photo-slot .slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo-slot .slot .lbl{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.5);color:#fff;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;z-index:1}
+.photo-slot .slot .dt{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.5);color:#fff;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;z-index:1}
+.photo-slot .slot .rm{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;z-index:2;border:none}
+/* Skill graph */
+.skill-graph-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.skill-graph-title{font-family:var(--font-d);font-size:15px;color:var(--chalk);margin-bottom:6px;letter-spacing:.5px}
+.skill-graph{width:100%;height:60px;display:block}
+.skill-graph polyline{fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.skill-graph circle{fill:var(--accent)}
+.skill-graph text{font-size:9px;fill:var(--muted2);font-weight:700}
+/* Monthly report */
+.month-report{background:linear-gradient(135deg,color-mix(in srgb,#a273ff 22%,var(--panel)),var(--panel));border:1px solid color-mix(in srgb,#a273ff 45%,var(--line));border-radius:18px;padding:16px;margin:8px 0 4px}
+.month-report .title{font-family:var(--font-d);font-size:22px;letter-spacing:.5px;margin-bottom:10px;color:#a273ff}
+/* AI Generator */
+.aigen-choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 12px}
+.aigen-choice{background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:11px;text-align:center;cursor:pointer;transition:.14s}
+.aigen-choice:active{transform:scale(.96)}
+.aigen-choice.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+.aigen-choice .em{font-size:22px;line-height:1}
+.aigen-choice .nm{font-size:12px;font-weight:800;margin-top:4px;color:var(--chalk)}
+/* Superset+ chain length indicator */
+.ss-len-badge{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:1px 6px;border-radius:5px;font-size:10px;font-weight:900;margin-left:4px;letter-spacing:.5px}
 
 /* Compact plan cards */
 body[data-compact="1"] .plan-list{gap:8px}
@@ -1026,6 +1076,7 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
       <div id="install-banner" style="display:none"></div>
       <div id="resume-banner" class="resume-banner" style="display:none"></div>
       <div id="deload-banner" class="deload-banner" style="display:none"></div>
+      <div id="month-report-slot"></div>
       <div id="report-slot"></div>
       <div id="streak-banner" class="streak-banner" style="display:none"></div>
       <div id="goal-card" class="goal-card" style="display:none"></div>
@@ -1587,10 +1638,15 @@ const DEFAULTS={
   deloadDismissedAt:0,
   challenges:{}, customChallenges:[],
   parks:{ favorites:[], notes:{} },
-  exerciseNotes:{}, /* per-exercise persistent notes */
-  warmupPlan:null, cooldownPlan:null, /* separate warm-up/cool-down plans */
+  exerciseNotes:{},
+  warmupPlan:null, cooldownPlan:null,
   buddyCode:'', buddies:[],
   lastReport:{ weekKey:'', dismissedAt:0 },
+  lastMonthReport:{ monthKey:'', dismissedAt:0 },
+  bodyMetrics:[], /* [{date, weight, chest, arm, waist, thigh}] */
+  recoveryScores:[], /* [{date, sleep, soreness, energy, score}] */
+  progressPhotos:[], /* [{id, date, dataUrl}] limit 20 */
+  skillHistory:{}, /* {skillId: [{date, stage}]} */
   flags:{ homeHintDismissed:false, onboarded:false },
   settings:{ sound:true, vibrate:true, wakeLock:true, beeps:true, prepare:5,
              theme:'dark', accent:'green', compact:false, defaultPlanColor:'none',
@@ -1847,7 +1903,14 @@ function decodePlan(s){ try{ const d=JSON.parse(decodeURIComponent(escape(atob(s
 /* ========================= PHASE C HELPERS ========================= */
 /* Training mode helpers */
 function planMode(p){ return p.mode || 'standard'; }
-function isSpecialMode(p){ const m=planMode(p); return m==='amrap'||m==='emom'||m==='tabata'; }
+function isSpecialMode(p){ const m=planMode(p); return m==='amrap'||m==='emom'||m==='tabata'||m==='circuit'||m==='ladder'; }
+function generateLadderReps(scheme, peak){
+  peak = peak||5;
+  if(scheme==='up'){ const a=[]; for(let i=1;i<=peak;i++) a.push(i); return a; }
+  if(scheme==='down'){ const a=[]; for(let i=peak;i>=1;i--) a.push(i); return a; }
+  /* up_down */
+  const a=[]; for(let i=1;i<=peak;i++) a.push(i); for(let i=peak-1;i>=1;i--) a.push(i); return a;
+}
 /* Media Session API */
 function updateMediaSession(){
   if(!DB.settings.mediaSession || !('mediaSession' in navigator) || !W || W.done) return;
@@ -1974,9 +2037,15 @@ function load(){
     if(!DB.exerciseNotes||typeof DB.exerciseNotes!=='object') DB.exerciseNotes={};
     if(!Array.isArray(DB.buddies)) DB.buddies=[];
     if(!DB.lastReport||typeof DB.lastReport!=='object') DB.lastReport={weekKey:'',dismissedAt:0};
+    if(!DB.lastMonthReport||typeof DB.lastMonthReport!=='object') DB.lastMonthReport={monthKey:'',dismissedAt:0};
+    if(!Array.isArray(DB.bodyMetrics)) DB.bodyMetrics=[];
+    if(!Array.isArray(DB.recoveryScores)) DB.recoveryScores=[];
+    if(!Array.isArray(DB.progressPhotos)) DB.progressPhotos=[];
+    if(!DB.skillHistory||typeof DB.skillHistory!=='object') DB.skillHistory={};
   }catch(e){ DB = structuredClone(DEFAULTS); }
 }
 function save(){
+  DB.updatedAt = Date.now(); /* Timestamp für konfliktfreies Merging */
   try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
   cloudScheduleSave();
 }
@@ -2000,7 +2069,42 @@ function mergeUniqueById(a,b){ const m=new Map(); (a||[]).concat(b||[]).forEach(
 function mergeHistory(a,b){ const m=new Map(); (a||[]).concat(b||[]).forEach(x=>{ if(!x||!x.date) return; const k=[x.date,x.planId,x.durationSec,x.completed].join('|'); if(!m.has(k)) m.set(k,x); }); return Array.from(m.values()).sort((x,y)=>(y.date||0)-(x.date||0)).slice(0,200); }
 function mergePRs(a,b){ const out={}; const all=Object.assign({},b||{},a||{}); Object.keys(all).forEach(k=>{ const A=(a&&a[k])||{}, B=(b&&b[k])||{}; out[k]={ bestReps:Math.max(A.bestReps||0,B.bestReps||0), bestDuration:Math.max(A.bestDuration||0,B.bestDuration||0), lastDate:Math.max(A.lastDate||0,B.lastDate||0), prDate:(A.bestReps||0)>=(B.bestReps||0)?(A.prDate||A.lastDate||0):(B.prDate||B.lastDate||0) }; }); return out; }
 function mergeSkills(a,b){ const out={}; const all=Object.assign({},b||{},a||{}); Object.keys(all).forEach(k=>{ const A=(a&&a[k])||{}, B=(b&&b[k])||{}; out[k]={ stage:Math.max(A.stage||0,B.stage||0), updatedAt:Math.max(A.updatedAt||0,B.updatedAt||0) }; }); return out; }
-function mergeDb(local, remote){ if(!remote) return local; const l=structuredClone(local||DEFAULTS), r=structuredClone(remote||{}); const sfL=l.streakFreeze||{}, sfR=r.streakFreeze||{}; return { customPlans:mergeUniqueById(l.customPlans,r.customPlans), overrides:Object.assign({},r.overrides||{},l.overrides||{}), hidden:Array.from(new Set([...(r.hidden||[]),...(l.hidden||[])])), favorites:Array.from(new Set([...(r.favorites||[]),...(l.favorites||[])])), prs:mergePRs(l.prs,r.prs), skills:mergeSkills(l.skills,r.skills), history:mergeHistory(l.history,r.history), flags:Object.assign({},DEFAULTS.flags,r.flags||{},l.flags||{}), settings:Object.assign({},DEFAULTS.settings,r.settings||{},l.settings||{}), achievements:Object.assign({},r.achievements||{},l.achievements||{}), progression:Object.assign({},r.progression||{},l.progression||{}), challenges:Object.assign({},r.challenges||{},l.challenges||{}), customChallenges:mergeUniqueById(l.customChallenges,r.customChallenges), streakFreeze:{ tokens:Math.max(sfL.tokens||0,sfR.tokens||0), lastGranted:Math.max(sfL.lastGranted||0,sfR.lastGranted||0), usedThisMonth:Math.max(sfL.usedThisMonth||0,sfR.usedThisMonth||0), monthKey:sfL.monthKey||sfR.monthKey||'', appliedWeeks:Array.from(new Set([...(sfL.appliedWeeks||[]),...(sfR.appliedWeeks||[])])) }, deloadDismissedAt:Math.max(l.deloadDismissedAt||0,r.deloadDismissedAt||0), parks:{ favorites:Array.from(new Set([...((r.parks&&r.parks.favorites)||[]),...((l.parks&&l.parks.favorites)||[])])), notes:Object.assign({},(r.parks&&r.parks.notes)||{},(l.parks&&l.parks.notes)||{}) }, exerciseNotes:Object.assign({},r.exerciseNotes||{},l.exerciseNotes||{}), warmupPlan:l.warmupPlan||r.warmupPlan||null, cooldownPlan:l.cooldownPlan||r.cooldownPlan||null, buddyCode:l.buddyCode||r.buddyCode||'', buddies:mergeUniqueById(l.buddies,r.buddies), lastReport:Object.assign({weekKey:'',dismissedAt:0},r.lastReport||{},l.lastReport||{}) }; }
+function mergeDb(local, remote){
+  if(!remote) return local;
+  const l=structuredClone(local||DEFAULTS), r=structuredClone(remote||{});
+  const sfL=l.streakFreeze||{}, sfR=r.streakFreeze||{};
+  /* Timestamp-basierte Konfliktlösung: Wer zuletzt gespeichert hat, gewinnt bei skalaren Feldern */
+  const lTs = +l.updatedAt || 0, rTs = +r.updatedAt || 0;
+  const remoteNewer = rTs > lTs;
+  const pickNewer = (a,b) => remoteNewer ? (b!==undefined?b:a) : (a!==undefined?a:b);
+  return {
+    customPlans:mergeUniqueById(l.customPlans,r.customPlans),
+    overrides:Object.assign({}, remoteNewer?l.overrides:r.overrides, remoteNewer?r.overrides:l.overrides),
+    hidden:Array.from(new Set([...(r.hidden||[]),...(l.hidden||[])])),
+    favorites:Array.from(new Set([...(r.favorites||[]),...(l.favorites||[])])),
+    prs:mergePRs(l.prs,r.prs),
+    skills:mergeSkills(l.skills,r.skills),
+    history:mergeHistory(l.history,r.history),
+    flags:Object.assign({},DEFAULTS.flags, remoteNewer?(l.flags||{}):(r.flags||{}), remoteNewer?(r.flags||{}):(l.flags||{})),
+    /* SETTINGS: Neuer gewinnt komplett, damit Nickname/Opt-Ins etc. sauber syncen */
+    settings:Object.assign({}, DEFAULTS.settings, remoteNewer ? (r.settings||{}) : (l.settings||{})),
+    achievements:Object.assign({}, remoteNewer?(l.achievements||{}):(r.achievements||{}), remoteNewer?(r.achievements||{}):(l.achievements||{})),
+    progression:Object.assign({}, remoteNewer?(l.progression||{}):(r.progression||{}), remoteNewer?(r.progression||{}):(l.progression||{})),
+    challenges:Object.assign({}, remoteNewer?(l.challenges||{}):(r.challenges||{}), remoteNewer?(r.challenges||{}):(l.challenges||{})),
+    customChallenges:mergeUniqueById(l.customChallenges,r.customChallenges),
+    streakFreeze:{ tokens:Math.max(sfL.tokens||0,sfR.tokens||0), lastGranted:Math.max(sfL.lastGranted||0,sfR.lastGranted||0), usedThisMonth:Math.max(sfL.usedThisMonth||0,sfR.usedThisMonth||0), monthKey:sfL.monthKey||sfR.monthKey||'', appliedWeeks:Array.from(new Set([...(sfL.appliedWeeks||[]),...(sfR.appliedWeeks||[])])) },
+    deloadDismissedAt:Math.max(l.deloadDismissedAt||0,r.deloadDismissedAt||0),
+    parks:{ favorites:Array.from(new Set([...((r.parks&&r.parks.favorites)||[]),...((l.parks&&l.parks.favorites)||[])])), notes:Object.assign({}, remoteNewer?((l.parks&&l.parks.notes)||{}):((r.parks&&r.parks.notes)||{}), remoteNewer?((r.parks&&r.parks.notes)||{}):((l.parks&&l.parks.notes)||{})) },
+    exerciseNotes:Object.assign({}, remoteNewer?(l.exerciseNotes||{}):(r.exerciseNotes||{}), remoteNewer?(r.exerciseNotes||{}):(l.exerciseNotes||{})),
+    /* Warm-up/Cool-down-Pläne: Neuer gewinnt */
+    warmupPlan: pickNewer(l.warmupPlan, r.warmupPlan),
+    cooldownPlan: pickNewer(l.cooldownPlan, r.cooldownPlan),
+    buddyCode:l.buddyCode||r.buddyCode||'',
+    buddies:mergeUniqueById(l.buddies,r.buddies),
+    lastReport:Object.assign({weekKey:'',dismissedAt:0}, remoteNewer?(l.lastReport||{}):(r.lastReport||{}), remoteNewer?(r.lastReport||{}):(l.lastReport||{})),
+    updatedAt: Math.max(lTs, rTs)
+  };
+}
 async function initFirebase(){
   try{
     const appMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js');
@@ -2016,7 +2120,15 @@ async function initFirebase(){
   }catch(err){ FB.lastError=err.message||String(err); authStatus('Firebase konnte nicht geladen werden. Du kannst lokal weitertrainieren.',false); renderAuth(); }
 }
 function userDocRef(){ return FIRE.doc(FB.db,'users',FB.user.uid,'barwork','state'); }
-async function loadCloudDb(){ if(!FB.ready||!FB.user) return; try{ const snap=await FIRE.getDoc(userDocRef()); if(snap.exists()){ DB=mergeDb(DB,snap.data().db); try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){} } await cloudSaveNow(true); /* Onboarding erst NACH Cloud-Sync prüfen, damit onboarded-Flag korrekt geladen ist */ setTimeout(()=>maybeStartOnboarding(), 400); }catch(err){ FB.lastError=err.message||String(err); toast('Cloud-Sync fehlgeschlagen'); } }
+async function loadCloudDb(){ if(!FB.ready||!FB.user) return; try{ const snap=await FIRE.getDoc(userDocRef()); if(snap.exists()){ DB=mergeDb(DB,snap.data().db); try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){}
+  /* Nach Cloud-Sync aktive View neu rendern, damit gemergte Settings sichtbar werden */
+  document.body.dataset.theme=DB.settings.theme||'dark';
+  document.body.dataset.accent=DB.settings.accent||'green';
+  document.body.dataset.compact=DB.settings.compact?'1':'';
+  if(currentView==='settings') renderSettings();
+  else if(currentView==='home') renderHome();
+  else if(currentView==='stats') renderStats();
+} await cloudSaveNow(true); /* Onboarding erst NACH Cloud-Sync prüfen */ setTimeout(()=>maybeStartOnboarding(), 400); }catch(err){ FB.lastError=err.message||String(err); toast('Cloud-Sync fehlgeschlagen'); } }
 function cloudScheduleSave(){ if(!FB.ready||!FB.user||FB.syncing) return; clearTimeout(FB.saveTimer); FB.saveTimer=setTimeout(()=>cloudSaveNow(false),900); }
 async function cloudSaveNow(silent){ if(!FB.ready||!FB.user) return; FB.syncing=true; FB.lastError=''; renderSettings(); try{ await FIRE.setDoc(userDocRef(), { db:cleanForCloud(DB), updatedAt:FIRE.serverTimestamp(), app:'BARWORK' }, { merge:true }); if(!silent) toast('Fortschritt synchronisiert'); }catch(err){ FB.lastError=err.message||String(err); if(!silent) toast('Cloud-Sync fehlgeschlagen'); } finally{ FB.syncing=false; renderSettings(); } }
 async function doAuth(mode){ if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.',false); return; } const email=$('#auth-email').value.trim(); const pass=$('#auth-pass').value; if(!email||!pass){ authStatus('Bitte E-Mail und Passwort eingeben.',false); return; } if(pass.length<6){ authStatus('Das Passwort muss mindestens 6 Zeichen haben.',false); return; } authStatus(mode==='register'?'Konto wird erstellt...':'Login läuft...',true); try{ if(mode==='register') await FIRE.createUserWithEmailAndPassword(FB.auth,email,pass); else await FIRE.signInWithEmailAndPassword(FB.auth,email,pass); FB.localMode=false; authStatus('',true); }catch(err){ authStatus(firebaseErrorText(err),false); } }
@@ -2036,6 +2148,107 @@ async function doGoogleLogin(){
 }
 async function doPasswordReset(){ if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.',false); return; } const email=$('#auth-email').value.trim(); if(!email){ authStatus('Bitte zuerst die E-Mail-Adresse eingeben.',false); return; } try{ await FIRE.sendPasswordResetEmail(FB.auth,email); authStatus('Passwort-E-Mail wurde gesendet.',true); }catch(err){ authStatus(firebaseErrorText(err),false); } }
 async function logout(){ try{ await cloudSaveNow(true); if(FB.auth) await FIRE.signOut(FB.auth); FB.localMode=false; show('auth',true); }catch(err){ toast('Logout fehlgeschlagen'); } }
+/* ========== AUTH-EXTENSIONS ========== */
+async function reauthenticate(password){
+  if(!FB.user || !FB.user.email) throw new Error('Nicht eingeloggt oder Google-Login');
+  const cred = FIRE.EmailAuthProvider.credential(FB.user.email, password);
+  return await FIRE.reauthenticateWithCredential(FB.user, cred);
+}
+function openChangePasswordSheet(){
+  const isGoogle = FB.user && FB.user.providerData && FB.user.providerData.some(p=>p.providerId==='google.com');
+  if(isGoogle){ toast('Google-Login: Passwort in deinem Google-Konto ändern'); return; }
+  const body=`<div class="field"><label>Aktuelles Passwort</label><input class="input" id="cp-old" type="password" autocomplete="current-password"></div>
+    <div class="field"><label>Neues Passwort (mind. 6 Zeichen)</label><input class="input" id="cp-new" type="password" autocomplete="new-password"></div>
+    <div class="field"><label>Neues Passwort wiederholen</label><input class="input" id="cp-new2" type="password" autocomplete="new-password"></div>
+    <div id="cp-msg" style="color:var(--danger);font-size:13px;font-weight:700;margin-bottom:10px;display:none"></div>
+    <button class="btn btn-primary btn-block btn-lg" id="cp-save">${svg('save')} Passwort ändern</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost btn-block" id="cp-cancel">Abbrechen</button>`;
+  openSheet('🔑 Passwort ändern', body);
+  const msg=(t)=>{ const el=$('#cp-msg'); el.textContent=t; el.style.display=t?'block':'none'; };
+  $('#cp-save').addEventListener('click',async()=>{
+    const oldPw=$('#cp-old').value, newPw=$('#cp-new').value, newPw2=$('#cp-new2').value;
+    if(!oldPw||!newPw){ msg('Bitte alle Felder ausfüllen'); return; }
+    if(newPw.length<6){ msg('Neues Passwort mindestens 6 Zeichen'); return; }
+    if(newPw!==newPw2){ msg('Passwörter stimmen nicht überein'); return; }
+    try{
+      await reauthenticate(oldPw);
+      await FIRE.updatePassword(FB.user, newPw);
+      closeSheet(); toast('Passwort geändert ✔');
+    }catch(err){ msg(firebaseErrorText(err)); }
+  });
+  $('#cp-cancel').addEventListener('click',closeSheet);
+}
+function openChangeEmailSheet(){
+  const isGoogle = FB.user && FB.user.providerData && FB.user.providerData.some(p=>p.providerId==='google.com');
+  if(isGoogle){ toast('Google-Login: E-Mail in deinem Google-Konto ändern'); return; }
+  const body=`<p style="color:var(--muted);font-weight:600;margin:2px 0 12px">Aktuelle E-Mail: <b style="color:var(--chalk)">${esc(FB.user.email||'')}</b></p>
+    <div class="field"><label>Aktuelles Passwort</label><input class="input" id="ce-pw" type="password" autocomplete="current-password"></div>
+    <div class="field"><label>Neue E-Mail-Adresse</label><input class="input" id="ce-new" type="email" autocomplete="email"></div>
+    <div id="ce-msg" style="color:var(--danger);font-size:13px;font-weight:700;margin-bottom:10px;display:none"></div>
+    <button class="btn btn-primary btn-block btn-lg" id="ce-save">${svg('save')} E-Mail ändern</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost btn-block" id="ce-cancel">Abbrechen</button>
+    <div class="hint" style="text-align:center;margin-top:10px">Du erhältst eine Bestätigungs-E-Mail an die neue Adresse.</div>`;
+  openSheet('✉️ E-Mail ändern', body);
+  const msg=(t)=>{ const el=$('#ce-msg'); el.textContent=t; el.style.display=t?'block':'none'; };
+  $('#ce-save').addEventListener('click',async()=>{
+    const pw=$('#ce-pw').value, newEmail=$('#ce-new').value.trim();
+    if(!pw||!newEmail){ msg('Bitte alle Felder ausfüllen'); return; }
+    try{
+      await reauthenticate(pw);
+      /* Firebase v9+: verifyBeforeUpdateEmail für sichere Änderung mit Verifikations-Mail */
+      if(FIRE.verifyBeforeUpdateEmail){ await FIRE.verifyBeforeUpdateEmail(FB.user, newEmail); }
+      else { await FIRE.updateEmail(FB.user, newEmail); }
+      closeSheet(); toast('Bestätigungs-E-Mail versendet an '+newEmail);
+    }catch(err){ msg(firebaseErrorText(err)); }
+  });
+  $('#ce-cancel').addEventListener('click',closeSheet);
+}
+function openDeleteAccountSheet(){
+  const isGoogle = FB.user && FB.user.providerData && FB.user.providerData.some(p=>p.providerId==='google.com');
+  const authField = isGoogle
+    ? `<div class="hint" style="text-align:center;padding:12px;background:var(--panel2);border-radius:10px;margin-bottom:14px">Du bist per Google eingeloggt. Klicke unten – ggf. musst du dich erneut anmelden.</div>`
+    : `<div class="field"><label>Aktuelles Passwort zur Bestätigung</label><input class="input" id="da-pw" type="password" autocomplete="current-password"></div>`;
+  const body=`<p style="color:var(--danger);font-weight:800;font-size:14px;margin:2px 0 10px">⚠️ Diese Aktion ist unwiderruflich!</p>
+    <p style="color:var(--muted);font-weight:600;font-size:13px;margin-bottom:14px">Dein Konto und <b style="color:var(--chalk)">alle Cloud-Daten</b> (Pläne, Verlauf, Statistik, Rekorde) werden dauerhaft gelöscht. Lokale Daten auf diesem Gerät kannst du separat behalten oder entfernen.</p>
+    ${authField}
+    <div class="field"><label>Zum Bestätigen "LÖSCHEN" eingeben</label><input class="input" id="da-confirm" placeholder="LÖSCHEN" autocapitalize="characters" autocomplete="off"></div>
+    <div id="da-msg" style="color:var(--danger);font-size:13px;font-weight:700;margin-bottom:10px;display:none"></div>
+    <button class="btn btn-danger solid btn-block btn-lg" id="da-yes" disabled>${svg('trash')} Konto endgültig löschen</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost btn-block" id="da-cancel">Abbrechen</button>`;
+  openSheet('🗑️ Konto löschen', body);
+  const yes=$('#da-yes'), conf=$('#da-confirm');
+  conf.addEventListener('input',()=>{ yes.disabled = conf.value.trim().toUpperCase()!=='LÖSCHEN'; });
+  const msg=(t)=>{ const el=$('#da-msg'); el.textContent=t; el.style.display=t?'block':'none'; };
+  yes.addEventListener('click',async()=>{
+    try{
+      if(isGoogle){
+        /* Google-Reauth via Popup */
+        try{ await FIRE.reauthenticateWithPopup(FB.user, FB.googleProvider); }catch(err){ msg('Re-Authentifizierung fehlgeschlagen'); return; }
+      } else {
+        const pw=$('#da-pw').value;
+        if(!pw){ msg('Passwort erforderlich'); return; }
+        await reauthenticate(pw);
+      }
+      /* Firestore-Datensatz löschen */
+      try{ await FIRE.deleteDoc(userDocRef()); }catch(e){}
+      /* Auth-User löschen */
+      await FIRE.deleteUser(FB.user);
+      closeSheet();
+      toast('Konto gelöscht. Auf Wiedersehen 👋');
+      /* Lokale Daten optional zurücksetzen (nachfragen) */
+      setTimeout(()=>{
+        confirmSheet('Lokale Daten auch löschen?','Auf diesem Gerät gespeicherte Pläne, Verlauf & Einstellungen werden entfernt.','Ja, alles löschen',()=>{
+          try{ localStorage.removeItem(KEY); }catch(e){}
+          location.reload();
+        });
+      }, 800);
+    }catch(err){ msg(firebaseErrorText(err)); }
+  });
+  $('#da-cancel').addEventListener('click',closeSheet);
+}
 function firebaseErrorText(err){ const c=(err&&err.code)||''; const map={ 'auth/invalid-email':'Die E-Mail-Adresse ist ungültig.', 'auth/user-not-found':'Kein Konto mit dieser E-Mail gefunden.', 'auth/wrong-password':'Passwort ist nicht korrekt.', 'auth/invalid-credential':'Login-Daten sind ungültig.', 'auth/email-already-in-use':'Für diese E-Mail existiert bereits ein Konto.', 'auth/weak-password':'Das Passwort ist zu schwach. Bitte mindestens 6 Zeichen verwenden.', 'auth/network-request-failed':'Netzwerkfehler. Bitte Internetverbindung prüfen.', 'auth/popup-blocked':'Der Browser hat das Google-Popup blockiert. Bitte Popups für diese Seite erlauben.', 'auth/unauthorized-domain':'Diese Domain ist in Firebase Authentication nicht autorisiert. Bitte GitHub-Pages-Domain in Firebase hinterlegen.' }; return map[c] || ('Firebase-Fehler: '+(err.message||c||'unbekannt')); }
 function renderAuth(){ if(FB.lastError&&!FB.ready) authStatus('Firebase konnte nicht geladen werden. Du kannst lokal weitertrainieren.',false); ['auth-login','auth-register','auth-reset','auth-google'].forEach(id=>{ const b=$('#'+id); if(b) b.disabled=!FB.ready; }); }
 
@@ -2724,6 +2937,215 @@ function deleteWcPlan(){
     save(); _editingWc=null; history.back(); toast('Auf Standard zurückgesetzt');
   });
 }
+/* ========================= BODY METRICS ========================= */
+function openBodyMetricsSheet(){
+  const last = (DB.bodyMetrics && DB.bodyMetrics[0]) || {};
+  const body = `<p style="color:var(--muted);font-weight:600;margin:2px 0 12px">Trage deine aktuellen Werte ein – jeder Eintrag wird historisch gespeichert.</p>
+    <div class="bm-grid">
+      <div class="bm-item"><label>Gewicht (kg)</label><input id="bm-w" type="number" step="0.1" min="30" max="200" value="${last.weight||DB.settings.bodyWeightKg||''}"></div>
+      <div class="bm-item"><label>Brust (cm)</label><input id="bm-c" type="number" step="0.5" min="50" max="200" value="${last.chest||''}"></div>
+      <div class="bm-item"><label>Arm (cm)</label><input id="bm-a" type="number" step="0.5" min="20" max="80" value="${last.arm||''}"></div>
+      <div class="bm-item"><label>Taille (cm)</label><input id="bm-t" type="number" step="0.5" min="50" max="200" value="${last.waist||''}"></div>
+      <div class="bm-item"><label>Oberschenkel (cm)</label><input id="bm-th" type="number" step="0.5" min="30" max="120" value="${last.thigh||''}"></div>
+      <div class="bm-item"><label>Körperfett (%)</label><input id="bm-bf" type="number" step="0.1" min="3" max="50" value="${last.bodyFat||''}"></div>
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" id="bm-save" style="margin-top:14px">${svg('save')} Eintrag speichern</button>
+    <div id="bm-hist-slot"></div>`;
+  openSheet('📏 Körpermaße', body);
+  const renderHist=()=>{
+    if(!DB.bodyMetrics||!DB.bodyMetrics.length){ $('#bm-hist-slot').innerHTML=''; return; }
+    const rows = DB.bodyMetrics.slice(0,10).map(m=>{
+      const d=new Date(m.date).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'});
+      const parts=[];
+      if(m.weight) parts.push(m.weight+'kg');
+      if(m.chest) parts.push('B'+m.chest);
+      if(m.arm) parts.push('A'+m.arm);
+      if(m.waist) parts.push('T'+m.waist);
+      if(m.bodyFat) parts.push(m.bodyFat+'%');
+      return `<div class="bm-hist-row"><span class="date">${d}</span><span class="vals">${esc(parts.join(' · '))}</span></div>`;
+    }).join('');
+    $('#bm-hist-slot').innerHTML=`<div class="bm-hist"><div class="chart-title" style="margin-bottom:8px">Verlauf</div>${rows}</div>`;
+  };
+  renderHist();
+  $('#bm-save').addEventListener('click',()=>{
+    const w=+$('#bm-w').value||null, c=+$('#bm-c').value||null, a=+$('#bm-a').value||null, t=+$('#bm-t').value||null, th=+$('#bm-th').value||null, bf=+$('#bm-bf').value||null;
+    if(!w&&!c&&!a&&!t&&!th&&!bf){ toast('Mindestens ein Wert nötig'); return; }
+    if(!Array.isArray(DB.bodyMetrics)) DB.bodyMetrics=[];
+    DB.bodyMetrics.unshift({date:Date.now(), weight:w, chest:c, arm:a, waist:t, thigh:th, bodyFat:bf});
+    DB.bodyMetrics=DB.bodyMetrics.slice(0,100);
+    if(w) DB.settings.bodyWeightKg=w;
+    save(); toast('Gespeichert ✔'); renderHist();
+  });
+}
+/* ========================= RECOVERY SCORE ========================= */
+function openRecoverySheet(){
+  const today = new Date().toDateString();
+  const existing = (DB.recoveryScores||[]).find(r=>new Date(r.date).toDateString()===today);
+  const body = `<p style="color:var(--muted);font-weight:600;margin:2px 0 12px">${existing?'Du hast heute schon eingecheckt – aktualisiere deine Werte:':'Wie fühlst du dich heute morgen?'}</p>
+    <div class="recov-slider"><div class="lbl">💤 Schlafqualität <b id="rs-sleep-v">${existing?existing.sleep:7}</b></div>
+      <input type="range" id="rs-sleep" min="1" max="10" value="${existing?existing.sleep:7}">
+      <div class="scale"><span>Miserabel</span><span>Perfekt</span></div></div>
+    <div class="recov-slider"><div class="lbl">💪 Muskelkater <b id="rs-sore-v">${existing?existing.soreness:3}</b></div>
+      <input type="range" id="rs-sore" min="1" max="10" value="${existing?existing.soreness:3}">
+      <div class="scale"><span>Keiner</span><span>Extrem</span></div></div>
+    <div class="recov-slider"><div class="lbl">⚡ Energie-Level <b id="rs-en-v">${existing?existing.energy:7}</b></div>
+      <input type="range" id="rs-en" min="1" max="10" value="${existing?existing.energy:7}">
+      <div class="scale"><span>Erschöpft</span><span>Voller Power</span></div></div>
+    <div id="rs-result"></div>
+    <div style="height:10px"></div>
+    <button class="btn btn-primary btn-block btn-lg" id="rs-save">${svg('check')} Speichern</button>`;
+  openSheet('🌅 Recovery-Check', body);
+  const calc=()=>{
+    const s=+$('#rs-sleep').value, so=+$('#rs-sore').value, e=+$('#rs-en').value;
+    /* Score: Schlaf + Energie hoch = gut, Soreness invertiert */
+    const score = Math.round(((s + e + (11-so)) / 3) * 10);
+    let verdict='Gute Regeneration', tip='Volles Training ist ok.';
+    if(score<40){ verdict='Erholung wichtig'; tip='Lieber Ruhetag oder sehr leichtes Training.'; }
+    else if(score<60){ verdict='Nur ~60% Volumen'; tip='Reduziertes Training – nicht ans Limit gehen.'; }
+    else if(score<80){ verdict='Solide Basis'; tip='Normales Training möglich.'; }
+    else { verdict='Top-Form!'; tip='Idealer Tag für intensives Training.'; }
+    $('#rs-result').innerHTML=`<div class="recov-result"><div class="score">${score}</div><div class="verdict">${verdict}</div><div class="tip">${esc(tip)}</div></div>`;
+    return {score,verdict,tip};
+  };
+  ['#rs-sleep','#rs-sore','#rs-en'].forEach(id=>{
+    const el=$(id); const vId=id.replace('#rs-','#rs-').replace('#rs-','#rs-')+'-v';
+    el.addEventListener('input',()=>{ $(id+'-v').textContent=el.value; calc(); });
+  });
+  calc();
+  $('#rs-save').addEventListener('click',()=>{
+    const s=+$('#rs-sleep').value, so=+$('#rs-sore').value, e=+$('#rs-en').value;
+    const {score}=calc();
+    if(!Array.isArray(DB.recoveryScores)) DB.recoveryScores=[];
+    const idx=DB.recoveryScores.findIndex(r=>new Date(r.date).toDateString()===today);
+    const entry={date:Date.now(),sleep:s,soreness:so,energy:e,score};
+    if(idx>=0) DB.recoveryScores[idx]=entry; else DB.recoveryScores.unshift(entry);
+    DB.recoveryScores=DB.recoveryScores.slice(0,60);
+    save(); closeSheet(); toast('Recovery-Score '+score+' gespeichert');
+  });
+}
+/* ========================= PHOTO PROGRESS ========================= */
+function openPhotoProgressSheet(){
+  const photos = DB.progressPhotos||[];
+  const first = photos[photos.length-1];
+  const last = photos[0];
+  const body = `<p style="color:var(--muted);font-weight:600;margin:2px 0 12px">Fotos werden lokal auf deinem Gerät gespeichert – nicht in die Cloud.</p>
+    <div class="photo-slot">
+      <div class="slot" id="ph-first" ${first?'':'onclick="document.getElementById(\'ph-input\').click()"'}>
+        ${first?`<img src="${first.dataUrl}" alt=""><span class="lbl">Erstes Foto</span><span class="dt">${new Date(first.date).toLocaleDateString('de-DE')}</span>`:'<span>Erstes Foto<br>hier laden</span>'}
+      </div>
+      <div class="slot" id="ph-last">
+        ${last&&last!==first?`<img src="${last.dataUrl}" alt=""><span class="lbl">Neuestes</span><span class="dt">${new Date(last.date).toLocaleDateString('de-DE')}</span><button class="rm" data-phrm="${last.id}">${svg('close')}</button>`:'<span>Neues Foto<br>hinzufügen</span>'}
+      </div>
+    </div>
+    <input type="file" id="ph-input" accept="image/*" style="display:none">
+    <button class="btn btn-primary btn-block btn-lg" id="ph-add">${svg('plus')} Neues Foto hinzufügen</button>
+    <div id="ph-all-slot"></div>`;
+  openSheet('📸 Fortschritts-Fotos', body);
+  const renderAll=()=>{
+    if(!photos.length){ $('#ph-all-slot').innerHTML=''; return; }
+    const items=photos.slice(0,8).map(p=>`<div class="slot" style="position:relative;aspect-ratio:3/4;overflow:hidden;border-radius:10px"><img src="${p.dataUrl}" style="width:100%;height:100%;object-fit:cover"><span class="dt" style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.5);color:#fff;padding:2px 6px;border-radius:5px;font-size:9px;font-weight:800">${new Date(p.date).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'})}</span><button class="rm" data-phrm="${p.id}" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;border:none">×</button></div>`).join('');
+    $('#ph-all-slot').innerHTML=`<div class="section-label" style="margin-top:16px">Alle Fotos (${photos.length})</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${items}</div>`;
+  };
+  renderAll();
+  $('#ph-add').addEventListener('click',()=>$('#ph-input').click());
+  const inp=$('#ph-input');
+  inp.addEventListener('change',()=>{
+    const f=inp.files[0]; if(!f) return;
+    if(f.size>5*1024*1024){ toast('Foto zu groß (max 5 MB)'); return; }
+    const reader=new FileReader();
+    reader.onload=(e)=>{
+      const dataUrl=e.target.result;
+      /* Bildkomprimierung via Canvas */
+      const img=new Image();
+      img.onload=()=>{
+        const maxW=800, maxH=1200;
+        let w=img.width, h=img.height;
+        if(w>maxW||h>maxH){ const r=Math.min(maxW/w,maxH/h); w=Math.round(w*r); h=Math.round(h*r); }
+        const c=document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        const compressed=c.toDataURL('image/jpeg',0.75);
+        if(!Array.isArray(DB.progressPhotos)) DB.progressPhotos=[];
+        DB.progressPhotos.unshift({id:'ph_'+Date.now().toString(36), date:Date.now(), dataUrl:compressed});
+        DB.progressPhotos=DB.progressPhotos.slice(0,20);
+        save(); toast('Foto gespeichert'); closeSheet(); setTimeout(()=>openPhotoProgressSheet(),100);
+      };
+      img.src=dataUrl;
+    };
+    reader.readAsDataURL(f);
+  });
+  document.addEventListener('click',function _h(e){
+    const rm=e.target.closest('[data-phrm]'); if(!rm) return;
+    e.stopPropagation();
+    const id=rm.dataset.phrm;
+    DB.progressPhotos=(DB.progressPhotos||[]).filter(p=>p.id!==id);
+    save(); document.removeEventListener('click',_h); closeSheet(); setTimeout(()=>openPhotoProgressSheet(),100);
+  }, {once:true});
+}
+/* ========================= KI-PLAN-GENERATOR ========================= */
+function openAiPlanGenerator(){
+  let state={ focus:null, dur:20, level:null };
+  const body = `<p style="color:var(--muted);font-weight:600;margin:2px 0 12px">Wir bauen dir einen passenden Plan aus unserer Bibliothek:</p>
+    <div style="font-weight:800;font-size:13px;margin-bottom:6px">Fokus</div>
+    <div class="aigen-choices" id="ai-focus">
+      ${[{v:'push',em:'💪',nm:'Push'},{v:'pull',em:'🎖️',nm:'Pull'},{v:'legs',em:'🦵',nm:'Beine'},{v:'core',em:'🎯',nm:'Bauch'},{v:'full',em:'⚡',nm:'Ganzkörper'},{v:'cardio',em:'🔥',nm:'Cardio'}].map(o=>`<div class="aigen-choice" data-focus="${o.v}"><div class="em">${o.em}</div><div class="nm">${esc(o.nm)}</div></div>`).join('')}
+    </div>
+    <div style="font-weight:800;font-size:13px;margin-bottom:6px">Level</div>
+    <div class="aigen-choices" id="ai-level">
+      ${[{v:'Beginner',em:'🌱',nm:'Beginner'},{v:'Medium',em:'💪',nm:'Fortgeschritten'},{v:'Advanced',em:'🏆',nm:'Advanced'}].map(o=>`<div class="aigen-choice" data-lvl="${o.v}"><div class="em">${o.em}</div><div class="nm">${esc(o.nm)}</div></div>`).join('')}
+    </div>
+    <div style="font-weight:800;font-size:13px;margin-bottom:6px">Dauer (Minuten)</div>
+    <div class="aigen-choices" id="ai-dur">
+      ${[10,15,20,30,45].map(v=>`<div class="aigen-choice ${v===20?'on':''}" data-dur="${v}"><div class="em">⏱️</div><div class="nm">${v} Min</div></div>`).join('')}
+    </div>
+    <button class="btn btn-primary btn-block btn-lg" id="ai-gen" disabled>${svg('bolt')} Plan generieren</button>`;
+  openSheet('🤖 KI-Plan-Generator', body);
+  const checkReady=()=>{ $('#ai-gen').disabled = !(state.focus && state.level); };
+  $$('#ai-focus [data-focus]').forEach(el=>el.addEventListener('click',()=>{
+    state.focus=el.dataset.focus;
+    $$('#ai-focus [data-focus]').forEach(x=>x.classList.toggle('on',x===el));
+    checkReady();
+  }));
+  $$('#ai-level [data-lvl]').forEach(el=>el.addEventListener('click',()=>{
+    state.level=el.dataset.lvl;
+    $$('#ai-level [data-lvl]').forEach(x=>x.classList.toggle('on',x===el));
+    checkReady();
+  }));
+  $$('#ai-dur [data-dur]').forEach(el=>el.addEventListener('click',()=>{
+    state.dur=+el.dataset.dur;
+    $$('#ai-dur [data-dur]').forEach(x=>x.classList.toggle('on',x===el));
+  }));
+  $('#ai-gen').addEventListener('click',()=>{
+    const plan = generatePlan(state.focus, state.level, state.dur);
+    DB.customPlans.push(plan); save();
+    closeSheet(); toast('Plan "'+plan.name+'" erstellt!');
+    setTimeout(()=>{ show('home'); }, 300);
+  });
+}
+function generatePlan(focus, level, durationMin){
+  const muscleMap={push:['chest','shoulders','arms'], pull:['back','arms'], legs:['legs'], core:['core'], full:['chest','back','shoulders','arms','core','legs'], cardio:['cardio','full']};
+  const targetMuscles=muscleMap[focus]||['full'];
+  const candidates = EX_LIB.filter(x=>(x.muscle||[]).some(m=>targetMuscles.includes(m)));
+  const levelDifficulty={Beginner:0.7, Medium:1.0, Advanced:1.3};
+  const factor=levelDifficulty[level]||1.0;
+  /* Grob: 1 Runde ~2 Min. → Anzahl Übungen basierend auf Dauer */
+  const totalRounds = Math.max(2, Math.min(6, Math.round(durationMin/6)));
+  const numEx = Math.max(4, Math.min(8, Math.round(durationMin/4)));
+  /* Zufällige Auswahl der Übungen aus Kandidaten */
+  const shuffled=candidates.slice().sort(()=>Math.random()-0.5);
+  const chosen=shuffled.slice(0,numEx);
+  const exercises=chosen.map(x=>{
+    if(x.type==='time') return {name:x.name, de:x.de, duration:Math.round(x.defDur*factor)};
+    return {name:x.name, de:x.de, reps:Math.round(x.defReps*factor)};
+  });
+  const focusLabel={push:'Push',pull:'Pull',legs:'Legs',core:'Core',full:'Full Body',cardio:'Cardio'}[focus];
+  return {
+    id:uid(), builtin:false, name:`${focusLabel} ${durationMin}min (${level})`,
+    author:'🤖 KI-generiert', level, mode:'standard',
+    cycles:totalRounds, restBetweenExercises:30, restBetweenCycles:60,
+    exercises, warmupEnabled:false, cooldownEnabled:false,
+    note:'Automatisch generiert – bearbeite den Plan nach Belieben!'
+  };
+}
 /* ========================= CHALLENGES RENDER ========================= */
 function getChallenge(id){ return allChallenges().find(c=>c.id===id); }
 function startChallenge(id){ if(!DB.challenges) DB.challenges={}; DB.challenges[id]={ startDate:Date.now(), dayLogs:{}, completedAt:0 }; save(); toast('Challenge gestartet'); renderChallenges(); }
@@ -2886,6 +3308,44 @@ async function renderParks(){
   }, ()=>{ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Standort verweigert</h3><p>Bitte erlaube den Standort-Zugriff.</p></div>`; }, {timeout:10000,maximumAge:600000});
 }
 /* ========================= WEEKLY REPORT BANNER ========================= */
+function computeMonthlyReport(){
+  const now=new Date(); const y=now.getFullYear(), m=now.getMonth();
+  /* Vormonat */
+  const prevMonthStart = new Date(y, m-1, 1).getTime();
+  const prevMonthEnd = new Date(y, m, 1).getTime();
+  const inMonth=(DB.history||[]).filter(h=>h.date>=prevMonthStart&&h.date<prevMonthEnd);
+  if(!inMonth.length) return null;
+  const totalMin=Math.round(inMonth.reduce((a,h)=>a+(h.durationSec||0),0)/60);
+  const reps={};
+  inMonth.forEach(h=>(h.entries||[]).forEach(en=>{ if(en.reps!=null){ const k=exKey(en.name); if(k) reps[k]=(reps[k]||0)+en.reps; }}));
+  const topEx=Object.entries(reps).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const bestSession=inMonth.slice().sort((a,b)=>(b.durationSec||0)-(a.durationSec||0))[0];
+  const monthKey=y+'-'+String(m).padStart(2,'0');
+  const monthName=new Date(y,m-1,1).toLocaleDateString('de-DE',{month:'long',year:'numeric'});
+  return { count:inMonth.length, totalMin, topEx, bestSession:bestSession?bestSession.planName:null, monthKey, monthName };
+}
+function renderMonthlyReport(){
+  const el=$('#month-report-slot'); if(!el) return;
+  const now=new Date();
+  /* Nur zeigen zwischen 1. und 5. des Monats */
+  if(now.getDate()>5){ el.innerHTML=''; return; }
+  const r=computeMonthlyReport();
+  if(!r){ el.innerHTML=''; return; }
+  if(DB.lastMonthReport && DB.lastMonthReport.monthKey===r.monthKey && DB.lastMonthReport.dismissedAt){ el.innerHTML=''; return; }
+  const topText=r.topEx.length?r.topEx.map(([k,v])=>`${exDisplay(k)}: ${v}`).join(' · '):'—';
+  el.innerHTML=`<div class="month-report"><div class="title">🗓️ ${esc(r.monthName)}</div>
+    <div class="report-list">
+      <div class="item"><span>Trainings</span><b>${r.count}</b></div>
+      <div class="item"><span>Trainingszeit</span><b>${r.totalMin} Min</b></div>
+      ${r.bestSession?`<div class="item"><span>Beste Session</span><b>${esc(r.bestSession)}</b></div>`:''}
+    </div>
+    <div class="hint" style="margin-top:6px">${esc(topText)}</div>
+    <button class="btn btn-ghost btn-sm" id="mrep-close" style="margin-top:10px">Ausblenden</button>
+  </div>`;
+  $('#mrep-close').addEventListener('click',()=>{
+    DB.lastMonthReport={monthKey:r.monthKey, dismissedAt:Date.now()}; save(); el.innerHTML='';
+  });
+}
 function renderWeeklyReport(){
   const el=$('#report-slot'); if(!el) return;
   const now=new Date(); const day=now.getDay()||7;
@@ -3195,6 +3655,7 @@ function renderHome(){
   const b4=$('#btn-parks'); if(b4) b4.innerHTML=svg('target')+' Parks';
   renderResumeBanner();
   renderDeloadBanner();
+  renderMonthlyReport();
   renderWeeklyReport();
   renderStreakBanner();
   renderGoalCard();
@@ -3417,6 +3878,8 @@ function renderModePicker(){
   const host=$('#f-mode-picker'); if(!host) return;
   const modes=[
     {v:'standard', em:'⚡', nm:'Standard',  de:'Klassische Runden mit Pausen'},
+    {v:'circuit',  em:'🔄', nm:'Circuit',   de:'Runde ohne Pause zwischen Übungen'},
+    {v:'ladder',   em:'📈', nm:'Ladder',    de:'Pyramide: 1-2-3-4-5-4-3-2-1'},
     {v:'amrap',    em:'🔥', nm:'AMRAP',     de:'Time-Cap: max. Runden in X Min'},
     {v:'emom',     em:'⏰', nm:'EMOM',      de:'Every Minute On The Minute'},
     {v:'tabata',   em:'💥', nm:'Tabata',    de:'20s Arbeit / 10s Pause × 8'}
@@ -3431,6 +3894,34 @@ function renderModeFields(){
   const host=$('#f-mode-fields'); if(!host) return;
   const m=editing.mode||'standard';
   if(m==='standard'){ host.innerHTML=''; return; }
+  if(m==='circuit'){
+    host.innerHTML=`<div class="mode-fields"><div class="lbl">🔄 Circuit-Einstellungen</div>
+      <div class="hint">Alle Übungen einer Runde ohne Pause dazwischen. Nur Pausen zwischen den Runden.</div>
+    </div>`;
+    return;
+  }
+  if(m==='ladder'){
+    const scheme = editing.ladderScheme || 'up_down';
+    const peak = editing.ladderPeak || 5;
+    const preview = generateLadderReps(scheme, peak);
+    host.innerHTML=`<div class="mode-fields"><div class="lbl">📈 Ladder-Einstellungen</div>
+      <div class="grid2">
+        <div class="field"><label>Schema</label>
+          <select class="select" id="f-ladder-scheme">
+            <option value="up_down" ${scheme==='up_down'?'selected':''}>Auf & ab (1→5→1)</option>
+            <option value="up" ${scheme==='up'?'selected':''}>Aufsteigend (1→5)</option>
+            <option value="down" ${scheme==='down'?'selected':''}>Absteigend (5→1)</option>
+          </select>
+        </div>
+        <div class="field"><label>Spitze</label><input class="input" id="f-ladder-peak" type="number" min="2" max="15" value="${peak}"></div>
+      </div>
+      <div class="ladder-viz">${preview.join(' → ')}</div>
+      <div class="hint">Pro Übung wird die Wiederholungszahl schrittweise angepasst.</div>
+    </div>`;
+    const sc=$('#f-ladder-scheme'); if(sc) sc.addEventListener('change',()=>{ editing.ladderScheme=sc.value; renderModeFields(); });
+    const pk=$('#f-ladder-peak'); if(pk) pk.addEventListener('change',()=>{ editing.ladderPeak=clampInt(pk.value,2,15,5); renderModeFields(); });
+    return;
+  }
   if(m==='amrap'){
     host.innerHTML=`<div class="mode-fields"><div class="lbl">🔥 AMRAP-Einstellungen</div>
       <div class="field"><label>Dauer (Sekunden)</label>
@@ -3602,6 +4093,28 @@ function buildSteps(p){
       const exIdx=(r-1)%n;
       steps.push({kind:'tabataWork', dur:20, round:r, totalRounds:rounds, ex:p.exercises[exIdx]});
       if(r<rounds) steps.push({kind:'tabataRest', dur:10, round:r, totalRounds:rounds, nextEx:p.exercises[r%n]});
+    }
+  } else if(mode==='circuit'){
+    /* Circuit: keine Pause zwischen Übungen innerhalb einer Runde */
+    for(let c=1;c<=p.cycles;c++){
+      for(let i=0;i<n;i++){
+        steps.push({kind:'exercise',cycle:c,exIndex:i,ex:p.exercises[i]});
+      }
+      if(c<p.cycles) steps.push({kind:'cycleRest',cycle:c,dur:p.restBetweenCycles,nextEx:p.exercises[0],nextCycle:c+1});
+    }
+  } else if(mode==='ladder'){
+    /* Ladder: Wiederholungs-Sequenz pro Übung durchlaufen */
+    const ladder = generateLadderReps(p.ladderScheme||'up_down', p.ladderPeak||5);
+    for(let li=0; li<ladder.length; li++){
+      const rung = ladder[li];
+      for(let i=0;i<n;i++){
+        const baseEx = p.exercises[i];
+        const ex = Object.assign({}, baseEx);
+        if(!baseEx.duration){ ex.reps = rung; }
+        steps.push({kind:'exercise', cycle:li+1, exIndex:i, ex, ladderRung:rung, ladderTotal:ladder.length});
+        if(i<n-1) steps.push({kind:'rest', cycle:li+1, dur:p.restBetweenExercises, nextEx:p.exercises[i+1], nextIndex:i+1});
+      }
+      if(li<ladder.length-1) steps.push({kind:'cycleRest', cycle:li+1, dur:p.restBetweenCycles, nextEx:p.exercises[0], nextCycle:li+2});
     }
   } else {
     /* Standard */
@@ -4223,7 +4736,10 @@ function renderSettings(){
     <div class="set-note">Konto & Sync</div>
     <div class="set-group">
       <div class="set-row"><div class="grow"><div class="st-title">${esc(userLabel())}</div><div class="st-sub">${cloudMsg()}</div></div><span class="sync-pill ${FB.user&&FB.ready&&!FB.lastError?'on':(FB.lastError?'err':'')}"><i class="sync-dot"></i>${FB.syncing?'Synchronisiert...':(FB.user?'Firebase':'Lokal')}</span></div>
-      ${FB.user?`<div class="set-row"><button class="btn btn-soft btn-block" id="btn-sync-now">${svg('save')} Jetzt synchronisieren</button></div><div class="set-row"><button class="btn btn-danger btn-block" id="btn-logout">Abmelden</button></div>`:`<div class="set-row"><button class="btn btn-primary btn-block" id="btn-go-login">Einloggen / registrieren</button></div>`}
+      ${FB.user?`<div class="set-row" data-action="change-password" style="cursor:pointer"><div class="grow"><div class="st-title">🔑 Passwort ändern</div><div class="st-sub">Neues Passwort setzen</div></div><span class="set-ic">${svg('edit')}</span></div>
+      <div class="set-row" data-action="change-email" style="cursor:pointer"><div class="grow"><div class="st-title">✉️ E-Mail ändern</div><div class="st-sub">Konto-E-Mail-Adresse aktualisieren</div></div><span class="set-ic">${svg('edit')}</span></div>
+      <div class="set-row" data-action="delete-account" style="cursor:pointer"><div class="grow"><div class="st-title" style="color:var(--danger)">🗑️ Konto löschen</div><div class="st-sub">Alle Cloud-Daten dauerhaft entfernen</div></div><span class="set-ic danger">${svg('trash')}</span></div>
+      <div class="set-row"><button class="btn btn-soft btn-block" id="btn-sync-now">${svg('save')} Jetzt synchronisieren</button></div><div class="set-row"><button class="btn btn-danger btn-block" id="btn-logout">Abmelden</button></div>`:`<div class="set-row"><button class="btn btn-primary btn-block" id="btn-go-login">Einloggen / registrieren</button></div>`}
     </div>
     ${standalone?'':`<div class="set-note">App</div>
     <div class="set-group">
@@ -4282,12 +4798,19 @@ function renderSettings(){
         </div>
       </div>
     </div>
-    <div class="set-note">Körpergewicht (für 1RM-Berechnungen)</div>
+    <div class="set-note">Körper & Regeneration</div>
     <div class="set-group">
       <div class="set-row"><div class="grow"><div class="st-title">Dein Körpergewicht</div><div class="st-sub">Basis für Krafttrainings-Äquivalente</div></div>
         <div class="mini-input" style="width:100px"><input class="input" id="set-bw" type="number" inputmode="decimal" min="30" max="200" value="${s.bodyWeightKg||75}"></div>
       </div>
-      <div class="set-row" data-action="restart-onboarding"><div class="grow"><div class="st-title">Onboarding erneut anzeigen</div><div class="st-sub">Empfehlungen basierend auf Erfahrung neu setzen</div></div><span class="set-ic">${svg('play')}</span></div>
+      <div class="set-row" data-action="body-metrics" style="cursor:pointer"><div class="grow"><div class="st-title">📏 Körpermaße tracken</div><div class="st-sub">Gewicht, Brust, Arm, Taille, Oberschenkel</div></div><span class="set-ic">${svg('chart')}</span></div>
+      <div class="set-row" data-action="recovery-score" style="cursor:pointer"><div class="grow"><div class="st-title">🌅 Recovery-Check</div><div class="st-sub">Schlaf, Muskelkater, Energie bewerten</div></div><span class="set-ic">${svg('droplet')}</span></div>
+      <div class="set-row" data-action="photo-progress" style="cursor:pointer"><div class="grow"><div class="st-title">📸 Fortschritts-Fotos</div><div class="st-sub">Vorher/Nachher lokal speichern</div></div><span class="set-ic">${svg('share')}</span></div>
+    </div>
+    <div class="set-note">Plan-Werkzeuge</div>
+    <div class="set-group">
+      <div class="set-row" data-action="ai-plan" style="cursor:pointer"><div class="grow"><div class="st-title">🤖 KI-Plan-Generator</div><div class="st-sub">Automatischer Trainingsplan nach deinen Vorgaben</div></div><span class="set-ic">${svg('bolt')}</span></div>
+      <div class="set-row" data-action="restart-onboarding" style="cursor:pointer"><div class="grow"><div class="st-title">Onboarding erneut anzeigen</div><div class="st-sub">Empfehlungen neu setzen</div></div><span class="set-ic">${svg('play')}</span></div>
     </div>
     <div class="set-note">Community (optional)</div>
     <div class="set-group">
@@ -4397,6 +4920,13 @@ function renderSettings(){
     if(a==='add-buddy') openAddBuddySheet();
     if(a==='show-leaderboard') openLeaderboardSheet();
     if(a==='show-buddies') openBuddiesSheet();
+    if(a==='change-password') openChangePasswordSheet();
+    if(a==='change-email') openChangeEmailSheet();
+    if(a==='delete-account') openDeleteAccountSheet();
+    if(a==='body-metrics') openBodyMetricsSheet();
+    if(a==='recovery-score') openRecoverySheet();
+    if(a==='photo-progress') openPhotoProgressSheet();
+    if(a==='ai-plan') openAiPlanGenerator();
   }));
   const nk=$('#set-nick'); if(nk) nk.addEventListener('change',()=>{ DB.settings.nickname=nk.value.trim().slice(0,20); save(); toast('Nickname gespeichert'); });
   $('#import-file').addEventListener('change',importData);
