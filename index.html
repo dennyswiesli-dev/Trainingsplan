@@ -895,6 +895,29 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .aigen-choice .nm{font-size:12px;font-weight:800;margin-top:4px;color:var(--chalk)}
 /* Superset+ chain length indicator */
 .ss-len-badge{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:1px 6px;border-radius:5px;font-size:10px;font-weight:900;margin-left:4px;letter-spacing:.5px}
+/* Superset chain: visual grouping (works for 2-5+ exercises) */
+.ex-edit[data-sschain="mid"]{border-top-color:var(--accent);border-top-style:solid;border-top-width:2px;border-bottom-color:var(--accent);border-bottom-style:solid;border-bottom-width:2px;border-left:3px solid var(--accent);border-right:1px solid var(--line)}
+.ex-edit[data-sschain="start"]{border-bottom:2px solid var(--accent);border-left:3px solid var(--accent)}
+.ex-edit[data-sschain="end"]{border-top:2px solid var(--accent);border-left:3px solid var(--accent);border-radius:0 0 15px 15px}
+.ex-edit[data-sschain="start"]{border-radius:15px 15px 0 0;position:relative}
+.ex-edit[data-sschain="start"]::before{content:'SUPERSET-KETTE';position:absolute;top:-10px;left:12px;background:var(--accent);color:var(--accent-ink);font-size:9px;font-weight:900;letter-spacing:1.5px;padding:2px 7px;border-radius:5px;z-index:1}
+/* Static Hold Progression */
+.hold-progress-card{background:linear-gradient(135deg,color-mix(in srgb,var(--work) 15%,var(--panel)),var(--panel));border:1px solid color-mix(in srgb,var(--work) 40%,var(--line));border-radius:12px;padding:10px 12px;margin-top:8px;display:flex;align-items:center;gap:10px}
+.hold-progress-card .em{font-size:22px;line-height:1}
+.hold-progress-card .info{flex:1;min-width:0}
+.hold-progress-card .lbl{color:var(--muted);font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px}
+.hold-progress-card .val{color:var(--chalk);font-family:var(--font-d);font-size:15px;letter-spacing:.5px}
+.hold-progress-card .sug{color:var(--work);font-size:12px;font-weight:800;margin-top:2px}
+/* Line chart for progression */
+.line-chart-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 12px;margin-bottom:14px}
+.line-chart-title{color:var(--muted2);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px}
+.line-chart-wrap{width:100%;height:120px;position:relative}
+.line-chart-svg{width:100%;height:100%;display:block}
+.line-chart-svg polyline{fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.line-chart-svg circle{fill:var(--accent)}
+.line-chart-svg .axis{stroke:var(--line);stroke-width:1}
+.line-chart-svg text{font-size:9px;fill:var(--muted2);font-weight:700}
+.line-chart-legend{color:var(--muted);font-size:11px;font-weight:700;margin-top:6px;display:flex;justify-content:space-between}
 
 /* Compact plan cards */
 body[data-compact="1"] .plan-list{gap:8px}
@@ -1771,6 +1794,63 @@ const ACHIEVEMENTS=[
 function ytUrl(name){ return 'https://www.youtube.com/results?search_query='+encodeURIComponent(String(name||'').trim()+' calisthenics tutorial'); }
 function ytEmbedFirst(name){ return 'https://www.youtube.com/embed?listType=search&list='+encodeURIComponent(String(name||'').trim()+' calisthenics tutorial'); }
 /* 1RM equivalents */
+/* ========================= STATIC HOLD PROGRESSION ========================= */
+/* ========================= LINE CHART HELPER ========================= */
+function renderLineChart(points, opts){
+  /* points: [{x:timestamp, y:value}], opts: {title, formatY, formatX} */
+  opts = opts || {};
+  if(!points || points.length<2) return `<div class="line-chart-card"><div class="line-chart-title">${esc(opts.title||'')}</div><div class="empty" style="padding:20px 0;color:var(--muted);text-align:center;font-size:12px">Zu wenig Daten (min. 2 Einträge nötig)</div></div>`;
+  const W=100, H=100;
+  const xs=points.map(p=>p.x), ys=points.map(p=>p.y);
+  const minX=Math.min(...xs), maxX=Math.max(...xs);
+  const minY=Math.min(...ys), maxY=Math.max(...ys);
+  const rangeX = maxX-minX || 1;
+  const rangeY = maxY-minY || 1;
+  const scaleX = v => ((v-minX)/rangeX)*W;
+  const scaleY = v => H - ((v-minY)/rangeY)*H*0.85 - H*0.075;
+  const poly = points.map(p=>`${scaleX(p.x).toFixed(1)},${scaleY(p.y).toFixed(1)}`).join(' ');
+  const circles = points.map(p=>`<circle cx="${scaleX(p.x).toFixed(1)}" cy="${scaleY(p.y).toFixed(1)}" r="1.6"/>`).join('');
+  const fY = opts.formatY || (v=>v.toString());
+  const fX = opts.formatX || (v=>new Date(v).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}));
+  return `<div class="line-chart-card">
+    <div class="line-chart-title">${esc(opts.title||'')}</div>
+    <div class="line-chart-wrap">
+      <svg class="line-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <polyline points="${poly}"/>
+        ${circles}
+      </svg>
+    </div>
+    <div class="line-chart-legend"><span>${esc(fX(minX))} · ${fY(minY)}</span><span>${esc(fX(maxX))} · ${fY(maxY)}</span></div>
+  </div>`;
+}
+function bestHoldFor(exName){
+  const k = exKey(exName); if(!k) return null;
+  const pr = DB.prs[k]; if(!pr) return null;
+  return pr.bestDuration || null;
+}
+function nextHoldTarget(current){
+  /* Progression: +2s bei <10s, +3s bei <20s, +5s sonst */
+  if(!current) return null;
+  if(current < 10) return current + 2;
+  if(current < 20) return current + 3;
+  if(current < 60) return current + 5;
+  return current + 10;
+}
+function holdProgressionHTML(ex){
+  if(!ex || !ex.duration) return '';
+  const best = bestHoldFor(ex.name);
+  if(!best) return '';
+  const target = nextHoldTarget(best);
+  const isPR = ex.duration >= target;
+  return `<div class="hold-progress-card">
+    <div class="em">${isPR?'🏆':'🎯'}</div>
+    <div class="info">
+      <div class="lbl">Bestwert</div>
+      <div class="val">${fmt(best)} Sek.</div>
+      <div class="sug">${isPR?'PR-Versuch!':'Ziel: '+fmt(target)+' Sek.'}</div>
+    </div>
+  </div>`;
+}
 function computeStrengthEquiv(){
   const bw=+DB.settings.bodyWeightKg||75; const out=[];
   const p=DB.prs||{};
@@ -1792,7 +1872,7 @@ function grantMonthlyFreeze(){
   if(DB.streakFreeze.monthKey!==mk){
     DB.streakFreeze.monthKey=mk; DB.streakFreeze.usedThisMonth=0;
     DB.streakFreeze.tokens=Math.min(2,(DB.streakFreeze.tokens||0)+1);
-    DB.streakFreeze.lastGranted=Date.now(); save();
+    DB.streakFreeze.lastGranted=Date.now(); save({silent:true}); /* silent: kein Settings-Timestamp-Update */
   }
 }
 function autoConsumeFreeze(){
@@ -1808,7 +1888,7 @@ function autoConsumeFreeze(){
     if(!(sf.appliedWeeks||[]).includes(lastKey)){
       sf.tokens-=1; sf.usedThisMonth=(sf.usedThisMonth||0)+1;
       sf.appliedWeeks=(sf.appliedWeeks||[]).concat([lastKey]).slice(-6);
-      save(); toast('🧊 Streak-Joker eingesetzt!');
+      save({silent:true}); toast('🧊 Streak-Joker eingesetzt!');
     }
   }
 }
@@ -2044,8 +2124,20 @@ function load(){
     if(!DB.skillHistory||typeof DB.skillHistory!=='object') DB.skillHistory={};
   }catch(e){ DB = structuredClone(DEFAULTS); }
 }
-function save(){
-  DB.updatedAt = Date.now(); /* Timestamp für konfliktfreies Merging */
+/* ===== PER-SECTION-TIMESTAMPS für konfliktfreies Merging =====
+   Statt einem globalen updatedAt: jede Sektion hat einen eigenen Timestamp.
+   Housekeeping (Freeze, Monatswechsel) darf mit save({silent:true}) speichern
+   ohne die User-Timestamps zu verändern. */
+function save(opts){
+  opts = opts || {};
+  const now = Date.now();
+  DB.updatedAt = now;
+  if(!DB.ts) DB.ts = {};
+  if(!opts.silent){
+    /* Standard: alle User-relevanten Sektionen bekommen einen neuen Timestamp */
+    const sections = opts.sections || ['settings','flags','warmupPlan','cooldownPlan','favorites','hidden','customPlans','overrides','challenges','customChallenges','parks','exerciseNotes','bodyMetrics','recoveryScores','progressPhotos','skillHistory','skills','buddies'];
+    sections.forEach(s => { DB.ts[s] = now; });
+  }
   try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
   cloudScheduleSave();
 }
@@ -2073,36 +2165,59 @@ function mergeDb(local, remote){
   if(!remote) return local;
   const l=structuredClone(local||DEFAULTS), r=structuredClone(remote||{});
   const sfL=l.streakFreeze||{}, sfR=r.streakFreeze||{};
-  /* Timestamp-basierte Konfliktlösung: Wer zuletzt gespeichert hat, gewinnt bei skalaren Feldern */
-  const lTs = +l.updatedAt || 0, rTs = +r.updatedAt || 0;
-  const remoteNewer = rTs > lTs;
-  const pickNewer = (a,b) => remoteNewer ? (b!==undefined?b:a) : (a!==undefined?a:b);
+  const lTsMap = l.ts || {};
+  const rTsMap = r.ts || {};
+  /* PER-SECTION-TIMESTAMPS: jede Sektion einzeln vergleichen. Fallback auf globales updatedAt. */
+  const lFallback = +l.updatedAt || 0, rFallback = +r.updatedAt || 0;
+  const pickSection = (name, defaultVal) => {
+    const lT = +lTsMap[name] || lFallback;
+    const rT = +rTsMap[name] || rFallback;
+    if(rT > lT && r[name] !== undefined) return r[name];
+    if(lT > 0 && l[name] !== undefined) return l[name];
+    return (r[name] !== undefined) ? r[name] : (l[name] !== undefined ? l[name] : defaultVal);
+  };
+  /* Objekt-Merge: neuer gewinnt bei Konflikten, aber beide Seiten werden vereinigt */
+  const pickObjSection = (name) => {
+    const lT = +lTsMap[name] || lFallback;
+    const rT = +rTsMap[name] || rFallback;
+    const rNewer = rT > lT;
+    return Object.assign({}, rNewer?(l[name]||{}):(r[name]||{}), rNewer?(r[name]||{}):(l[name]||{}));
+  };
+  const mergedTs = {};
+  ['settings','flags','warmupPlan','cooldownPlan','favorites','hidden','customPlans','overrides','challenges','customChallenges','parks','exerciseNotes','bodyMetrics','recoveryScores','progressPhotos','skillHistory','skills','buddies','achievements','progression','lastReport','lastMonthReport'].forEach(k=>{
+    mergedTs[k] = Math.max(+lTsMap[k]||0, +rTsMap[k]||0);
+  });
   return {
     customPlans:mergeUniqueById(l.customPlans,r.customPlans),
-    overrides:Object.assign({}, remoteNewer?l.overrides:r.overrides, remoteNewer?r.overrides:l.overrides),
+    overrides: pickObjSection('overrides'),
     hidden:Array.from(new Set([...(r.hidden||[]),...(l.hidden||[])])),
     favorites:Array.from(new Set([...(r.favorites||[]),...(l.favorites||[])])),
     prs:mergePRs(l.prs,r.prs),
     skills:mergeSkills(l.skills,r.skills),
     history:mergeHistory(l.history,r.history),
-    flags:Object.assign({},DEFAULTS.flags, remoteNewer?(l.flags||{}):(r.flags||{}), remoteNewer?(r.flags||{}):(l.flags||{})),
-    /* SETTINGS: Neuer gewinnt komplett, damit Nickname/Opt-Ins etc. sauber syncen */
-    settings:Object.assign({}, DEFAULTS.settings, remoteNewer ? (r.settings||{}) : (l.settings||{})),
-    achievements:Object.assign({}, remoteNewer?(l.achievements||{}):(r.achievements||{}), remoteNewer?(r.achievements||{}):(l.achievements||{})),
-    progression:Object.assign({}, remoteNewer?(l.progression||{}):(r.progression||{}), remoteNewer?(r.progression||{}):(l.progression||{})),
-    challenges:Object.assign({}, remoteNewer?(l.challenges||{}):(r.challenges||{}), remoteNewer?(r.challenges||{}):(l.challenges||{})),
-    customChallenges:mergeUniqueById(l.customChallenges,r.customChallenges),
+    flags: Object.assign({}, DEFAULTS.flags, pickObjSection('flags')),
+    /* SETTINGS: Per-Section-Timestamp-Vergleich */
+    settings: Object.assign({}, DEFAULTS.settings, pickObjSection('settings')),
+    achievements: pickObjSection('achievements'),
+    progression: pickObjSection('progression'),
+    challenges: pickObjSection('challenges'),
+    customChallenges: mergeUniqueById(l.customChallenges, r.customChallenges),
     streakFreeze:{ tokens:Math.max(sfL.tokens||0,sfR.tokens||0), lastGranted:Math.max(sfL.lastGranted||0,sfR.lastGranted||0), usedThisMonth:Math.max(sfL.usedThisMonth||0,sfR.usedThisMonth||0), monthKey:sfL.monthKey||sfR.monthKey||'', appliedWeeks:Array.from(new Set([...(sfL.appliedWeeks||[]),...(sfR.appliedWeeks||[])])) },
     deloadDismissedAt:Math.max(l.deloadDismissedAt||0,r.deloadDismissedAt||0),
-    parks:{ favorites:Array.from(new Set([...((r.parks&&r.parks.favorites)||[]),...((l.parks&&l.parks.favorites)||[])])), notes:Object.assign({}, remoteNewer?((l.parks&&l.parks.notes)||{}):((r.parks&&r.parks.notes)||{}), remoteNewer?((r.parks&&r.parks.notes)||{}):((l.parks&&l.parks.notes)||{})) },
-    exerciseNotes:Object.assign({}, remoteNewer?(l.exerciseNotes||{}):(r.exerciseNotes||{}), remoteNewer?(r.exerciseNotes||{}):(l.exerciseNotes||{})),
-    /* Warm-up/Cool-down-Pläne: Neuer gewinnt */
-    warmupPlan: pickNewer(l.warmupPlan, r.warmupPlan),
-    cooldownPlan: pickNewer(l.cooldownPlan, r.cooldownPlan),
-    buddyCode:l.buddyCode||r.buddyCode||'',
-    buddies:mergeUniqueById(l.buddies,r.buddies),
-    lastReport:Object.assign({weekKey:'',dismissedAt:0}, remoteNewer?(l.lastReport||{}):(r.lastReport||{}), remoteNewer?(r.lastReport||{}):(l.lastReport||{})),
-    updatedAt: Math.max(lTs, rTs)
+    parks:{ favorites:Array.from(new Set([...((r.parks&&r.parks.favorites)||[]),...((l.parks&&l.parks.favorites)||[])])), notes: (function(){ const p=pickObjSection('parks'); return p.notes||{}; })() },
+    exerciseNotes: pickObjSection('exerciseNotes'),
+    warmupPlan: pickSection('warmupPlan', null),
+    cooldownPlan: pickSection('cooldownPlan', null),
+    bodyMetrics: (function(){ const l1=l.bodyMetrics||[], r1=r.bodyMetrics||[]; const m=new Map(); [...l1,...r1].forEach(x=>{ if(x&&x.date) m.set(x.date,x); }); return Array.from(m.values()).sort((a,b)=>b.date-a.date).slice(0,100); })(),
+    recoveryScores: (function(){ const l1=l.recoveryScores||[], r1=r.recoveryScores||[]; const m=new Map(); [...l1,...r1].forEach(x=>{ if(x&&x.date) m.set(new Date(x.date).toDateString(),x); }); return Array.from(m.values()).sort((a,b)=>b.date-a.date).slice(0,60); })(),
+    progressPhotos: mergeUniqueById(l.progressPhotos, r.progressPhotos),
+    skillHistory: pickObjSection('skillHistory'),
+    buddyCode: l.buddyCode || r.buddyCode || '',
+    buddies: mergeUniqueById(l.buddies, r.buddies),
+    lastReport: pickObjSection('lastReport'),
+    lastMonthReport: pickObjSection('lastMonthReport'),
+    updatedAt: Math.max(lFallback, rFallback),
+    ts: mergedTs
   };
 }
 async function initFirebase(){
@@ -2438,6 +2553,27 @@ function renderStats(){
     <div class="strength-list">${strengthArr.map(s=>`<div class="strength-item"><span>${esc(s.label)} · ${esc(s.reps)}</span><b>~ ${s.kg} kg</b></div>`).join('')}</div>
     <div class="hint" style="margin-top:8px;font-size:11px">Geschätzte 1RM nach Brzycki-Formel</div>
   </div>` : '';
+  /* 1RM-Progression über Zeit */
+  const bw = +DB.settings.bodyWeightKg || 75;
+  const oneRmMap = {push_up:0.65, pull_up:1.0, chin_up:1.0, dips:0.9, squats:0.85};
+  const oneRmProgression = {};
+  (DB.history||[]).forEach(h=>{
+    (h.entries||[]).forEach(en=>{
+      if(en.reps==null || en.reps<=0) return;
+      const k = exKey(en.name); if(!k || !(k in oneRmMap)) return;
+      const load = bw * oneRmMap[k];
+      const oneRM = Math.round(load*(1+en.reps/30));
+      if(!oneRmProgression[k]) oneRmProgression[k]=[];
+      oneRmProgression[k].push({x:h.date, y:oneRM});
+    });
+  });
+  let oneRmGraphHtml='';
+  const bestKey = Object.keys(oneRmProgression).sort((a,b)=>oneRmProgression[b].length-oneRmProgression[a].length)[0];
+  if(bestKey && oneRmProgression[bestKey].length>=2){
+    const points = oneRmProgression[bestKey].sort((a,b)=>a.x-b.x);
+    const label = exDisplay(bestKey);
+    oneRmGraphHtml = `<div class="section-label" style="margin-top:18px">📈 1RM-Verlauf: ${esc(label)}</div>${renderLineChart(points,{title:'Geschätzte 1RM über Zeit',formatY:v=>v+' kg'})}`;
+  }
   const vol = volumeLastWeek();
   const volBlock = vol.length ? `<div class="vol-box"><div class="vol-title">🎯 Volumen (letzte 7 Tage)</div>${vol.map(v=>`<div class="vol-row"><div class="vol-lbl">${esc(v.label)}</div><div class="vol-bar"><i style="width:${v.pct}%"></i></div><div class="vol-val">${v.val}</div></div>`).join('')}</div>`:'';
   /* Forecasts */
@@ -2497,6 +2633,7 @@ function renderStats(){
     ${topBlock}
     ${prBlock}
     ${strengthBlock}
+    ${oneRmGraphHtml}
     ${volBlock}
     ${forecastBlock}
     ${renderAchievementsBlock()}
@@ -2521,12 +2658,31 @@ function renderSkills(){
   };
   const basics=SKILL_CATALOG.filter(s=>s.category==='basic'||!s.category);
   const advanced=SKILL_CATALOG.filter(s=>s.category==='advanced');
-  m.innerHTML=`<div class="section-label">🏗️ Grundübungen</div>${basics.map(renderCard).join('')}<div class="section-label" style="margin-top:20px">⚡ Fortgeschrittene Skills</div>${advanced.map(renderCard).join('')}`;
+  /* Skill-Progression-Graph für den am weitesten fortgeschrittenen Skill */
+  let graphHtml='';
+  const skillsWithHistory = Object.keys(DB.skillHistory||{}).filter(id=>(DB.skillHistory[id]||[]).length>=2);
+  if(skillsWithHistory.length){
+    /* Wähle Skill mit den meisten Einträgen */
+    skillsWithHistory.sort((a,b)=>(DB.skillHistory[b]||[]).length-(DB.skillHistory[a]||[]).length);
+    const showId = skillsWithHistory[0];
+    const skill = SKILL_CATALOG.find(s=>s.id===showId);
+    if(skill){
+      const points = (DB.skillHistory[showId]||[]).map(h=>({x:h.date,y:h.stage}));
+      graphHtml = `<div class="section-label" style="margin-top:20px">📈 Skill-Verlauf: ${esc(skill.name)}</div>${renderLineChart(points,{title:'Stufe über Zeit', formatY:v=>'Stufe '+v})}`;
+    }
+  }
+  m.innerHTML=`<div class="section-label">🏗️ Grundübungen</div>${basics.map(renderCard).join('')}<div class="section-label" style="margin-top:20px">⚡ Fortgeschrittene Skills</div>${advanced.map(renderCard).join('')}${graphHtml}`;
   $$('#skills-main .skill-stage').forEach(el=>el.addEventListener('click',()=>{
     if(el.dataset.locked==='1'){ toast('Zuerst die Voraussetzungen erfüllen'); return; }
     const id=el.dataset.skill,stage=+el.dataset.stage;
     const cur=(DB.skills[id]&&DB.skills[id].stage)||0;
-    DB.skills[id]={stage:cur===stage?stage-1:stage,updatedAt:Date.now()};
+    const newStage = cur===stage?stage-1:stage;
+    DB.skills[id]={stage:newStage,updatedAt:Date.now()};
+    /* Track skill history for progression graph */
+    if(!DB.skillHistory) DB.skillHistory={};
+    if(!Array.isArray(DB.skillHistory[id])) DB.skillHistory[id]=[];
+    DB.skillHistory[id].push({date:Date.now(), stage:newStage});
+    DB.skillHistory[id]=DB.skillHistory[id].slice(-50);
     save(); renderSkills();
   }));
 }
@@ -3728,7 +3884,7 @@ function renderDeloadBanner(){
     </div>
     <button class="deload-x" id="deload-dismiss" aria-label="Ausblenden">${svg('close')}</button>`;
   const dx=$('#deload-dismiss'); if(dx) dx.addEventListener('click',()=>{
-    DB.deloadDismissedAt=Date.now(); save(); el.style.display='none';
+    DB.deloadDismissedAt=Date.now(); save({silent:true}); el.style.display='none';
   });
 }
 function renderGoalCard(){
@@ -3969,16 +4125,39 @@ function renderWarmCool(){
   const wd=$('#f-warmup-dur'); if(wd) wd.value = editing.warmupDuration || DB.settings.warmupDuration || 120;
   const cdd=$('#f-cooldown-dur'); if(cdd) cdd.value = editing.cooldownDuration || DB.settings.cooldownDuration || 180;
 }
+function computeSsChainPositions(){
+  /* Analyse Superset-Ketten: welche Position hat jede Übung in einer Kette? */
+  const arr = editing.exercises;
+  const positions = arr.map(()=>null);
+  for(let i=0;i<arr.length;i++){
+    const prev = i>0 ? arr[i-1].supersetLink : false;
+    const cur = arr[i].supersetLink;
+    if(cur && !prev) positions[i]='start';
+    else if(cur && prev) positions[i]='mid';
+    else if(!cur && prev) positions[i]='end';
+  }
+  return positions;
+}
+function chainLengthAt(startIdx){
+  const arr = editing.exercises;
+  let len=1;
+  for(let i=startIdx;i<arr.length && arr[i].supersetLink; i++) len++;
+  return len;
+}
 function renderExEditor(){
   const c=$('#ex-editor');
+  const ssPositions = computeSsChainPositions();
   c.innerHTML = editing.exercises.map((e,i)=>{
     const isTime = !!e.duration;
     const val = isTime ? e.duration : (e.reps!=null?e.reps:'');
-    const ssStart = e.supersetStart?' data-supersetstart="1"':'';
-    const ssLink = e.supersetLink?' data-supersetend="1"':'';
-    return `<div class="ex-edit" data-i="${i}"${ssStart}${ssLink}>
+    const ssPos = ssPositions[i];
+    const ssAttr = ssPos ? ` data-sschain="${ssPos}"` : '';
+    const chainBadge = ssPos==='start' ? `<span class="ss-len-badge">Kette: ${chainLengthAt(i)}</span>` : '';
+    const ssStart = ssPos==='start' ? ' data-supersetstart="1"' : '';
+    const ssLink = e.supersetLink ? ' data-supersetend="1"' : '';
+    return `<div class="ex-edit" data-i="${i}"${ssAttr}${ssStart}${ssLink}>
       <div class="ex-edit-head">
-        <div class="ex-edit-num">${i+1}</div>
+        <div class="ex-edit-num">${i+1}${chainBadge}</div>
         <input class="input grow" data-f="name" placeholder="Übungsname" value="${esc(e.name)}" maxlength="50">
         <div class="ex-tools">
           <button class="tool" data-mv="up" ${i===0?'disabled':''} aria-label="nach oben">${svg('up')}</button>
@@ -4251,7 +4430,7 @@ function renderStep(){
       adjust.style.display='none';
       primary.classList.remove('paused');
       primary.innerHTML= W.paused? svgFill('play')+' Weiter' : svgFill('pause')+' Pause';
-      hintEl.innerHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="wk-alt-btn" id="wk-alt-btn">'+svg('swap')+' Alternative</button><a class="yt-btn-workout" href="'+ytUrl(e.name)+'" target="_blank" rel="noopener">'+svg('play')+' YouTube</a>'+liveNoteBtnHtml()+'</div>';
+      hintEl.innerHTML=holdProgressionHTML(e)+'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px"><button class="wk-alt-btn" id="wk-alt-btn">'+svg('swap')+' Alternative</button><a class="yt-btn-workout" href="'+ytUrl(e.name)+'" target="_blank" rel="noopener">'+svg('play')+' YouTube</a>'+liveNoteBtnHtml()+'</div>';
     } else {
       bigEl.textContent=e.reps;
       unitEl.textContent='Wiederholungen';
@@ -4933,7 +5112,24 @@ function renderSettings(){
   // install
   renderInstallSlot();
   const lo=$('#btn-logout'); if(lo) lo.addEventListener('click', logout);
-  const sn=$('#btn-sync-now'); if(sn) sn.addEventListener('click', ()=>cloudSaveNow(false));
+  const sn=$('#btn-sync-now'); if(sn) sn.addEventListener('click', async ()=>{
+    /* FULL ROUND-TRIP: erst PULL, dann MERGE, dann PUSH */
+    if(!FB.ready||!FB.user){ toast('Nicht eingeloggt'); return; }
+    toast('Synchronisiere...');
+    try{
+      const snap = await FIRE.getDoc(userDocRef());
+      if(snap.exists()){
+        DB = mergeDb(DB, snap.data().db);
+        try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
+        document.body.dataset.theme=DB.settings.theme||'dark';
+        document.body.dataset.accent=DB.settings.accent||'green';
+        document.body.dataset.compact=DB.settings.compact?'1':'';
+      }
+      await cloudSaveNow(true);
+      renderSettings();
+      toast('✔ Synchronisiert – neueste Version geladen');
+    }catch(err){ toast('Sync fehlgeschlagen: '+(err.message||err)); }
+  });
   const gl=$('#btn-go-login'); if(gl) gl.addEventListener('click', ()=>show('auth',true));
 }
 
