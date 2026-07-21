@@ -1811,7 +1811,7 @@ async function initFirebase(){
   }catch(err){ FB.lastError=err.message||String(err); authStatus('Firebase konnte nicht geladen werden. Du kannst lokal weitertrainieren.',false); renderAuth(); }
 }
 function userDocRef(){ return FIRE.doc(FB.db,'users',FB.user.uid,'barwork','state'); }
-async function loadCloudDb(){ if(!FB.ready||!FB.user) return; try{ const snap=await FIRE.getDoc(userDocRef()); if(snap.exists()){ DB=mergeDb(DB,snap.data().db); try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){} } await cloudSaveNow(true); }catch(err){ FB.lastError=err.message||String(err); toast('Cloud-Sync fehlgeschlagen'); } }
+async function loadCloudDb(){ if(!FB.ready||!FB.user) return; try{ const snap=await FIRE.getDoc(userDocRef()); if(snap.exists()){ DB=mergeDb(DB,snap.data().db); try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){} } await cloudSaveNow(true); /* Onboarding erst NACH Cloud-Sync prüfen, damit onboarded-Flag korrekt geladen ist */ setTimeout(()=>maybeStartOnboarding(), 400); }catch(err){ FB.lastError=err.message||String(err); toast('Cloud-Sync fehlgeschlagen'); } }
 function cloudScheduleSave(){ if(!FB.ready||!FB.user||FB.syncing) return; clearTimeout(FB.saveTimer); FB.saveTimer=setTimeout(()=>cloudSaveNow(false),900); }
 async function cloudSaveNow(silent){ if(!FB.ready||!FB.user) return; FB.syncing=true; FB.lastError=''; renderSettings(); try{ await FIRE.setDoc(userDocRef(), { db:cleanForCloud(DB), updatedAt:FIRE.serverTimestamp(), app:'BARWORK' }, { merge:true }); if(!silent) toast('Fortschritt synchronisiert'); }catch(err){ FB.lastError=err.message||String(err); if(!silent) toast('Cloud-Sync fehlgeschlagen'); } finally{ FB.syncing=false; renderSettings(); } }
 async function doAuth(mode){ if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.',false); return; } const email=$('#auth-email').value.trim(); const pass=$('#auth-pass').value; if(!email||!pass){ authStatus('Bitte E-Mail und Passwort eingeben.',false); return; } if(pass.length<6){ authStatus('Das Passwort muss mindestens 6 Zeichen haben.',false); return; } authStatus(mode==='register'?'Konto wird erstellt...':'Login läuft...',true); try{ if(mode==='register') await FIRE.createUserWithEmailAndPassword(FB.auth,email,pass); else await FIRE.signInWithEmailAndPassword(FB.auth,email,pass); FB.localMode=false; authStatus('',true); }catch(err){ authStatus(firebaseErrorText(err),false); } }
@@ -2476,7 +2476,12 @@ function deleteCustomChallenge(id){
 }
 function renderChallenges(){
   const bi=$('#chal-back-ic'); if(bi) bi.innerHTML=svg('left');
-  const nb=$('#btn-new-chal'); if(nb) nb.innerHTML=svg('plus');
+  const nb=$('#btn-new-chal');
+  if(nb){
+    nb.innerHTML=svg('plus');
+    /* Handler nur einmal binden (Idempotenz-Guard) */
+    if(!nb._bound){ nb._bound=true; nb.addEventListener('click', openNewChallengeSheet); }
+  }
   const m=$('#chal-main'); if(!m) return;
   if(!DB.challenges) DB.challenges={};
   const all=allChallenges();
@@ -2647,9 +2652,33 @@ function checkPlanImportUrl(){
 /* ========================= ONBOARDING ========================= */
 let _obState={ step:1, level:null, goal:null, freq:null };
 function startOnboarding(){
-  if(DB.flags.onboarded) return;
   _obState={step:1,level:null,goal:null,freq:null};
   renderOnboarding();
+}
+/* Plan-Empfehlungen basierend auf Level+Ziel berechnen */
+function getRecommendedPlans(level, goal){
+  const map={
+    Beginner:{
+      strength:['b-basic-beginner','b-pull-push','b-shoulder-routine'],
+      skills:['b-basic-beginner','b-shoulder-routine','b-pull-push'],
+      endurance:['b-basic-beginner','b-home-fullbody','b-shoulder-routine'],
+      balanced:['b-basic-beginner','b-pull-push','b-shoulder-routine']
+    },
+    Medium:{
+      strength:['b-fullbody-7r','b-pull-it','b-biceps-triceps'],
+      skills:['b-fullbody-7r','b-muscleup-hunt','b-abs-core'],
+      endurance:['b-insane-cardio','b-home-fullbody','b-fullbody-7r'],
+      balanced:['b-fullbody-7r','b-pull-it','b-leg-routine']
+    },
+    Advanced:{
+      strength:['b-fullbody-luis','b-arm-routine','b-back-routine'],
+      skills:['b-muscleup-hunt','b-fullbody-luis','b-abs-core'],
+      endurance:['b-insane-cardio','b-pushup-hell','b-fullbody-luis'],
+      balanced:['b-fullbody-luis','b-muscleup-hunt','b-leg-routine']
+    }
+  };
+  const ids=(map[level]&&map[level][goal])||['b-basic-beginner','b-fullbody-7r','b-pull-push'];
+  return ids.map(id=>BUILTINS.find(b=>b.id===id)).filter(Boolean);
 }
 function renderOnboarding(){
   const existing=$('#ob-scrim'); if(existing) existing.remove();
@@ -2671,14 +2700,26 @@ function renderOnboarding(){
         ${[{v:'strength',em:'🏋️',nm:'Kraft aufbauen',de:'Push Ups, Pull Ups, Dips maximieren'},{v:'skills',em:'⚡',nm:'Skills lernen',de:'Muscle Up, Handstand, Levers'},{v:'endurance',em:'🔥',nm:'Ausdauer',de:'HIIT, Kondition, Fettverbrennung'},{v:'balanced',em:'⚖️',nm:'Ausgewogen',de:'Gesunde Mischung aus allem'}].map(o=>`<button class="ob-choice ${s.goal===o.v?'on':''}" data-obgoal="${o.v}"><div class="em">${o.em}</div><div class="info"><div class="nm">${o.nm}</div><div class="de">${o.de}</div></div></button>`).join('')}
       </div>
       <div class="ob-actions"><button class="btn btn-ghost" id="ob-back">Zurück</button><button class="btn btn-primary" id="ob-next" ${!s.goal?'disabled':''}>Weiter</button></div>`;
-  } else {
-    content=`<div class="ob-step">Schritt 3 / 3</div>
+  } else if(s.step===3){
+    content=`<div class="ob-step">Schritt 3 / 4</div>
       <div class="ob-title">Wie oft trainierst du pro Woche?</div>
       <div class="ob-sub">Das setzt dein Wochenziel.</div>
       <div class="ob-choices">
         ${[{v:2,em:'🌿',nm:'2 × Woche',de:'Einsteiger-Frequenz'},{v:3,em:'💪',nm:'3 × Woche',de:'Optimal für die meisten'},{v:4,em:'🔥',nm:'4 × Woche',de:'Ambitioniert'},{v:5,em:'⚡',nm:'5+ × Woche',de:'Für Fortgeschrittene'}].map(o=>`<button class="ob-choice ${s.freq===o.v?'on':''}" data-obfreq="${o.v}"><div class="em">${o.em}</div><div class="info"><div class="nm">${o.nm}</div><div class="de">${o.de}</div></div></button>`).join('')}
       </div>
-      <div class="ob-actions"><button class="btn btn-ghost" id="ob-back">Zurück</button><button class="btn btn-primary" id="ob-finish" ${!s.freq?'disabled':''}>Los geht's! 🚀</button></div>`;
+      <div class="ob-actions"><button class="btn btn-ghost" id="ob-back">Zurück</button><button class="btn btn-primary" id="ob-next" ${!s.freq?'disabled':''}>Weiter</button></div>`;
+  } else {
+    /* Schritt 4: Explizite Plan-Empfehlungen */
+    const recs=getRecommendedPlans(s.level,s.goal);
+    const goalLabels={strength:'Kraft aufbauen',skills:'Skills lernen',endurance:'Ausdauer',balanced:'Ausgewogen'};
+    content=`<div class="ob-step">Schritt 4 / 4 · Empfehlungen</div>
+      <div class="ob-title">Deine Trainingspläne 🎯</div>
+      <div class="ob-sub">Basierend auf: <b style="color:var(--chalk)">${esc(s.level)}</b> · <b style="color:var(--chalk)">${esc(goalLabels[s.goal]||s.goal)}</b> · <b style="color:var(--chalk)">${s.freq}× / Woche</b></div>
+      <div class="ob-choices" style="max-height:340px;overflow-y:auto">
+        ${recs.map(p=>`<div class="ob-choice on" style="cursor:default"><div class="em">⭐</div><div class="info"><div class="nm">${esc(p.name)}</div><div class="de">${esc(p.level||'')} · ${p.cycles} Runden · ${(p.exercises||[]).length} Übungen · ~${Math.round(estimate(p)/60)} Min</div></div></div>`).join('')}
+      </div>
+      <div class="hint" style="text-align:center;margin:8px 0 4px">Diese Pläne werden als Favoriten markiert und erscheinen ganz oben auf deiner Startseite.</div>
+      <div class="ob-actions"><button class="btn btn-ghost" id="ob-back">Zurück</button><button class="btn btn-primary" id="ob-finish">Los geht's! 🚀</button></div>`;
   }
   const el=document.createElement('div'); el.className='ob-scrim'; el.id='ob-scrim';
   el.innerHTML=`<div class="ob-card">${content}</div>`;
@@ -2686,21 +2727,21 @@ function renderOnboarding(){
   $$('[data-oblvl]',el).forEach(b=>b.addEventListener('click',()=>{ s.level=b.dataset.oblvl; renderOnboarding(); }));
   $$('[data-obgoal]',el).forEach(b=>b.addEventListener('click',()=>{ s.goal=b.dataset.obgoal; renderOnboarding(); }));
   $$('[data-obfreq]',el).forEach(b=>b.addEventListener('click',()=>{ s.freq=+b.dataset.obfreq; renderOnboarding(); }));
-  const nx=$('#ob-next',el); if(nx) nx.addEventListener('click',()=>{ if((s.step===1&&s.level)||(s.step===2&&s.goal)){ s.step++; renderOnboarding(); }});
+  const nx=$('#ob-next',el); if(nx) nx.addEventListener('click',()=>{ if((s.step===1&&s.level)||(s.step===2&&s.goal)||(s.step===3&&s.freq)){ s.step++; renderOnboarding(); }});
   const bk=$('#ob-back',el); if(bk) bk.addEventListener('click',()=>{ s.step--; renderOnboarding(); });
-  const sk=$('#ob-skip',el); if(sk) sk.addEventListener('click',()=>{ DB.flags.onboarded=true; save(); el.remove(); });
+  const sk=$('#ob-skip',el); if(sk) sk.addEventListener('click',()=>{ if(!DB.flags) DB.flags={}; DB.flags.onboarded=true; save(); el.remove(); });
   const fn=$('#ob-finish',el); if(fn) fn.addEventListener('click',()=>{
-    DB.settings.weeklyGoal=s.freq;
-    /* Favorisiere passende Pläne */
-    const recommendations={
-      Beginner:['b-basic-beginner','b-shoulder-routine','b-pull-push'],
-      Medium:['b-fullbody-7r','b-pull-it','b-abs-core'],
-      Advanced:['b-fullbody-luis','b-muscleup-hunt','b-arm-routine']
-    };
-    (recommendations[s.level]||[]).forEach(id=>{ if(!DB.favorites.includes(id)) DB.favorites.push(id); });
-    if(s.goal==='endurance' && !DB.favorites.includes('b-insane-cardio')) DB.favorites.push('b-insane-cardio');
-    DB.flags.onboarded=true; save(); el.remove();
-    toast('🎉 Willkommen! Passende Pläne sind markiert.'); renderHome();
+    if(!DB.flags) DB.flags={};
+    DB.settings.weeklyGoal=s.freq||3;
+    /* Empfehlungen anwenden: alle empfohlenen Pläne als Favoriten markieren */
+    const recs=getRecommendedPlans(s.level,s.goal);
+    if(!Array.isArray(DB.favorites)) DB.favorites=[];
+    recs.forEach(p=>{ if(!DB.favorites.includes(p.id)) DB.favorites.push(p.id); });
+    DB.flags.onboarded=true;
+    save();
+    el.remove();
+    toast('🎉 '+recs.length+' Pläne als Favoriten markiert!');
+    renderHome();
   });
 }
 /* ========================= PR TIMELINE SHEET ========================= */
@@ -3963,7 +4004,7 @@ $('#auth-login').addEventListener('click',()=>doAuth('login'));
 $('#auth-register').addEventListener('click',()=>doAuth('register'));
 $('#auth-google').addEventListener('click',doGoogleLogin);
 $('#auth-reset').addEventListener('click',doPasswordReset);
-$('#auth-local').addEventListener('click',()=>{ FB.localMode=true; show('home',true); toast('Lokaler Modus aktiv'); });
+$('#auth-local').addEventListener('click',()=>{ FB.localMode=true; show('home',true); toast('Lokaler Modus aktiv'); setTimeout(()=>maybeStartOnboarding(),400); });
 $('#auth-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doAuth('login'); });
 
 
@@ -4307,6 +4348,16 @@ function openAltPicker(){
 }
 
 /* ========================= INIT ========================= */
+let _onboardingChecked=false;
+function maybeStartOnboarding(){
+  if(_onboardingChecked) return;
+  if(DB.flags && DB.flags.onboarded) { _onboardingChecked=true; return; }
+  if((DB.history||[]).length>0){ _onboardingChecked=true; return; }
+  if((DB.customPlans||[]).length>0){ _onboardingChecked=true; return; }
+  if((DB.favorites||[]).length>0){ _onboardingChecked=true; return; }
+  _onboardingChecked=true;
+  startOnboarding();
+}
 function init(){
   load();
   document.body.dataset.theme=DB.settings.theme||'dark';
@@ -4314,7 +4365,7 @@ function init(){
   document.body.dataset.compact=DB.settings.compact?'1':'';
   grantMonthlyFreeze();
   autoConsumeFreeze();
-  setTimeout(()=>{ checkPlanImportUrl(); if(!DB.flags.onboarded && (DB.history||[]).length===0) startOnboarding(); },800);
+  setTimeout(()=>{ checkPlanImportUrl(); if(!FB.user && !FB.ready){ maybeStartOnboarding(); } },800);
   const m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', DB.settings.theme==='light'?'#eef1f5':'#0B0E13');
   history.replaceState({view:'auth'},'');
   show('auth',false);
