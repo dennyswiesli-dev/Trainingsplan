@@ -914,7 +914,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .wp-day .d-lbl{font-size:9px;letter-spacing:1px}
 .wp-day .d-ic{font-size:13px;margin-top:1px}
 .wp-actions{display:flex;gap:6px}
-.wp-actions button{flex:1;padding:8px 10px;border-radius:9px;font-weight:800;font-size:12.5px;border:1px solid var(--line);background:var(--panel2);color:var(--chalk)}
+.wp-actions button{flex:1;padding:10px 14px;border-radius:10px;font-weight:800;font-size:13px;border:1px solid var(--line);background:var(--panel2);color:var(--chalk);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px}
+.wp-actions button svg{width:14px !important;height:14px !important;flex:0 0 14px}
 .wp-actions button.primary{background:var(--accent);color:var(--accent-ink);border:none}
 .today-banner{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 22%,var(--panel)),var(--panel));border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:18px;padding:14px 16px;margin:8px 0 4px}
 .today-banner .em{width:44px;height:44px;flex:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--font-d);font-size:14px;letter-spacing:.5px}
@@ -1472,6 +1473,7 @@ const I = {
   down:'<path d="M6 9l6 6 6-6"/>',
   bolt:'<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>',
   dumbbell:'<path d="M6.5 6.5l11 11M4 8l2-2M2 10l2-2m14 6l2-2m-2 6l2-2M8 4l-2 2m14 14l-2-2"/>',
+  park:'<path d="M12 22v-6"/><path d="M12 2L4 12h5v6h6v-6h5L12 2z"/><circle cx="6" cy="21" r="1"/><circle cx="18" cy="21" r="1"/>',
   star:'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
   starFill:'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>',
   chart:'<path d="M3 3v18h18"/><path d="M7 15l4-4 4 4 5-5"/>',
@@ -1529,7 +1531,7 @@ const BUILTINS = [
     ]
   },
   {
-    id:'b-fullbody-luis', builtin:true, name:'Full Body Routine', author:'Luis Rodrigues',
+    id:'b-fullbody-luis', builtin:true, name:'Full Body Routine', author:'BARWORK Community',
     level:'Advanced', cycles:3, restBetweenExercises:45, restBetweenCycles:120,
     note:'Explosive & Endurance Routine (Schultern, Rücken, Brust, Bizeps, Trizeps, Beine, Bauch). Runden & Pausen sind auf dem Poster nicht angegeben – hier als Vorschlag hinterlegt und frei anpassbar.',
     exercises:[
@@ -1572,7 +1574,7 @@ const BUILTINS = [
     ]
   },
   {
-    id:'b-abs-core', builtin:true, name:'Abs & Core', author:'Chazynash Bar-Risan',
+    id:'b-abs-core', builtin:true, name:'Abs & Core', author:'BARWORK Community',
     level:'Medium', cycles:4, restBetweenExercises:30, restBetweenCycles:180,
     note:'4 Zyklen · 3 Min. Pause zwischen den Runden · 30 Sek. zwischen den Übungen.',
     exercises:[
@@ -1601,7 +1603,7 @@ const BUILTINS = [
     ]
   },
   {
-    id:'b-arm-routine', builtin:true, name:'Arm Routine', author:'Nico Decraene',
+    id:'b-arm-routine', builtin:true, name:'Arm Routine', author:'BARWORK Community',
     level:'Medium', cycles:5, restBetweenExercises:30, restBetweenCycles:90,
     note:'Saubere, langsame Ausführung für maximalen Burn. Das Poster zeigt nur eine 30-Sek.-Pause in der Mitte und keine Rundenpause – hier als Vorschlag hinterlegt und frei anpassbar.',
     exercises:[
@@ -1658,7 +1660,7 @@ const BUILTINS = [
     ]
   },
   {
-    id:'b-back-routine', builtin:true, name:'Back Routine', author:'Ranjit Bhachu',
+    id:'b-back-routine', builtin:true, name:'Back Routine', author:'BARWORK Community',
     level:'Medium', cycles:3, restBetweenExercises:30, restBetweenCycles:120,
     note:'3 Runden, insgesamt 90 Wiederholungen + 30 Sek. Halten. Pausen sind auf dem Poster nicht angegeben – hier als Vorschlag hinterlegt und frei anpassbar.',
     exercises:[
@@ -1683,7 +1685,7 @@ const BUILTINS = [
     ]
   },
   {
-    id:'b-pushup-hell', builtin:true, name:'Push-Up Hell', author:'Margaret Mary',
+    id:'b-pushup-hell', builtin:true, name:'Push-Up Hell', author:'BARWORK Community',
     level:'Medium', cycles:3, restBetweenExercises:30, restBetweenCycles:120,
     note:'3 Zyklen · 2 Min. Pause zwischen den Runden · 30 Sek. zwischen den Übungen.',
     exercises:[
@@ -3900,24 +3902,38 @@ function renderBuddiesView(){
   if(ab){ ab.innerHTML=svg('plus'); if(!ab._bound){ ab._bound=true; ab.addEventListener('click', openAddBuddySheet); } }
   const m=$('#buddies-main'); if(!m) return;
   if(!FB.user){
-    m.innerHTML = '<div class="empty">'+svg('list')+'<h3>Login erforderlich</h3><p>Buddy-Features brauchen ein Cloud-Konto zum Austausch.</p></div>';
+    m.innerHTML = '<div class="empty">'+svg('list')+'<h3>Login erforderlich</h3><p>Buddy-Features brauchen ein Cloud-Konto zum Austausch.</p><button class="btn btn-primary btn-sm" data-nav="auth" style="margin-top:14px">Einloggen</button></div>';
     return;
   }
+  const s = DB.settings;
   const code = ensureBuddyCode();
-  const nick = (DB.settings.nickname||'').trim();
-  let html = '<div class="buddy-code-display"><div class="lbl">Dein Buddy-Code</div><div class="code">'+esc(code)+'</div><div class="hint">Teile diesen Code mit Freunden</div></div>';
+  const nick = (s.nickname||'').trim();
+  /* 1. Nickname-Einstellung (früher in Settings) */
+  let html = '<div class="section-label">👤 Dein Community-Profil</div>';
+  html += '<div class="set-group" style="margin-bottom:14px">';
+  html += '<div class="set-row"><div class="grow"><div class="st-title">Nickname</div><div class="st-sub">Wird für Leaderboard & Buddies angezeigt</div></div>'
+        + '<div class="mini-input" style="width:140px"><input class="input" id="bv-nick" placeholder="Anonym" maxlength="20" value="'+esc(nick)+'"></div></div>';
+  /* Leaderboard opt-in switch */
+  const lbOn = !!s.leaderboardOptIn;
+  html += '<div class="set-row"><div class="grow"><div class="st-title">Am Leaderboard teilnehmen</div><div class="st-sub">Wöchentliche Stats werden anonym geteilt</div></div>'
+        + '<button class="switch '+(lbOn?'on':'')+'" id="bv-lb-toggle" role="switch" aria-checked="'+lbOn+'"></button></div>';
+  html += '</div>';
+  /* 2. Buddy-Code */
+  html += '<div class="buddy-code-display"><div class="lbl">Dein Buddy-Code</div><div class="code">'+esc(code)+'</div><div class="hint">Teile diesen Code mit Freunden, damit sie dich hinzufügen können</div></div>';
   if(!nick){
-    html += '<div class="banner" style="margin-bottom:14px"><div class="banner-ic">'+svg('edit')+'</div><div class="grow"><b>Nickname fehlt</b><span>Setze einen Nickname in den Einstellungen, damit Buddies dich erkennen.</span></div></div>';
+    html += '<div class="banner" style="margin-bottom:14px"><div class="banner-ic">'+svg('edit')+'</div><div class="grow"><b>Nickname fehlt</b><span>Setze oben einen Nickname, damit Buddies dich erkennen.</span></div></div>';
   }
+  /* 3. Buddy-Aktionen */
   html += '<div class="pc-actions" style="margin-bottom:14px"><button class="btn btn-primary" style="flex:1" id="bv-add">'+svg('plus')+' Buddy hinzufügen</button><button class="btn btn-ghost" style="flex:1" id="bv-lb">'+svg('trophy')+' Leaderboard</button></div>';
+  /* 4. Buddy-Liste */
   const buddies = DB.buddies||[];
   if(!buddies.length){
     html += '<div class="empty"><h3>Noch keine Buddies</h3><p>Frage einen Freund nach seinem Code.</p></div>';
   } else {
-    html += '<div class="section-label">Deine Buddies ('+buddies.length+')</div>';
+    html += '<div class="section-label">👥 Deine Buddies ('+buddies.length+')</div>';
     html += buddies.map(function(b){
       const av = esc((b.nickname||'B')[0].toUpperCase());
-      return '<div class="buddy-item"><div class="buddy-av">'+av+'</div><div class="buddy-info"><div class="buddy-nm">'+esc(b.nickname||'Buddy')+'</div><div class="buddy-sub">🔥 '+(b.streakCurrent||0)+' Wo · '+(b.weekWorkouts||0)+' Tr · '+(b.weekMinutes||0)+' Min</div></div><button class="buddy-actions" data-buddyrm="'+esc(b.code)+'"><button>'+svg('trash')+'</button></button></div>';
+      return '<div class="buddy-item"><div class="buddy-av">'+av+'</div><div class="buddy-info"><div class="buddy-nm">'+esc(b.nickname||'Buddy')+'</div><div class="buddy-sub">🔥 '+(b.streakCurrent||0)+' Wo · '+(b.weekWorkouts||0)+' Tr · '+(b.weekMinutes||0)+' Min</div></div><div class="buddy-actions"><button data-buddyrm="'+esc(b.code)+'" aria-label="Entfernen">'+svg('trash')+'</button></div></div>';
     }).join('');
     /* Silent refresh - fire and forget */
     if(typeof refreshBuddies==='function'){
@@ -3925,6 +3941,17 @@ function renderBuddiesView(){
     }
   }
   m.innerHTML = html;
+  /* Handlers */
+  const nk=$('#bv-nick'); if(nk) nk.addEventListener('change',function(){
+    DB.settings.nickname = nk.value.trim().slice(0,20);
+    save(); toast('Nickname gespeichert');
+  });
+  const lbSwitch=$('#bv-lb-toggle'); if(lbSwitch) lbSwitch.addEventListener('click',function(){
+    DB.settings.leaderboardOptIn = !DB.settings.leaderboardOptIn;
+    lbSwitch.classList.toggle('on', DB.settings.leaderboardOptIn);
+    save();
+    toast(DB.settings.leaderboardOptIn ? 'Leaderboard-Teilnahme aktiv' : 'Leaderboard-Teilnahme aus');
+  });
   const bv=$('#bv-add'); if(bv) bv.addEventListener('click', openAddBuddySheet);
   const lb=$('#bv-lb'); if(lb) lb.addEventListener('click', openLeaderboardSheet);
   $$('#buddies-main [data-buddyrm]').forEach(function(b){ b.addEventListener('click',function(){
@@ -4072,7 +4099,7 @@ function renderHome(){
   const b1=$('#btn-stats'); if(b1) b1.innerHTML=svg('chart')+' Statistik';
   const b2=$('#btn-skills'); if(b2) b2.innerHTML=svg('target')+' Skills';
   const b3=$('#btn-challenges'); if(b3) b3.innerHTML=svg('trophy')+' Challenges';
-  const b4=$('#btn-parks'); if(b4) b4.innerHTML=svg('dumbbell')+' Parks';
+  const b4=$('#btn-parks'); if(b4) b4.innerHTML=svg('park')+' Parks';
   const b5=$('#btn-wplans'); if(b5) b5.innerHTML=svg('cal')+' Wochen';
   const b6=$('#btn-buddies'); if(b6) b6.innerHTML=svg('list')+' Buddies';
   renderTodayBanner();
@@ -5235,18 +5262,6 @@ function renderSettings(){
       <div class="set-row" data-action="ai-plan" style="cursor:pointer"><div class="grow"><div class="st-title">🤖 KI-Plan-Generator</div><div class="st-sub">Automatischer Trainingsplan nach deinen Vorgaben</div></div><span class="set-ic">${svg('bolt')}</span></div>
       <div class="set-row" data-action="restart-onboarding" style="cursor:pointer"><div class="grow"><div class="st-title">Onboarding erneut anzeigen</div><div class="st-sub">Empfehlungen neu setzen</div></div><span class="set-ic">${svg('play')}</span></div>
     </div>
-    <div class="set-note">Community (optional)</div>
-    <div class="set-group">
-      <div class="set-row"><div class="grow"><div class="st-title">Nickname</div><div class="st-sub">Für Leaderboard & Buddy sichtbar</div></div>
-        <div class="mini-input" style="width:140px"><input class="input" id="set-nick" placeholder="Anonym" maxlength="20" value="${esc(s.nickname||'')}"></div>
-      </div>
-      ${switchRow('leaderboardOptIn','Am wöchentlichen Leaderboard teilnehmen','Deine anonymisierten Wochenstats werden geteilt',s.leaderboardOptIn)}
-      ${FB.user?`<div class="set-row"><div class="grow"><div class="st-title">Dein Buddy-Code</div><div class="st-sub">Teile diesen Code mit Freunden</div></div>
-        <div style="font-family:var(--font-d);font-size:20px;letter-spacing:3px;color:var(--accent);user-select:all">${esc(ensureBuddyCode())}</div></div>
-      <div class="set-row" data-action="add-buddy"><div class="grow"><div class="st-title">Buddy hinzufügen</div><div class="st-sub">Freund per Code hinzufügen</div></div><span class="set-ic">${svg('plus')}</span></div>
-      <div class="set-row" data-action="show-leaderboard"><div class="grow"><div class="st-title">Leaderboard ansehen</div><div class="st-sub">Wochenranking der Community</div></div><span class="set-ic">${svg('trophy')}</span></div>
-      <div class="set-row" data-action="show-buddies"><div class="grow"><div class="st-title">Meine Buddies (${(DB.buddies||[]).length})</div><div class="st-sub">Freunde und ihre Wochenstats</div></div><span class="set-ic">${svg('list')}</span></div>`:'<div class="set-row"><div class="grow"><div class="st-sub">Login erforderlich für Community-Features</div></div></div>'}
-    </div>
     <div class="set-note">Erinnerungen</div>
     <div class="set-group">
       ${switchRow('reminderEnabled','Trainings-Erinnerung','Push-Benachrichtigung an Trainingstagen',s.reminderEnabled)}
@@ -5340,9 +5355,6 @@ function renderSettings(){
     if(a==='reset') resetAll();
     if(a==='edit-warmup') openWcEditor('warmup');
     if(a==='edit-cooldown') openWcEditor('cooldown');
-    if(a==='add-buddy') openAddBuddySheet();
-    if(a==='show-leaderboard') openLeaderboardSheet();
-    if(a==='show-buddies') openBuddiesSheet();
     if(a==='change-password') openChangePasswordSheet();
     if(a==='change-email') openChangeEmailSheet();
     if(a==='delete-account') openDeleteAccountSheet();
@@ -5351,7 +5363,7 @@ function renderSettings(){
     if(a==='photo-progress') openPhotoProgressSheet();
     if(a==='ai-plan') openAiPlanGenerator();
   }));
-  const nk=$('#set-nick'); if(nk) nk.addEventListener('change',()=>{ DB.settings.nickname=nk.value.trim().slice(0,20); save(); toast('Nickname gespeichert'); });
+  /* set-nick wurde in die Buddies-View verschoben */
   $('#import-file').addEventListener('change',importData);
   // install
   renderInstallSlot();
