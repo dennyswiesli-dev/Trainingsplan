@@ -797,6 +797,54 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .music-mini .m-title{flex:1;min-width:0;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .music-mini button{width:34px;height:34px;border-radius:9px;background:var(--panel2);color:var(--chalk);border:1px solid var(--line);display:grid;place-items:center}
 .music-mini button svg{width:16px;height:16px}
+/* ========= PHASE C ========= */
+/* Training mode picker in editor */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 12px}
+.mode-tile{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:12px 10px;text-align:left;transition:.14s;cursor:pointer}
+.mode-tile:active{transform:scale(.97)}
+.mode-tile.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+.mode-tile .m-em{font-size:22px;line-height:1;margin-bottom:4px}
+.mode-tile .m-nm{font-family:var(--font-d);font-size:15px;letter-spacing:.5px;color:var(--chalk)}
+.mode-tile .m-de{color:var(--muted);font-size:11px;font-weight:600;margin-top:2px;line-height:1.3}
+/* Mode-specific fields */
+.mode-fields{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+.mode-fields .lbl{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px}
+/* Superset chain visual in editor */
+.ex-edit[data-sspos="start"]{border-top:3px solid var(--accent);border-top-left-radius:6px;border-top-right-radius:6px}
+.ex-edit[data-sspos="middle"]{border-top:1px solid var(--accent);border-bottom:1px solid var(--accent);border-left:3px solid var(--accent)}
+.ex-edit[data-sspos="end"]{border-bottom:3px solid var(--accent);border-left:3px solid var(--accent);border-bottom-left-radius:6px;border-bottom-right-radius:6px}
+.ss-chain-info{background:linear-gradient(90deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 40%,transparent) 100%);color:var(--accent-ink);padding:5px 12px;border-radius:8px 8px 0 0;font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:6px;margin-top:12px}
+.ss-chain-info svg{width:12px;height:12px}
+/* AMRAP counter UI in workout */
+.amrap-counter{background:var(--panel);border:2px solid var(--accent);border-radius:16px;padding:14px;margin-top:6px;display:flex;align-items:center;gap:12px}
+.amrap-counter .lbl{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase}
+.amrap-counter .val{font-family:var(--font-d);font-size:36px;letter-spacing:.5px;color:var(--chalk);line-height:1}
+.amrap-counter .sub{color:var(--muted);font-size:12px;font-weight:600;margin-top:3px}
+.amrap-counter .grow{flex:1;min-width:0}
+.amrap-round-btn{padding:14px 18px;border-radius:12px;background:var(--work);color:var(--work-ink);font-family:var(--font-d);font-size:18px;letter-spacing:.5px;border:none;flex:none}
+.amrap-round-btn:active{transform:scale(.96)}
+/* EMOM UI */
+.emom-clock-big{background:var(--panel);border:2px solid var(--accent);border-radius:16px;padding:14px;text-align:center;margin-top:6px}
+.emom-clock-big.warn{border-color:var(--rest)}
+.emom-clock-big .lbl{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.emom-clock-big.warn .lbl{color:var(--rest)}
+.emom-clock-big .min-of{font-family:var(--font-d);font-size:16px;letter-spacing:1px;color:var(--muted);margin-top:2px}
+/* Tabata badge */
+.tabata-badge{display:inline-flex;align-items:center;gap:5px;background:#ff5478;color:#fff;font-size:11px;font-weight:900;padding:4px 9px;border-radius:8px;letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+/* Leaderboard */
+.lb-podium{display:flex;justify-content:center;align-items:flex-end;gap:8px;margin:12px 0 18px}
+.lb-podium .pod{background:var(--panel);border:1px solid var(--line);border-radius:10px 10px 4px 4px;padding:10px 6px;text-align:center;flex:1;max-width:100px}
+.lb-podium .pod .em{font-size:24px;line-height:1}
+.lb-podium .pod .nm{font-size:11px;font-weight:800;color:var(--chalk);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-podium .pod .val{font-family:var(--font-d);font-size:15px;color:var(--accent);margin-top:2px}
+.lb-podium .pod.gold{background:linear-gradient(180deg,color-mix(in srgb,#f0c419 25%,var(--panel)),var(--panel));border-color:#f0c419;transform:scale(1.1)}
+.lb-podium .pod.silver{background:linear-gradient(180deg,color-mix(in srgb,#c0c0c0 25%,var(--panel)),var(--panel));border-color:#c0c0c0}
+.lb-podium .pod.bronze{background:linear-gradient(180deg,color-mix(in srgb,#cd7f32 25%,var(--panel)),var(--panel));border-color:#cd7f32}
+/* Buddy */
+.buddy-code-display{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 20%,var(--panel)),var(--panel));border:2px dashed var(--accent);border-radius:14px;padding:16px;text-align:center;margin-bottom:14px}
+.buddy-code-display .lbl{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.buddy-code-display .code{font-family:var(--font-d);font-size:36px;letter-spacing:8px;color:var(--chalk);line-height:1;user-select:all}
+.buddy-code-display .hint{color:var(--muted);font-size:11px;font-weight:600;margin-top:8px}
 
 /* Compact plan cards */
 body[data-compact="1"] .plan-list{gap:8px}
@@ -1093,7 +1141,12 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
           </select>
         </div>
       </div>
-      <div class="grid2">
+      <div class="field">
+        <label>Trainings-Modus</label>
+        <div class="mode-grid" id="f-mode-picker"></div>
+      </div>
+      <div id="f-mode-fields"></div>
+      <div class="grid2" id="f-standard-fields">
         <div class="field">
           <label for="f-cycles">Runden (Zyklen)</label>
           <input class="input" id="f-cycles" type="number" inputmode="numeric" min="1" max="20" value="4">
@@ -1791,6 +1844,101 @@ function ensureBuddyCode(){ if(!DB.buddyCode){ DB.buddyCode=genBuddyCode(); save
 /* Plan share encoding */
 function encodePlan(p){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify({v:1,p})))); }catch(e){ return ''; } }
 function decodePlan(s){ try{ const d=JSON.parse(decodeURIComponent(escape(atob(s)))); return d&&d.p||null; }catch(e){ return null; } }
+/* ========================= PHASE C HELPERS ========================= */
+/* Training mode helpers */
+function planMode(p){ return p.mode || 'standard'; }
+function isSpecialMode(p){ const m=planMode(p); return m==='amrap'||m==='emom'||m==='tabata'; }
+/* Media Session API */
+function updateMediaSession(){
+  if(!DB.settings.mediaSession || !('mediaSession' in navigator) || !W || W.done) return;
+  try{
+    const st = currentStep();
+    let title = 'BARWORK', artist = W.plan.name || '';
+    if(st){
+      if(st.kind==='exercise' || st.kind==='warmupEx' || st.kind==='cooldownEx') title = st.ex.name;
+      else if(st.kind==='rest') title = '⏸ Pause';
+      else if(st.kind==='cycleRest') title = '⏸ Rundenpause';
+      else if(st.kind==='prepare') title = '🚀 Bereit machen';
+      else if(st.kind==='warmupRest'||st.kind==='cooldownRest') title = '⏸ Pause';
+    }
+    navigator.mediaSession.metadata = new MediaMetadata({ title, artist, album:'Street Workout', artwork:[{src:'icon-192.png',sizes:'192x192',type:'image/png'},{src:'icon-512.png',sizes:'512x512',type:'image/png'}] });
+    navigator.mediaSession.playbackState = W.paused ? 'paused' : 'playing';
+    try{ navigator.mediaSession.setActionHandler('play',()=>{ if(W&&W.paused) togglePause(); }); }catch(e){}
+    try{ navigator.mediaSession.setActionHandler('pause',()=>{ if(W&&!W.paused) togglePause(); }); }catch(e){}
+    try{ navigator.mediaSession.setActionHandler('nexttrack',()=>{ if(W) skipStep(); }); }catch(e){}
+    try{ navigator.mediaSession.setActionHandler('previoustrack',()=>{ if(W) prevStep(); }); }catch(e){}
+  }catch(e){}
+}
+function clearMediaSession(){
+  if(!('mediaSession' in navigator)) return;
+  try{ navigator.mediaSession.metadata=null; navigator.mediaSession.playbackState='none';
+    ['play','pause','nexttrack','previoustrack'].forEach(a=>{try{navigator.mediaSession.setActionHandler(a,null);}catch(e){}});
+  }catch(e){}
+}
+/* Leaderboard weekly summary */
+function currentWeekSummary(){
+  const now = new Date(); const day = now.getDay()||7;
+  const monday = new Date(now); monday.setDate(now.getDate()-(day-1)); monday.setHours(0,0,0,0);
+  const nextMon = new Date(monday); nextMon.setDate(monday.getDate()+7);
+  const inWeek = (DB.history||[]).filter(h=>h.date>=monday.getTime()&&h.date<nextMon.getTime());
+  const totalMin = Math.round(inWeek.reduce((a,h)=>a+(h.durationSec||0),0)/60);
+  const reps={};
+  inWeek.forEach(h=>(h.entries||[]).forEach(en=>{ if(en.reps!=null){ const k=exKey(en.name); if(k) reps[k]=(reps[k]||0)+en.reps; }}));
+  const totalReps=Object.values(reps).reduce((a,b)=>a+b,0);
+  return { count:inWeek.length, totalMin, totalReps, weekKey:isoWeekKey(monday) };
+}
+async function pushLeaderboardEntry(){
+  if(!DB.settings.leaderboardOptIn || !FB.ready || !FB.user) return;
+  const nick = (DB.settings.nickname||'').trim();
+  if(!nick){ return; }
+  try{
+    const s = currentWeekSummary();
+    const entry = { nickname:nick.slice(0,20), workouts:s.count, minutes:s.totalMin, reps:s.totalReps, weekKey:s.weekKey, updatedAt:FIRE.serverTimestamp() };
+    const ref = FIRE.doc(FB.db, 'leaderboard', s.weekKey, 'entries', FB.user.uid);
+    await FIRE.setDoc(ref, entry, {merge:true});
+  }catch(err){ /* silent - Firestore rules may not allow */ }
+}
+async function fetchLeaderboard(){
+  if(!FB.ready || !FB.user){ return null; }
+  try{
+    const s = currentWeekSummary();
+    const colRef = FIRE.collection(FB.db, 'leaderboard', s.weekKey, 'entries');
+    const q = FIRE.query(colRef, FIRE.orderBy('workouts','desc'), FIRE.limit(50));
+    const snap = await FIRE.getDocs(q);
+    const rows=[]; snap.forEach(d=>{ const data=d.data(); rows.push({uid:d.id, ...data}); });
+    return { weekKey:s.weekKey, rows };
+  }catch(err){ return { error: err.message||String(err) }; }
+}
+/* Buddy system */
+async function pushBuddyProfile(){
+  if(!FB.ready || !FB.user) return;
+  ensureBuddyCode();
+  const nick = (DB.settings.nickname||'Buddy').slice(0,20);
+  const s = currentWeekSummary();
+  const streak = computeStreak();
+  try{
+    const ref = FIRE.doc(FB.db, 'buddies', DB.buddyCode);
+    await FIRE.setDoc(ref, { uid:FB.user.uid, nickname:nick, weekWorkouts:s.count, weekMinutes:s.totalMin, streakCurrent:streak.current, streakBest:streak.best, updatedAt:FIRE.serverTimestamp() }, {merge:true});
+  }catch(err){ /* silent */ }
+}
+async function fetchBuddyByCode(code){
+  if(!FB.ready) return null;
+  try{
+    const ref = FIRE.doc(FB.db, 'buddies', code.toUpperCase().trim());
+    const snap = await FIRE.getDoc(ref);
+    if(!snap.exists()) return null;
+    return snap.data();
+  }catch(err){ return null; }
+}
+async function refreshBuddies(){
+  if(!Array.isArray(DB.buddies)) DB.buddies=[];
+  for(let i=0;i<DB.buddies.length;i++){
+    const b=DB.buddies[i];
+    const fresh=await fetchBuddyByCode(b.code);
+    if(fresh){ b.nickname=fresh.nickname; b.weekWorkouts=fresh.weekWorkouts; b.weekMinutes=fresh.weekMinutes; b.streakCurrent=fresh.streakCurrent; b.streakBest=fresh.streakBest; b.refreshedAt=Date.now(); }
+  }
+  save();
+}
 /* Skill catalog */
 const SKILL_CATALOG=[
   {id:'pullup',name:'Pull Up',icon:'flame',category:'basic',stages:[{label:'1 Pull Up',target:1},{label:'5 Pull Ups',target:5},{label:'10 Pull Ups',target:10},{label:'15 Pull Ups',target:15},{label:'20 Pull Ups',target:20}]},
@@ -2909,6 +3057,69 @@ function openPrTimeline(exId){
   }).join('');
   openSheet('PR-Historie · '+name,`<div class="pr-timeline">${rows}</div>`);
 }
+/* ========================= LEADERBOARD & BUDDY SHEETS ========================= */
+function openAddBuddySheet(){
+  const body=`<p style="color:var(--muted);font-weight:600;margin:2px 0 12px">Frage deinen Freund nach seinem Buddy-Code (6 Zeichen) und trage ihn hier ein:</p>
+    <div class="field"><label>Buddy-Code</label><input class="input" id="bd-code" placeholder="ABC123" maxlength="6" style="text-align:center;font-family:var(--font-d);font-size:22px;letter-spacing:6px;text-transform:uppercase"></div>
+    <button class="btn btn-primary btn-block btn-lg" id="bd-add">${svg('plus')} Buddy hinzufügen</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost btn-block" id="bd-cancel">Abbrechen</button>`;
+  openSheet('Buddy hinzufügen', body);
+  $('#bd-add').addEventListener('click', async ()=>{
+    const code = ($('#bd-code').value||'').trim().toUpperCase();
+    if(code.length!==6){ toast('Code muss 6 Zeichen haben'); return; }
+    if(code===DB.buddyCode){ toast('Das ist dein eigener Code'); return; }
+    if((DB.buddies||[]).some(b=>b.code===code)){ toast('Buddy bereits hinzugefügt'); return; }
+    toast('Suche Buddy...');
+    const data = await fetchBuddyByCode(code);
+    if(!data){ toast('Buddy nicht gefunden'); return; }
+    if(!Array.isArray(DB.buddies)) DB.buddies=[];
+    DB.buddies.push({ id:'bd_'+code, code, nickname:data.nickname||'Buddy', weekWorkouts:data.weekWorkouts||0, weekMinutes:data.weekMinutes||0, streakCurrent:data.streakCurrent||0, streakBest:data.streakBest||0, addedAt:Date.now(), refreshedAt:Date.now() });
+    save(); closeSheet(); toast('Buddy hinzugefügt: '+data.nickname); renderSettings();
+  });
+  $('#bd-cancel').addEventListener('click', closeSheet);
+  setTimeout(()=>{ const el=$('#bd-code'); if(el) el.focus(); },300);
+}
+async function openLeaderboardSheet(){
+  openSheet('🏆 Leaderboard (diese Woche)','<div style="text-align:center;padding:30px 20px;color:var(--muted)">Lade Ranking...</div>');
+  await pushLeaderboardEntry(); /* eigenen Eintrag aktualisieren */
+  const res = await fetchLeaderboard();
+  if(!res || res.error){
+    $('#sheet-body').innerHTML=`<div class="empty" style="padding:20px 0">${svg('eyeoff')}<h3>Leaderboard nicht verfügbar</h3><p style="font-size:12px">${res&&res.error?esc(res.error):'Möglicherweise sind die Firestore-Regeln nicht konfiguriert.'}</p></div>`;
+    return;
+  }
+  if(!res.rows.length){
+    $('#sheet-body').innerHTML=`<div class="empty" style="padding:20px 0">${svg('trophy')}<h3>Noch keine Einträge</h3><p>Sei der Erste diese Woche!</p></div>`;
+    return;
+  }
+  const myUid = FB.user ? FB.user.uid : '';
+  const top3 = res.rows.slice(0,3);
+  const rest = res.rows.slice(3);
+  let podium = '';
+  if(top3.length){
+    podium = '<div class="lb-podium">'+top3.map((r,i)=>{
+      const cls = i===0?'gold':(i===1?'silver':'bronze');
+      const em = i===0?'🥇':(i===1?'🥈':'🥉');
+      return `<div class="pod ${cls}"><div class="em">${em}</div><div class="nm">${esc(r.nickname||'?')}</div><div class="val">${r.workouts}</div></div>`;
+    }).join('')+'</div>';
+  }
+  const restHTML = rest.map((r,i)=>`<div class="lb-item ${r.uid===myUid?'me':''}"><div class="lb-rank">${i+4}</div><div class="lb-nm">${esc(r.nickname||'?')}${r.uid===myUid?'<span class="lb-me-tag">DU</span>':''}</div><div class="lb-val">${r.workouts}</div></div>`).join('');
+  $('#sheet-body').innerHTML = podium + (restHTML?'<div style="height:8px"></div>'+restHTML:'') + `<div class="hint" style="text-align:center;margin-top:14px">Sortiert nach Trainings diese Woche</div>`;
+}
+async function openBuddiesSheet(){
+  if(!Array.isArray(DB.buddies) || !DB.buddies.length){
+    openSheet('Meine Buddies',`<div class="empty" style="padding:20px 0">${svg('list')}<h3>Noch keine Buddies</h3><p>Füge Freunde per Buddy-Code hinzu.</p></div>`);
+    return;
+  }
+  openSheet('Meine Buddies','<div style="text-align:center;padding:20px;color:var(--muted)">Aktualisiere Stats...</div>');
+  await refreshBuddies();
+  const rows = DB.buddies.map(b=>`<div class="buddy-item"><div class="buddy-av">${esc((b.nickname||'B')[0].toUpperCase())}</div><div class="buddy-info"><div class="buddy-nm">${esc(b.nickname||'Buddy')}</div><div class="buddy-sub">🔥 ${b.streakCurrent||0} Wochen · ${b.weekWorkouts||0} Trainings · ${b.weekMinutes||0} Min</div></div><button class="buddy-actions" data-buddyrm="${esc(b.code)}"><button>${svg('trash')}</button></button></div>`).join('');
+  $('#sheet-body').innerHTML = rows + `<div class="hint" style="text-align:center;margin-top:14px">Stats werden bei jedem Öffnen aktualisiert</div>`;
+  $$('#sheet-body [data-buddyrm]').forEach(b=>b.addEventListener('click',()=>{
+    const code=b.dataset.buddyrm;
+    DB.buddies=DB.buddies.filter(x=>x.code!==code); save(); openBuddiesSheet();
+  }));
+}
 /* ========================= ROUTER ========================= */
 let currentView='home';
 function show(view, push=true){
@@ -3173,13 +3384,18 @@ function confirmSheet(title, msg, confirmLabel, onYes){
 let editing=null; // working copy
 function blankPlan(){
   return { id:uid(), builtin:false, name:'', author:'', level:'Custom',
+    mode:'standard',
     cycles:3, restBetweenExercises:DB.settings.defaultRestEx, restBetweenCycles:DB.settings.defaultRestCycle,
+    amrapDuration:600, /* 10 Min */
+    emomMinutes:10, emomRepsPerMinute:8,
+    tabataRounds:8,
     exercises:[{name:'', reps:10}],
     warmupEnabled:false, warmupDuration:DB.settings.warmupDuration||120,
     cooldownEnabled:false, cooldownDuration:DB.settings.cooldownDuration||180 };
 }
 function openEditor(id){
   editing = id ? structuredClone(findPlan(id)) : blankPlan();
+  if(!editing.mode) editing.mode='standard';
   $('#editor-title').textContent = id ? (isBuiltin(id)?'Plan anpassen':'Plan bearbeiten') : 'Neuer Plan';
   $('#editor-back-ic').innerHTML=svg('left');
   $('#f-name').value=editing.name||'';
@@ -3192,9 +3408,54 @@ function openEditor(id){
   $('#restcy-hint').textContent='= '+fmt(editing.restBetweenCycles||0)+' Min:Sek';
   $('#editor-reset-wrap').style.display = (id && isBuiltin(id) && DB.overrides[id]) ? 'block':'none';
   renderColorPicker();
+  renderModePicker();
   renderWarmCool();
   renderExEditor();
   show('editor');
+}
+function renderModePicker(){
+  const host=$('#f-mode-picker'); if(!host) return;
+  const modes=[
+    {v:'standard', em:'⚡', nm:'Standard',  de:'Klassische Runden mit Pausen'},
+    {v:'amrap',    em:'🔥', nm:'AMRAP',     de:'Time-Cap: max. Runden in X Min'},
+    {v:'emom',     em:'⏰', nm:'EMOM',      de:'Every Minute On The Minute'},
+    {v:'tabata',   em:'💥', nm:'Tabata',    de:'20s Arbeit / 10s Pause × 8'}
+  ];
+  host.innerHTML=modes.map(m=>`<div class="mode-tile ${editing.mode===m.v?'on':''}" data-mode="${m.v}"><div class="m-em">${m.em}</div><div class="m-nm">${esc(m.nm)}</div><div class="m-de">${esc(m.de)}</div></div>`).join('');
+  $$('#f-mode-picker [data-mode]').forEach(el=>el.addEventListener('click',()=>{
+    editing.mode=el.dataset.mode; renderModePicker(); renderModeFields();
+  }));
+  renderModeFields();
+}
+function renderModeFields(){
+  const host=$('#f-mode-fields'); if(!host) return;
+  const m=editing.mode||'standard';
+  if(m==='standard'){ host.innerHTML=''; return; }
+  if(m==='amrap'){
+    host.innerHTML=`<div class="mode-fields"><div class="lbl">🔥 AMRAP-Einstellungen</div>
+      <div class="field"><label>Dauer (Sekunden)</label>
+        <div class="field-inline"><input class="input" id="f-amrap-dur" type="number" min="60" max="3600" value="${editing.amrapDuration||600}" style="max-width:120px"><span class="suffix">= ${fmt(editing.amrapDuration||600)} Min:Sek</span></div>
+      </div>
+      <div class="hint">So viele Runden wie möglich in der Zeit. Nach jeder Übung tippst du zum Weiterschalten, Runden werden automatisch gezählt.</div>
+    </div>`;
+    const inp=$('#f-amrap-dur'); if(inp) inp.addEventListener('change',()=>{ editing.amrapDuration=clampInt(inp.value,60,3600,600); renderModeFields(); });
+  } else if(m==='emom'){
+    host.innerHTML=`<div class="mode-fields"><div class="lbl">⏰ EMOM-Einstellungen</div>
+      <div class="grid2">
+        <div class="field"><label>Anzahl Minuten</label><input class="input" id="f-emom-min" type="number" min="2" max="60" value="${editing.emomMinutes||10}"></div>
+        <div class="field"><label>Wdh. pro Minute</label><input class="input" id="f-emom-reps" type="number" min="1" max="99" value="${editing.emomRepsPerMinute||8}"></div>
+      </div>
+      <div class="hint">Zu Beginn jeder Minute: X Wiederholungen. Was du schneller schaffst, ist Pause bis zur nächsten Minute. Übungen wechseln pro Minute durch.</div>
+    </div>`;
+    const mi=$('#f-emom-min'); if(mi) mi.addEventListener('change',()=>{ editing.emomMinutes=clampInt(mi.value,2,60,10); });
+    const re=$('#f-emom-reps'); if(re) re.addEventListener('change',()=>{ editing.emomRepsPerMinute=clampInt(re.value,1,99,8); });
+  } else if(m==='tabata'){
+    host.innerHTML=`<div class="mode-fields"><div class="lbl">💥 Tabata-Einstellungen</div>
+      <div class="field"><label>Anzahl Runden</label><input class="input" id="f-tabata-r" type="number" min="4" max="16" value="${editing.tabataRounds||8}" style="max-width:120px"></div>
+      <div class="hint">Fix: 20 Sekunden Vollgas, 10 Sekunden Pause. Übungen rotieren pro Runde durch. Klassisch: 8 Runden = 4 Min.</div>
+    </div>`;
+    const tr=$('#f-tabata-r'); if(tr) tr.addEventListener('change',()=>{ editing.tabataRounds=clampInt(tr.value,4,16,8); });
+  }
 }
 function renderColorPicker(){
   const host=$('#f-color-picker'); if(!host) return;
@@ -3315,7 +3576,8 @@ function vibe(p){ if(DB.settings.vibrate&&navigator.vibrate){ try{navigator.vibr
 
 function buildSteps(p){
   const steps=[]; const n=p.exercises.length; const prep=DB.settings.prepare||0;
-  /* NEUE Warmup-Logik: verwendet gespeicherten Warm-up-Plan aus Einstellungen */
+  const mode = planMode(p);
+  /* Warmup */
   if(p.warmupEnabled){
     const wu = getWarmupPlan();
     (wu.exercises||[]).forEach((ex,i)=>{
@@ -3324,15 +3586,35 @@ function buildSteps(p){
     });
   }
   if(prep>0) steps.push({kind:'prepare',dur:prep,cycle:1,nextEx:p.exercises[0]});
-  for(let c=1;c<=p.cycles;c++){
-    for(let i=0;i<n;i++){
-      steps.push({kind:'exercise',cycle:c,exIndex:i,ex:p.exercises[i]});
-      const isSSLink = !!p.exercises[i].supersetLink;
-      if(i<n-1 && !isSSLink) steps.push({kind:'rest',cycle:c,dur:p.restBetweenExercises,nextEx:p.exercises[i+1],nextIndex:i+1});
+  if(mode==='amrap'){
+    /* EIN einziger AMRAP-Step mit Timer und Übungs-Rotation */
+    steps.push({kind:'amrap', dur:p.amrapDuration||600, exercises:p.exercises});
+  } else if(mode==='emom'){
+    /* Pro Minute: ein EMOM-Step, Übung rotiert */
+    const mins = p.emomMinutes||10;
+    for(let m=1;m<=mins;m++){
+      const exIdx=(m-1)%n;
+      steps.push({kind:'emom', dur:60, minute:m, totalMinutes:mins, ex:p.exercises[exIdx], reps:p.emomRepsPerMinute||8});
     }
-    if(c<p.cycles) steps.push({kind:'cycleRest',cycle:c,dur:p.restBetweenCycles,nextEx:p.exercises[0],nextCycle:c+1});
+  } else if(mode==='tabata'){
+    const rounds=p.tabataRounds||8;
+    for(let r=1;r<=rounds;r++){
+      const exIdx=(r-1)%n;
+      steps.push({kind:'tabataWork', dur:20, round:r, totalRounds:rounds, ex:p.exercises[exIdx]});
+      if(r<rounds) steps.push({kind:'tabataRest', dur:10, round:r, totalRounds:rounds, nextEx:p.exercises[r%n]});
+    }
+  } else {
+    /* Standard */
+    for(let c=1;c<=p.cycles;c++){
+      for(let i=0;i<n;i++){
+        steps.push({kind:'exercise',cycle:c,exIndex:i,ex:p.exercises[i]});
+        const isSSLink = !!p.exercises[i].supersetLink;
+        if(i<n-1 && !isSSLink) steps.push({kind:'rest',cycle:c,dur:p.restBetweenExercises,nextEx:p.exercises[i+1],nextIndex:i+1});
+      }
+      if(c<p.cycles) steps.push({kind:'cycleRest',cycle:c,dur:p.restBetweenCycles,nextEx:p.exercises[0],nextCycle:c+1});
+    }
   }
-  /* NEUE Cooldown-Logik: verwendet gespeicherten Cool-down-Plan */
+  /* Cooldown */
   if(p.cooldownEnabled){
     const cd = getCooldownPlan();
     (cd.exercises||[]).forEach((ex,i)=>{
@@ -3389,6 +3671,7 @@ function isCountdown(st){
   if(st.kind==='warmupRest'||st.kind==='cooldownRest') return true;
   if(st.kind==='exercise' && st.ex.duration) return true;
   if((st.kind==='warmupEx'||st.kind==='cooldownEx') && st.ex && st.ex.duration) return true;
+  if(st.kind==='amrap'||st.kind==='emom'||st.kind==='tabataWork'||st.kind==='tabataRest') return true;
   return false;
 }
 
@@ -3404,6 +3687,8 @@ function goTo(idx, initial){
     else dur = st.dur;
     W.total=dur; W.remaining=dur*1000;
   } else { W.total=0; W.remaining=0; }
+  /* AMRAP: State initialisieren */
+  if(st.kind==='amrap' && W.amrapExIdx==null){ W.amrapExIdx=0; W.amrapRounds=0; }
   W.currentRepInput=null;
   // transition sound/vibration
   if(!initial){
@@ -3415,6 +3700,7 @@ function goTo(idx, initial){
   renderStep();
 }
 function renderStep(){
+  updateMediaSession();
   const st=currentStep(); const p=W.plan; const wv=$('#view-workout');
   // phase accent
   wv.classList.remove('phase-rest');
@@ -3533,6 +3819,49 @@ function renderStep(){
     primary.classList.remove('paused');
     primary.innerHTML= W.paused? svgFill('play')+' Weiter' : svgFill('pause')+' Pause';
     if(st.nextEx){ nextEl.innerHTML='Als Nächstes: <b>'+esc(st.nextEx.name)+'</b>'; }
+  } else if(st.kind==='amrap'){
+    const curEx = st.exercises[(W.amrapExIdx||0)%st.exercises.length];
+    phaseEl.textContent='🔥 AMRAP';
+    nameEl.textContent=curEx.name;
+    deEl.textContent=curEx.de||'';
+    unitEl.textContent='Sekunden verbleibend';
+    ring.classList.add('tap');
+    adjust.style.display='none';
+    primary.classList.remove('paused');
+    primary.innerHTML= W.paused? svgFill('play')+' Weiter' : svgFill('pause')+' Pause';
+    const targetInfo = curEx.duration ? fmt(curEx.duration)+' Sek.' : (curEx.reps||10)+' Wdh.';
+    hintEl.innerHTML='<div class="amrap-counter"><div class="grow"><div class="lbl">Runden</div><div class="val">'+(W.amrapRounds||0)+'</div><div class="sub">Übung '+(((W.amrapExIdx||0)%st.exercises.length)+1)+' / '+st.exercises.length+' · Ziel: '+targetInfo+'</div></div><button class="amrap-round-btn" id="amrap-tap">'+svg('check')+' Fertig</button></div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px"><a class="yt-btn-workout" href="'+ytUrl(curEx.name)+'" target="_blank" rel="noopener">'+svg('play')+' YouTube</a>'+liveNoteBtnHtml()+'</div>';
+  } else if(st.kind==='emom'){
+    const min=st.minute||1, total=st.totalMinutes||10;
+    phaseEl.textContent='⏰ EMOM · Min '+min+'/'+total;
+    nameEl.textContent=st.ex.name;
+    deEl.textContent=(st.ex.de||'')+' · '+st.reps+' Wdh.';
+    unitEl.textContent='Sekunden bis nächste Minute';
+    ring.classList.add('tap');
+    adjust.style.display='none';
+    primary.classList.remove('paused');
+    primary.innerHTML= W.paused? svgFill('play')+' Weiter' : svgFill('pause')+' Pause';
+    hintEl.innerHTML='<div class="emom-clock-big"><div class="lbl">🎯 '+st.reps+' Wiederholungen</div><div class="min-of">Minute '+min+' von '+total+'</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px"><a class="yt-btn-workout" href="'+ytUrl(st.ex.name)+'" target="_blank" rel="noopener">'+svg('play')+' YouTube</a>'+liveNoteBtnHtml()+'</div>';
+  } else if(st.kind==='tabataWork'){
+    phaseEl.textContent='💥 TABATA · Runde '+st.round+'/'+st.totalRounds;
+    nameEl.textContent=st.ex.name;
+    deEl.textContent=(st.ex.de||'')+' · Vollgas!';
+    unitEl.textContent='Sekunden Arbeit';
+    ring.classList.remove('tap');
+    adjust.style.display='none';
+    primary.classList.remove('paused');
+    primary.innerHTML= W.paused? svgFill('play')+' Weiter' : svgFill('pause')+' Pause';
+    hintEl.innerHTML='<span class="tabata-badge">🔥 20s Arbeit</span><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px"><a class="yt-btn-workout" href="'+ytUrl(st.ex.name)+'" target="_blank" rel="noopener">'+svg('play')+' YouTube</a>'+liveNoteBtnHtml()+'</div>';
+  } else if(st.kind==='tabataRest'){
+    phaseEl.textContent='💤 TABATA-Pause';
+    nameEl.textContent='10 Sekunden Pause';
+    deEl.textContent='';
+    unitEl.textContent='Sekunden';
+    ring.classList.remove('tap');
+    adjust.style.display='none';
+    primary.classList.remove('paused');
+    primary.innerHTML= W.paused? svgFill('play')+' Weiter' : svgFill('pause')+' Pause';
+    if(st.nextEx) nextEl.innerHTML='Als Nächstes: <b>'+esc(st.nextEx.name)+'</b>';
   } else { // rest / cycleRest
     phaseEl.textContent = st.kind==='cycleRest'? 'Rundenpause' : 'Pause';
     nameEl.textContent = st.kind==='cycleRest'? ('Runde '+(st.nextCycle)+' kommt') : 'Kurze Pause';
@@ -3593,17 +3922,35 @@ function tick(){
     if(sec<=3 && sec>=1 && sec!==W.lastBeepSec){
       W.lastBeepSec=sec;
       if(DB.settings.beeps) beep(700,0.07,0.13);
-      if(DB.settings.voice && st.kind!=='exercise') speak(String(sec));
+      if(DB.settings.voice && st.kind!=='exercise' && st.kind!=='amrap' && st.kind!=='emom') speak(String(sec));
     }
-    if(W.remaining<=0){ updateTimeUI(); advance(); return; }
+    if(W.remaining<=0){
+      updateTimeUI();
+      /* AMRAP: Time-Up → Workout beenden */
+      if(st.kind==='amrap'){ finishWorkout(false); return; }
+      advance(); return;
+    }
   }
   updateTimeUI();
 }
 function recordCurrentEntry(actualRepsOverride){
   if(!W) return;
   const st=currentStep(); if(!st) return;
-  /* Warm-up/Cool-down-Übungen werden NICHT im Verlauf gespeichert */
   if(st.kind==='warmupEx'||st.kind==='cooldownEx') return;
+  /* AMRAP/EMOM/Tabata: eigene Einträge basierend auf Modus */
+  if(st.kind==='amrap'){
+    const curEx = st.exercises[(W.amrapExIdx||0)%st.exercises.length];
+    W.entries.push({ name:curEx.name, mode:'amrap', reps:curEx.reps||null, duration:curEx.duration||null, round:W.amrapRounds||0 });
+    return;
+  }
+  if(st.kind==='emom'){
+    W.entries.push({ name:st.ex.name, mode:'emom', minute:st.minute, reps:st.reps });
+    return;
+  }
+  if(st.kind==='tabataWork'){
+    W.entries.push({ name:st.ex.name, mode:'tabata', round:st.round, duration:20 });
+    return;
+  }
   if(st.kind!=='exercise') return;
   const e=st.ex;
   const entry={ name:e.name, cycle:st.cycle, exIndex:st.exIndex };
@@ -3619,6 +3966,19 @@ function recordCurrentEntry(actualRepsOverride){
   W.entries.push(entry);
 }
 function advance(){ recordCurrentEntry(null); goTo(W.idx+1,false); }
+function amrapAdvance(){
+  if(!W) return;
+  const st=currentStep(); if(!st||st.kind!=='amrap') return;
+  recordCurrentEntry(null);
+  W.amrapExIdx = (W.amrapExIdx||0) + 1;
+  if(W.amrapExIdx % st.exercises.length === 0){
+    W.amrapRounds = (W.amrapRounds||0) + 1;
+    vibe(60); beep(880,0.12,0.16);
+  } else {
+    vibe(30); beep(700,0.08,0.14);
+  }
+  renderStep();
+}
 function prevStep(){ if(W.idx>0) goTo(W.idx-1,false); }
 function skipStep(){
   const st=currentStep();
@@ -3637,7 +3997,9 @@ function adjustTime(delta){
   W.lastBeepSec=null; updateTimeUI(); vibe(15);
 }
 function finishWorkout(){
-  stopLoop(); W.done=true; releaseWake();
+  stopLoop(); W.done=true; releaseWake(); clearMediaSession();
+  /* Leaderboard-Update anstoßen (silent) */
+  if(DB.settings.leaderboardOptIn) setTimeout(()=>{ pushLeaderboardEntry(); pushBuddyProfile(); }, 500);
   const early = arguments[0]===true;
   const now=Date.now();
   const dur=Math.round(W.activeMs/1000);
@@ -3742,7 +4104,7 @@ function askRpeSheet(when, dur){
   $('#rpe-skip').addEventListener('click',closeSheet);
 }
 function teardownWorkout(silent){
-  stopLoop(); releaseWake();
+  stopLoop(); releaseWake(); clearMediaSession();
   if(W && !W.done){
     const doneEx=exercisesCompleted();
     if(doneEx>0){
@@ -3927,6 +4289,18 @@ function renderSettings(){
       </div>
       <div class="set-row" data-action="restart-onboarding"><div class="grow"><div class="st-title">Onboarding erneut anzeigen</div><div class="st-sub">Empfehlungen basierend auf Erfahrung neu setzen</div></div><span class="set-ic">${svg('play')}</span></div>
     </div>
+    <div class="set-note">Community (optional)</div>
+    <div class="set-group">
+      <div class="set-row"><div class="grow"><div class="st-title">Nickname</div><div class="st-sub">Für Leaderboard & Buddy sichtbar</div></div>
+        <div class="mini-input" style="width:140px"><input class="input" id="set-nick" placeholder="Anonym" maxlength="20" value="${esc(s.nickname||'')}"></div>
+      </div>
+      ${switchRow('leaderboardOptIn','Am wöchentlichen Leaderboard teilnehmen','Deine anonymisierten Wochenstats werden geteilt',s.leaderboardOptIn)}
+      ${FB.user?`<div class="set-row"><div class="grow"><div class="st-title">Dein Buddy-Code</div><div class="st-sub">Teile diesen Code mit Freunden</div></div>
+        <div style="font-family:var(--font-d);font-size:20px;letter-spacing:3px;color:var(--accent);user-select:all">${esc(ensureBuddyCode())}</div></div>
+      <div class="set-row" data-action="add-buddy"><div class="grow"><div class="st-title">Buddy hinzufügen</div><div class="st-sub">Freund per Code hinzufügen</div></div><span class="set-ic">${svg('plus')}</span></div>
+      <div class="set-row" data-action="show-leaderboard"><div class="grow"><div class="st-title">Leaderboard ansehen</div><div class="st-sub">Wochenranking der Community</div></div><span class="set-ic">${svg('trophy')}</span></div>
+      <div class="set-row" data-action="show-buddies"><div class="grow"><div class="st-title">Meine Buddies (${(DB.buddies||[]).length})</div><div class="st-sub">Freunde und ihre Wochenstats</div></div><span class="set-ic">${svg('list')}</span></div>`:'<div class="set-row"><div class="grow"><div class="st-sub">Login erforderlich für Community-Features</div></div></div>'}
+    </div>
     <div class="set-note">Erinnerungen</div>
     <div class="set-group">
       ${switchRow('reminderEnabled','Trainings-Erinnerung','Push-Benachrichtigung an Trainingstagen',s.reminderEnabled)}
@@ -4020,7 +4394,11 @@ function renderSettings(){
     if(a==='reset') resetAll();
     if(a==='edit-warmup') openWcEditor('warmup');
     if(a==='edit-cooldown') openWcEditor('cooldown');
+    if(a==='add-buddy') openAddBuddySheet();
+    if(a==='show-leaderboard') openLeaderboardSheet();
+    if(a==='show-buddies') openBuddiesSheet();
   }));
+  const nk=$('#set-nick'); if(nk) nk.addEventListener('change',()=>{ DB.settings.nickname=nk.value.trim().slice(0,20); save(); toast('Nickname gespeichert'); });
   $('#import-file').addEventListener('change',importData);
   // install
   renderInstallSlot();
@@ -4331,6 +4709,8 @@ $('#wk-hint').addEventListener('click',e=>{
   if(alt){ e.stopPropagation(); openAltPicker(); return; }
   const noteBtn=e.target.closest('#wk-note-btn');
   if(noteBtn){ e.stopPropagation(); openLiveNoteSheet(); return; }
+  const amrapTap=e.target.closest('#amrap-tap');
+  if(amrapTap){ e.stopPropagation(); amrapAdvance(); return; }
   const b=e.target.closest('[data-repadj]'); if(!b) return;
   e.stopPropagation();
   const delta=+b.dataset.repadj;
