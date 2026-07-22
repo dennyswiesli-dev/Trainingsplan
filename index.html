@@ -1151,7 +1151,10 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
         <div class="wk-round" id="wk-round">Runde 1 / 4</div>
         <div class="wk-exno" id="wk-exno">Übung 1 / 7</div>
       </div>
-      <button class="wk-sound" id="wk-sound" aria-label="Ton umschalten"></button>
+      <div style="display:flex;gap:8px">
+        <button class="wk-sound" id="wk-edit" aria-label="Plan anpassen"></button>
+        <button class="wk-sound" id="wk-sound" aria-label="Ton umschalten"></button>
+      </div>
     </div>
     <div class="progress"><i id="wk-progress"></i></div>
     <div class="dots" id="wk-dots"></div>
@@ -1754,6 +1757,7 @@ const DEFAULTS={
              defaultRestEx:30, defaultRestCycle:120,
              trackReps:true, askRpe:true, askNotes:true, voice:false, weeklyGoal:3,
              reminderEnabled:false, reminderTime:'18:00', reminderDays:[1,2,3,4,5],
+             notifyPauseEnd:true,
              warmupEnabled:false, warmupDuration:120,
              cooldownEnabled:false, cooldownDuration:180 },
   achievements:{}, progression:{}
@@ -2972,6 +2976,21 @@ async function requestNotifPermission(){
   if(Notification.permission==='denied') return 'denied';
   return await Notification.requestPermission();
 }
+/* Zeigt eine System-Benachrichtigung über den Service Worker.
+   Wichtig: `new Notification(...)` wirft in installierten PWAs auf Android/Chrome
+   einen Fehler ("Illegal constructor") – dort ist showNotification() über die
+   Service-Worker-Registrierung Pflicht, deshalb läuft alles über diesen Weg. */
+async function showAppNotification(title, opts){
+  if(!notifSupported() || Notification.permission!=='granted') return false;
+  const options=Object.assign({ icon:'icon-192.png', badge:'icon-192.png' }, opts);
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    await reg.showNotification(title, options);
+    return true;
+  }catch(e){
+    try{ new Notification(title, options); return true; }catch(e2){ return false; }
+  }
+}
 function scheduleNextReminder(){
   if(!DB.settings.reminderEnabled || !notifSupported() || Notification.permission!=='granted') return;
   const now=new Date();
@@ -2994,16 +3013,23 @@ function fireReminder(){
   const today=dayKey(new Date());
   const trainedToday=(DB.history||[]).some(h=>dayKey(h.date)===today);
   if(!trainedToday){
-    try{
-      new Notification('🔥 Zeit für Training!', {
-        body:'Du warst heute noch nicht aktiv. Zeit für BARWORK!',
-        icon:'icon-192.png',
-        badge:'icon-192.png',
-        tag:'barwork-reminder'
-      });
-    }catch(e){}
+    showAppNotification('🔥 Zeit für Training!', {
+      body:'Du warst heute noch nicht aktiv. Zeit für BARWORK!',
+      tag:'barwork-reminder'
+    });
   }
   scheduleNextReminder();
+}
+/* Benachrichtigung wenn eine Pause vorbei ist, während die App im Hintergrund ist */
+function notifyPauseEnd(st){
+  if(!DB.settings.notifyPauseEnd || !document.hidden) return;
+  const name = st.ex && st.ex.name;
+  showAppNotification('⏱️ Pause vorbei!', {
+    body: name ? ('Weiter geht\'s mit: '+name) : 'Zeit für die nächste Übung.',
+    tag:'barwork-pause',
+    renotify:true,
+    vibrate:[0,150]
+  });
 }
 
 /* ========================= WARM-UP / COOL-DOWN PLAN EDITOR ========================= */
@@ -4786,9 +4812,10 @@ function startWorkout(id){
     return;
   }
   ac(); if(audioCtx&&audioCtx.state==='suspended'){ try{audioCtx.resume();}catch(e){} }
-  W={ plan:p, steps:buildSteps(p), idx:0, remaining:0, total:0, paused:false,
-      activeMs:0, lastTs:0, lastBeepSec:null, done:false, cyclesTotal:p.cycles,
-      exercisesTotal:p.cycles*p.exercises.length,
+  const livePlan=structuredClone(p); /* eigene Kopie: Live-Anpassungen dürfen den gespeicherten Plan nicht sofort verändern */
+  W={ plan:livePlan, steps:buildSteps(livePlan), idx:0, remaining:0, total:0, paused:false,
+      activeMs:0, lastTs:0, lastBeepSec:null, done:false, cyclesTotal:livePlan.cycles,
+      exercisesTotal:livePlan.cycles*livePlan.exercises.length,
       entries:[], currentRepInput:null };
   initVoice();
   $('#wk-done').style.display='none';
@@ -4798,6 +4825,7 @@ function startWorkout(id){
   $('.progress').style.display='';
   $('#wk-dots').style.display='';
   $('#wk-close').innerHTML=svg('close');
+  $('#wk-edit').innerHTML=svg('edit');
   $('#wk-prev').innerHTML=svg('prev');
   $('#wk-skip').innerHTML=svg('skip');
   updateSoundBtn();
@@ -4822,9 +4850,12 @@ function isCountdown(st){
   return false;
 }
 
+const PAUSE_KINDS=['rest','cycleRest','warmupRest','cooldownRest'];
+function longBeep(){ beep(880,0.45,0.22,'sine'); }
 function goTo(idx, initial){
   if(idx<0) idx=0;
   if(idx>=W.steps.length){ finishWorkout(); return; }
+  const prevSt=W.steps[W.idx];
   W.idx=idx; W.lastBeepSec=null;
   const st=currentStep();
   if(isCountdown(st)){
@@ -4839,10 +4870,17 @@ function goTo(idx, initial){
   W.currentRepInput=null;
   // transition sound/vibration
   if(!initial){
-    if(st.kind==='exercise'){ beep(980,0.14,0.18,'square'); vibe(70); speak(st.ex.name); }
+    /* Pause fertig = langer Piepton statt kurzem Übergangs-Piepton */
+    const pauseEnded = prevSt && PAUSE_KINDS.includes(prevSt.kind);
+    if(st.kind==='exercise'){
+      if(pauseEnded){ longBeep(); vibe([0,150]); } else { beep(980,0.14,0.18,'square'); vibe(70); }
+      speak(st.ex.name);
+    }
     else if(st.kind==='rest'){ beep(460,0.14,0.14); vibe([0,40,50,40]); if(st.nextEx) speak('Pause. Als Nächstes: '+st.nextEx.name); }
     else if(st.kind==='cycleRest'){ beep(400,0.2,0.15); vibe([0,60,60,60]); speak('Rundenpause. Runde '+(st.nextCycle)+' kommt.'); }
     else if(st.kind==='prepare'){ speak('Bereit machen'); }
+    else if((st.kind==='warmupEx'||st.kind==='cooldownEx') && pauseEnded){ longBeep(); vibe([0,150]); }
+    if(pauseEnded && (st.kind==='exercise'||st.kind==='warmupEx'||st.kind==='cooldownEx')) notifyPauseEnd(st);
   }
   renderStep();
 }
@@ -5218,6 +5256,7 @@ function finishWorkout(){
   vibe([0,100,60,100,60,160]);
   speak('Geschafft!');
   if(DB.settings.askRpe){ setTimeout(()=>askRpeSheet(now, dur), 700); }
+  else { maybeAskSavePlanEdits(); }
   setTimeout(()=>{ const un=checkAchievements(false); }, 1400);
 }
 function askRpeSheet(when, dur){
@@ -5247,8 +5286,9 @@ function askRpeSheet(when, dur){
     }
     closeSheet();
     if(chosenRpe||note) toast('Gespeichert');
+    maybeAskSavePlanEdits();
   });
-  $('#rpe-skip').addEventListener('click',closeSheet);
+  $('#rpe-skip').addEventListener('click',()=>{ closeSheet(); maybeAskSavePlanEdits(); });
 }
 function teardownWorkout(silent){
   stopLoop(); releaseWake(); clearMediaSession();
@@ -5482,6 +5522,7 @@ function renderSettings(){
       ${switchRow('trackReps','Wiederholungen erfassen','Tatsächliche Wdh. beim Training eingeben',s.trackReps)}
       ${switchRow('askRpe','Belastung abfragen','Nach dem Training bewerten',s.askRpe)}
       ${switchRow('voice','Sprachansage','Übungen und Countdown ansagen',s.voice)}
+      ${switchRow('notifyPauseEnd','Push bei Pausenende','Systembenachrichtigung, wenn die App im Hintergrund ist',s.notifyPauseEnd)}
     </div>
     <div class="set-note">Wochenziel</div>
     <div class="set-group">
@@ -5548,6 +5589,7 @@ function renderSettings(){
       <div class="set-row"><div id="days-picker" style="display:flex;gap:6px;flex-wrap:wrap;width:100%">
         ${['Mo','Di','Mi','Do','Fr','Sa','So'].map((d,i)=>{ const day=i+1===7?0:i+1; const on=(s.reminderDays||[]).includes(day); return `<button class="btn ${on?'btn-primary':'btn-soft'} btn-sm" data-remday="${day}">${d}</button>`; }).join('')}
       </div></div>
+      <div class="set-row"><button class="btn btn-soft btn-block" id="btn-test-notif">🔔 Test-Benachrichtigung senden</button></div>
     </div>
     <div class="set-note">Aufwärm- & Cool-Down-Pläne</div>
     <div class="set-group">
@@ -5600,6 +5642,12 @@ function renderSettings(){
         });
       } else { clearTimeout(window._barworkReminderTimer); }
     }
+    if(k==='notifyPauseEnd' && s[k]){
+      requestNotifPermission().then(p=>{
+        if(p==='denied'){ toast('Benachrichtigungen sind blockiert'); s[k]=false; sw.classList.remove('on'); save(); }
+        else if(p==='unsupported'){ toast('Nicht unterstützt in diesem Browser'); s[k]=false; sw.classList.remove('on'); save(); }
+      });
+    }
   }));
   // number inputs
   const bindNum=(id,key,min,max)=>{ const el=$('#'+id); if(!el)return; el.addEventListener('change',()=>{ s[key]=clampInt(el.value,min,max,s[key]); el.value=s[key]; save(); }); };
@@ -5612,6 +5660,14 @@ function renderSettings(){
   const bw=$('#set-bw'); if(bw) bw.addEventListener('change',()=>{ DB.settings.bodyWeightKg=Math.max(30,Math.min(200,+bw.value||75)); save(); });
   const ro=$$('#settings-main [data-action="restart-onboarding"]'); ro.forEach(r=>r.addEventListener('click',()=>{ DB.flags.onboarded=false; save(); toast('Onboarding wird gestartet...'); setTimeout(()=>{ show('home',true); startOnboarding(); },300); }));
   const rt=$('#set-remtime'); if(rt) rt.addEventListener('change',()=>{ s.reminderTime=rt.value||'18:00'; save(); scheduleNextReminder(); });
+  const tn=$('#btn-test-notif'); if(tn) tn.addEventListener('click', async ()=>{
+    const p=await requestNotifPermission();
+    if(p==='granted'){
+      const ok=await showAppNotification('🏋️ BARWORK Test', { body:'So sehen deine Benachrichtigungen aus.', tag:'barwork-test' });
+      toast(ok?'Test-Benachrichtigung gesendet':'Benachrichtigung konnte nicht angezeigt werden');
+    } else if(p==='denied'){ toast('Benachrichtigungen sind blockiert – bitte in den Browser-/App-Einstellungen erlauben'); }
+    else if(p==='unsupported'){ toast('Nicht unterstützt in diesem Browser'); }
+  });
   $$('#days-picker [data-remday]').forEach(b=> b.addEventListener('click',()=>{
     const day=+b.dataset.remday;
     s.reminderDays=s.reminderDays||[];
@@ -5913,6 +5969,7 @@ $('#f-restcy').addEventListener('input',()=>{ $('#restcy-hint').textContent='= '
 // workout controls
 $('#wk-close').addEventListener('click',closeWorkout);
 $('#wk-sound').addEventListener('click',()=>{ DB.settings.sound=!DB.settings.sound; save(); updateSoundBtn(); if(DB.settings.sound) beep(880,0.08,0.14); });
+$('#wk-edit').addEventListener('click', openWorkoutEditSheet);
 /* Live workout notes - inline button HTML für Button-Zeile */
 function liveNoteBtnHtml(){
   const has = W && W.liveNote && W.liveNote.length>0;
@@ -6012,6 +6069,101 @@ function openOverview(){
   $('#wk-overview').classList.add('show');
 }
 function closeOverview(){ $('#wk-overview').classList.remove('show'); }
+
+/* ========================= LIVE-ANPASSUNG WÄHREND DES TRAININGS ========================= */
+function openWorkoutEditSheet(){
+  if(!W || W.done) return;
+  const st=currentStep();
+  if(!st || !['exercise','rest','cycleRest'].includes(st.kind)){
+    toast('Anpassung erst im Hauptteil des Trainings möglich');
+    return;
+  }
+  const mode=planMode(W.plan);
+  if(mode!=='standard' && mode!=='circuit'){
+    toast('Anpassung in diesem Trainingsmodus nicht möglich');
+    return;
+  }
+  const p=W.plan;
+  const curCycle=st.cycle||1;
+  const body=`
+    <p style="color:var(--muted);font-weight:600;margin:2px 0 14px">Passe Runden oder Pausenzeiten für den Rest dieses Trainings an. Am Ende kannst du entscheiden, ob die Änderung dauerhaft im Plan gespeichert wird.</p>
+    <div class="set-row"><div class="grow"><div class="st-title">Runden</div><div class="st-sub">Du bist aktuell in Runde ${curCycle}</div></div>
+      <div class="mini-input"><input class="input" id="we-cycles" type="number" inputmode="numeric" min="${curCycle}" max="30" value="${p.cycles}"></div></div>
+    <div class="set-row"><div class="grow"><div class="st-title">Pause zw. Übungen</div><div class="st-sub">Sekunden</div></div>
+      <div class="mini-input"><input class="input" id="we-restex" type="number" inputmode="numeric" min="0" max="600" value="${p.restBetweenExercises}"></div></div>
+    <div class="set-row"><div class="grow"><div class="st-title">Pause zw. Runden</div><div class="st-sub">Sekunden</div></div>
+      <div class="mini-input"><input class="input" id="we-restcy" type="number" inputmode="numeric" min="0" max="1200" value="${p.restBetweenCycles}"></div></div>
+    <div style="height:8px"></div>
+    <button class="btn btn-primary btn-block" id="we-save">Übernehmen</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost btn-block" id="we-cancel">Abbrechen</button>`;
+  openSheet('✎ Plan anpassen', body);
+  $('#we-save').addEventListener('click',()=>{
+    const newCycles=clampInt($('#we-cycles').value, curCycle, 30, p.cycles);
+    const newRestEx=clampInt($('#we-restex').value, 0, 600, p.restBetweenExercises);
+    const newRestCy=clampInt($('#we-restcy').value, 0, 1200, p.restBetweenCycles);
+    closeSheet();
+    applyWorkoutEdit(newCycles, newRestEx, newRestCy);
+  });
+  $('#we-cancel').addEventListener('click', closeSheet);
+}
+function applyWorkoutEdit(newCycles, newRestEx, newRestCy){
+  if(!W) return;
+  const p=W.plan;
+  const changed = newCycles!==p.cycles || newRestEx!==p.restBetweenExercises || newRestCy!==p.restBetweenCycles;
+  if(!changed) return;
+  const doneMainExercises=exercisesCompleted();
+  p.cycles=newCycles;
+  p.restBetweenExercises=newRestEx;
+  p.restBetweenCycles=newRestCy;
+  const newSteps=buildSteps(p);
+  const exIndices=[];
+  newSteps.forEach((s,i)=>{ if(s.kind==='exercise') exIndices.push(i); });
+  let newIdx;
+  if(doneMainExercises<exIndices.length){
+    newIdx=exIndices[doneMainExercises];
+  } else {
+    const cdIdx=newSteps.findIndex(s=>s.kind==='cooldownEx');
+    newIdx=cdIdx>=0 ? cdIdx : newSteps.length;
+  }
+  W.steps=newSteps;
+  W.cyclesTotal=newCycles;
+  W.exercisesTotal=exIndices.length;
+  W.planEdited=true;
+  W._editSummary={ cycles:newCycles, restBetweenExercises:newRestEx, restBetweenCycles:newRestCy };
+  renderDots();
+  vibe(20); toast('Plan angepasst');
+  goTo(Math.min(newIdx,newSteps.length), true);
+}
+function maybeAskSavePlanEdits(){
+  if(W && W.planEdited) setTimeout(()=>askSavePlanEditsSheet(), 400);
+}
+function askSavePlanEditsSheet(){
+  if(!W || !W.planEdited) return;
+  const sum=W._editSummary||{};
+  const body=`<p style="color:var(--muted);font-weight:600;margin:2px 0 14px">Du hast diesen Plan während des Trainings angepasst: <b>${sum.cycles} Runden</b> · ${sum.restBetweenExercises}s Übungspause · ${fmt(sum.restBetweenCycles)} Rundenpause. Sollen diese Änderungen dauerhaft im Plan gespeichert werden?</p>
+    <button class="btn btn-primary btn-block" id="spe-save">Im Plan speichern</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost btn-block" id="spe-skip">Nur für dieses Training</button>`;
+  openSheet('Plan-Änderungen speichern?', body);
+  $('#spe-save').addEventListener('click',()=>{
+    saveWorkoutEditToPlan();
+    closeSheet();
+  });
+  $('#spe-skip').addEventListener('click', closeSheet);
+}
+function saveWorkoutEditToPlan(){
+  if(!W || !W.planEdited) return;
+  const updated=structuredClone(W.plan);
+  if(isBuiltin(updated.id)){
+    DB.overrides[updated.id]=updated;
+  } else {
+    const idx=DB.customPlans.findIndex(x=>x.id===updated.id);
+    if(idx>=0) DB.customPlans[idx]=updated; else DB.customPlans.push(updated);
+  }
+  save();
+  toast('Plan aktualisiert');
+}
 
 
 /* ========================= ACHIEVEMENTS ========================= */

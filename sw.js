@@ -1,5 +1,5 @@
 /* BARWORK Service Worker – Offline-Cache & Updates */
-const VERSION = 'barwork-v4-google-popup';
+const VERSION = 'barwork-v5-notifications';
 const FONT_CACHE = 'barwork-fonts-v1';
 const CORE = [
   './',
@@ -27,6 +27,18 @@ self.addEventListener('activate', (e) => {
     const keys = await caches.keys();
     await Promise.all(keys.map((k) => (k !== VERSION && k !== FONT_CACHE) ? caches.delete(k) : null));
     await self.clients.claim();
+  })());
+});
+
+// Benachrichtigung angetippt: App-Fenster fokussieren oder neu öffnen
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil((async () => {
+    const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of clientsList) {
+      if ('focus' in c) return c.focus();
+    }
+    if (self.clients.openWindow) return self.clients.openWindow('./');
   })());
 });
 
