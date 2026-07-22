@@ -5129,15 +5129,19 @@ function recordCurrentEntry(actualRepsOverride){
     return;
   }
   if(st.kind==='emom'){
+    W.entries=W.entries.filter(en=>!(en.mode==='emom' && en.minute===st.minute));
     W.entries.push({ name:st.ex.name, mode:'emom', minute:st.minute, reps:st.reps });
     return;
   }
   if(st.kind==='tabataWork'){
+    W.entries=W.entries.filter(en=>!(en.mode==='tabata' && en.round===st.round));
     W.entries.push({ name:st.ex.name, mode:'tabata', round:st.round, duration:20 });
     return;
   }
   if(st.kind!=='exercise') return;
   const e=st.ex;
+  /* Zurück-Navigation + erneutes Abschließen darf keinen zweiten Eintrag für dieselbe Übung/Runde erzeugen */
+  W.entries=W.entries.filter(en=>!(en.cycle===st.cycle && en.exIndex===st.exIndex && en.mode==null));
   const entry={ name:e.name, cycle:st.cycle, exIndex:st.exIndex };
   if(e.duration){ entry.duration=e.duration; entry.completedFully=true; }
   else{
@@ -6271,7 +6275,7 @@ function progressionCardHTML(s){
     </div>
   </div>`;
 }
-function applyProgression(exId, newTarget){
+function applyProgression(exId, currentTarget, newTarget){
   /* update every plan (custom + override) that references this exercise */
   let touched=0;
   const bump=(plan)=>{
@@ -6292,7 +6296,9 @@ function applyProgression(exId, newTarget){
       DB.overrides[b.id]=clone;
     }
   });
-  DB.progression[exId]=Object.assign({}, DB.progression[exId]||{}, { acceptedTarget:newTarget, acceptedAt:Date.now() });
+  /* acceptedTarget muss mit dem in analyseProgression() geprüften (alten) Zielwert übereinstimmen,
+     sonst taucht der Vorschlag beim nächsten Rendern (z.B. nach Verlauf -> zurück) wieder auf */
+  DB.progression[exId]=Object.assign({}, DB.progression[exId]||{}, { acceptedTarget:currentTarget, acceptedAt:Date.now() });
   save();
   return touched;
 }
@@ -6307,7 +6313,7 @@ function renderProgressionCards(host){
     const id=card.dataset.progr;
     const s=list.find(x=>x.id===id); if(!s) return;
     const acc=card.querySelector('[data-progr-acc]'); const dis=card.querySelector('[data-progr-dis]');
-    acc.addEventListener('click',()=>{ const n=applyProgression(id, s.newTarget); toast(`${s.name}: neues Ziel ${s.newTarget} Wdh. (${n} Plan${n===1?'':'e'} aktualisiert)`); card.remove(); });
+    acc.addEventListener('click',()=>{ const n=applyProgression(id, s.currentTarget, s.newTarget); toast(`${s.name}: neues Ziel ${s.newTarget} Wdh. (${n} Plan${n===1?'':'e'} aktualisiert)`); card.remove(); });
     dis.addEventListener('click',()=>{ dismissProgression(id, s.currentTarget); toast('Vorschlag ausgeblendet'); card.remove(); });
   });
 }
