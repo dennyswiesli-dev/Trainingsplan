@@ -1731,6 +1731,7 @@ const BUILTINS = [
 
 /* ========================= STORAGE ========================= */
 const KEY='barwork.db.v1';
+const ACTIVE_WORKOUT_KEY='barwork.activeWorkout.v1'; /* separat von DB, damit ein laufendes Training auch nach App-Kill/Reload wiederhergestellt werden kann */
 const DEFAULTS={
   customPlans:[], overrides:{}, hidden:[], history:[],
   favorites:[], prs:{}, skills:{},
@@ -2149,9 +2150,20 @@ function load(){
     if(DB.activeWeeklyPlanId===undefined) DB.activeWeeklyPlanId=null;
   }catch(e){ DB = structuredClone(DEFAULTS); }
 }
+let _storageWriteWarned=false;
+function persistDb(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(DB));
+    _storageWriteWarned=false;
+    return true;
+  }catch(e){
+    if(!_storageWriteWarned){ _storageWriteWarned=true; toast('⚠️ Speichern fehlgeschlagen – Speicherplatz voll?'); }
+    return false;
+  }
+}
 function save(){
   DB.updatedAt = Date.now(); /* Timestamp für konfliktfreies Merging */
-  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
+  persistDb();
   cloudScheduleSave();
 }
 /* ========================= FIREBASE LOGIN / CLOUD SYNC ========================= */
@@ -2169,7 +2181,13 @@ let FIRE=null;
 function userLabel(){ return FB.user ? (FB.user.displayName || FB.user.email || 'Eingeloggt') : 'Nicht eingeloggt'; }
 function cloudMsg(){ if(FB.lastError) return 'Sync-Fehler'; if(FB.user && FB.ready) return 'Cloud-Sync aktiv'; if(FB.localMode) return 'Lokaler Modus'; return 'Nicht eingeloggt'; }
 function authStatus(msg, ok){ const el=$('#auth-status'); if(!el) return; el.textContent=msg||''; el.style.display=msg?'block':'none'; el.classList.toggle('ok',!!ok); }
-function cleanForCloud(obj){ return JSON.parse(JSON.stringify(obj||{})); }
+function cleanForCloud(obj){
+  /* Fortschrittsfotos bleiben grundsätzlich lokal: Firestore-Dokumente sind auf 1 MB begrenzt,
+     und schon wenige komprimierte Fotos würden jeden Cloud-Sync zum Scheitern bringen. */
+  const copy=Object.assign({}, obj||{});
+  delete copy.progressPhotos;
+  return JSON.parse(JSON.stringify(copy));
+}
 function mergeUniqueById(a,b){ const m=new Map(); (a||[]).concat(b||[]).forEach(x=>{ if(x&&x.id) m.set(x.id,x); }); return Array.from(m.values()); }
 function mergeHistory(a,b){ const m=new Map(); (a||[]).concat(b||[]).forEach(x=>{ if(!x||!x.date) return; const k=[x.date,x.planId,x.durationSec,x.completed].join('|'); if(!m.has(k)) m.set(k,x); }); return Array.from(m.values()).sort((x,y)=>(y.date||0)-(x.date||0)).slice(0,200); }
 function mergePRs(a,b){ const out={}; const all=Object.assign({},b||{},a||{}); Object.keys(all).forEach(k=>{ const A=(a&&a[k])||{}, B=(b&&b[k])||{}; out[k]={ bestReps:Math.max(A.bestReps||0,B.bestReps||0), bestDuration:Math.max(A.bestDuration||0,B.bestDuration||0), lastDate:Math.max(A.lastDate||0,B.lastDate||0), prDate:(A.bestReps||0)>=(B.bestReps||0)?(A.prDate||A.lastDate||0):(B.prDate||B.lastDate||0) }; }); return out; }
@@ -2183,6 +2201,8 @@ function mergeDb(local, remote){
   const remoteNewer = rTs > lTs;
   const pickNewer = (a,b) => remoteNewer ? (b!==undefined?b:a) : (a!==undefined?a:b);
   return {
+    /* Fortschrittsfotos werden nie in die Cloud synchronisiert (Firestore 1MB-Limit) - immer lokal beibehalten */
+    progressPhotos: l.progressPhotos||[],
     customPlans:mergeUniqueById(l.customPlans,r.customPlans),
     overrides:Object.assign({}, remoteNewer?l.overrides:r.overrides, remoteNewer?r.overrides:l.overrides),
     hidden:Array.from(new Set([...(r.hidden||[]),...(l.hidden||[])])),
@@ -2233,6 +2253,7 @@ async function loadCloudDb(){
     const snap = await FIRE.getDoc(userDocRef());
     if(snap.exists()){
       const cloudDb = snap.data().db;
+      const localPhotos = DB.progressPhotos||[]; /* nie in der Cloud - beim Übernehmen erhalten */
       /* Prüfen ob Local unberührt (nach logout oder Erstinstallation) */
       const localFresh = !DB.ts || Object.keys(DB.ts||{}).length===0;
       const localEmpty = (!DB.customPlans||!DB.customPlans.length) && (!DB.history||!DB.history.length);
@@ -2241,6 +2262,7 @@ async function loadCloudDb(){
         DB = Object.assign({}, structuredClone(DEFAULTS), cloudDb);
         DB.settings = Object.assign({}, DEFAULTS.settings, cloudDb.settings||{});
         DB.flags = Object.assign({}, DEFAULTS.flags, cloudDb.flags||{});
+        DB.progressPhotos = localPhotos;
       } else {
         /* Beide Seiten haben Daten → normales timestamp-basiertes Merging */
         DB = mergeDb(DB, cloudDb);
@@ -2263,7 +2285,7 @@ async function loadCloudDb(){
         DB = structuredClone(DEFAULTS);
       }
     }
-    try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
+    persistDb();
     document.body.dataset.theme = DB.settings.theme || 'dark';
     document.body.dataset.accent = DB.settings.accent || 'green';
     document.body.dataset.compact = DB.settings.compact ? '1' : '';
@@ -2289,7 +2311,14 @@ async function loadCloudDb(){
   }
 }
 function cloudScheduleSave(){ if(!FB.ready||!FB.user||FB.syncing) return; clearTimeout(FB.saveTimer); FB.saveTimer=setTimeout(()=>cloudSaveNow(false),900); }
-async function cloudSaveNow(silent){ if(!FB.ready||!FB.user) return; FB.syncing=true; FB.lastError=''; renderSettings(); try{ await FIRE.setDoc(userDocRef(), { db:cleanForCloud(DB), updatedAt:FIRE.serverTimestamp(), app:'BARWORK' }, { merge:true }); if(!silent) toast('Fortschritt synchronisiert'); }catch(err){ FB.lastError=err.message||String(err); if(!silent) toast('Cloud-Sync fehlgeschlagen'); } finally{ FB.syncing=false; renderSettings(); } }
+async function cloudSaveNow(silent){
+  if(!FB.ready||!FB.user) return;
+  FB.syncing=true; FB.lastError='';
+  if(currentView==='settings') renderSettings();
+  try{ await FIRE.setDoc(userDocRef(), { db:cleanForCloud(DB), updatedAt:FIRE.serverTimestamp(), app:'BARWORK' }, { merge:true }); if(!silent) toast('Fortschritt synchronisiert'); }
+  catch(err){ FB.lastError=err.message||String(err); if(!silent) toast('Cloud-Sync fehlgeschlagen'); }
+  finally{ FB.syncing=false; if(currentView==='settings') renderSettings(); }
+}
 async function doAuth(mode){ if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.',false); return; } const email=$('#auth-email').value.trim(); const pass=$('#auth-pass').value; if(!email||!pass){ authStatus('Bitte E-Mail und Passwort eingeben.',false); return; } if(pass.length<6){ authStatus('Das Passwort muss mindestens 6 Zeichen haben.',false); return; } authStatus(mode==='register'?'Konto wird erstellt...':'Login läuft...',true); try{ if(mode==='register') await FIRE.createUserWithEmailAndPassword(FB.auth,email,pass); else await FIRE.signInWithEmailAndPassword(FB.auth,email,pass); FB.localMode=false; authStatus('',true); }catch(err){ authStatus(firebaseErrorText(err),false); } }
 async function doGoogleLogin(){
   if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.', false); return; }
@@ -4062,7 +4091,7 @@ function checkBuddyInviteUrl(){
   } else {
     /* Für später merken */
     DB.pendingBuddyInvite = code;
-    try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){}
+    persistDb();
     setTimeout(function(){
       const body = '<p style="color:var(--muted);font-weight:600;margin:2px 0 14px">Du wurdest zu <b style="color:var(--chalk)">BARWORK</b> als Trainings-Buddy eingeladen! 🎯</p>'
         +'<p style="color:var(--muted);font-size:13px;margin-bottom:14px">Melde dich an oder registriere ein neues Konto – die Buddy-Verknüpfung passiert dann automatisch.</p>'
@@ -4343,7 +4372,7 @@ function renderResumeBanner(){
     });
   });
 }
-function resumeWorkout(){
+function resumeWorkout(keepPaused){
   if(!W || W.done){ return; }
   show('workout', true);
   /* UI wiederherstellen */
@@ -4353,12 +4382,16 @@ function resumeWorkout(){
   $('.wk-top').style.display='';
   $('.progress').style.display='';
   $('#wk-dots').style.display='';
+  $('#wk-close').innerHTML=svg('close');
+  $('#wk-edit').innerHTML=svg('edit');
+  $('#wk-prev').innerHTML=svg('prev');
+  $('#wk-skip').innerHTML=svg('skip');
   updateSoundBtn();
   renderDots();
   requestWake();
   renderStep();
   startLoop();
-  W.paused=false;
+  if(!keepPaused) W.paused=false;
 }
 function renderStreakBanner(){
   const el=$('#streak-banner'); if(!el) return;
@@ -4797,6 +4830,44 @@ function buildSteps(p){
   }
   return steps;
 }
+/* Sichert das laufende Training separat von der DB, damit es einen App-Kill/Reload übersteht
+   (z.B. wenn iOS/Android die im Hintergrund pausierte PWA aus dem Speicher wirft). */
+function persistActiveWorkout(){
+  if(!W || W.done){ clearActiveWorkoutSnapshot(); return; }
+  try{
+    const snap=Object.assign({}, W, { _timer:undefined, savedAt:Date.now() });
+    localStorage.setItem(ACTIVE_WORKOUT_KEY, JSON.stringify(snap));
+  }catch(e){}
+}
+function clearActiveWorkoutSnapshot(){
+  try{ localStorage.removeItem(ACTIVE_WORKOUT_KEY); }catch(e){}
+}
+function checkResumeActiveWorkout(){
+  if(W) return;
+  let snap=null;
+  try{ snap=JSON.parse(localStorage.getItem(ACTIVE_WORKOUT_KEY)||'null'); }catch(e){}
+  if(!snap || !snap.plan || !Array.isArray(snap.steps)){ clearActiveWorkoutSnapshot(); return; }
+  const ageMs=Date.now()-(snap.savedAt||0);
+  if(ageMs>6*3600*1000){ clearActiveWorkoutSnapshot(); return; } /* zu alt, vermutlich nicht mehr relevant */
+  const doneExSteps=snap.steps.slice(0,snap.idx).filter(s=>s.kind==='exercise').length;
+  const doneCount=doneExSteps>0 ? doneExSteps : (snap.entries?snap.entries.length:0);
+  if(doneCount<=0){ clearActiveWorkoutSnapshot(); return; } /* noch nichts absolviert */
+  const body=`<p style="color:var(--muted);font-weight:600;margin:2px 0 14px">Dein Training <b>${esc(snap.plan.name)}</b> wurde unterbrochen (z.B. durch Schließen der App). Du hattest bereits ${doneCount} Übung${doneCount===1?'':'en'} absolviert. Möchtest du fortsetzen?</p>
+    <button class="action" id="raw-resume">${svg('play')}<span>Training fortsetzen</span></button>
+    <button class="action danger" id="raw-discard">${svg('close')}<span>Verwerfen</span></button>`;
+  openSheet('Unterbrochenes Training gefunden', body);
+  $('#raw-resume').addEventListener('click',()=>{
+    closeSheet();
+    W=Object.assign({}, snap, { _timer:null, paused:true });
+    delete W.savedAt;
+    resumeWorkout(true);
+    toast('Training fortgesetzt');
+  });
+  $('#raw-discard').addEventListener('click',()=>{
+    closeSheet();
+    clearActiveWorkoutSnapshot();
+  });
+}
 function startWorkout(id){
   const p=findPlan(id); if(!p) return;
   /* Wenn bereits ein pausiertes Training läuft: kurz nachfragen */
@@ -4883,6 +4954,7 @@ function goTo(idx, initial){
     if(pauseEnded && (st.kind==='exercise'||st.kind==='warmupEx'||st.kind==='cooldownEx')) notifyPauseEnd(st);
   }
   renderStep();
+  persistActiveWorkout();
 }
 function renderStep(){
   updateMediaSession();
@@ -5167,6 +5239,7 @@ function amrapAdvance(){
     vibe(30); beep(700,0.08,0.14);
   }
   renderStep();
+  persistActiveWorkout();
 }
 function prevStep(){ if(W.idx>0) goTo(W.idx-1,false); }
 function skipStep(){
@@ -5178,6 +5251,7 @@ function togglePause(){
   const st=currentStep();
   if(st.kind==='exercise' && !st.ex.duration){ advance(); return; } // primary = Fertig
   W.paused=!W.paused; renderStep(); vibe(20);
+  persistActiveWorkout();
 }
 function adjustTime(delta){
   const st=currentStep(); if(!isCountdown(st)) return;
@@ -5186,7 +5260,7 @@ function adjustTime(delta){
   W.lastBeepSec=null; updateTimeUI(); vibe(15);
 }
 function finishWorkout(){
-  stopLoop(); W.done=true; releaseWake(); clearMediaSession();
+  stopLoop(); W.done=true; releaseWake(); clearMediaSession(); clearActiveWorkoutSnapshot();
   /* Leaderboard-Update anstoßen (silent) */
   if(DB.settings.leaderboardOptIn) setTimeout(()=>{ pushLeaderboardEntry(); pushBuddyProfile(); }, 500);
   const early = arguments[0]===true;
@@ -5295,7 +5369,7 @@ function askRpeSheet(when, dur){
   $('#rpe-skip').addEventListener('click',()=>{ closeSheet(); maybeAskSavePlanEdits(); });
 }
 function teardownWorkout(silent){
-  stopLoop(); releaseWake(); clearMediaSession();
+  stopLoop(); releaseWake(); clearMediaSession(); clearActiveWorkoutSnapshot();
   if(W && !W.done){
     const doneEx=exercisesCompleted();
     if(doneEx>0){
@@ -6287,9 +6361,12 @@ function applyProgression(exId, currentTarget, newTarget){
   };
   DB.customPlans.forEach(bump);
   Object.values(DB.overrides||{}).forEach(bump);
+  /* Nur Builtins automatisch überschreiben, die der Nutzer auch tatsächlich trainiert hat -
+     sonst tauchen unerwartete Overrides an Plänen auf, die er nie genutzt hat. */
+  const trainedPlanIds=new Set((DB.history||[]).map(h=>h.planId));
   BUILTINS.forEach(b=>{
-    /* if plan is not overridden, and contains this exercise, create an override */
     if(DB.overrides[b.id]) return;
+    if(!trainedPlanIds.has(b.id)) return;
     if((b.exercises||[]).some(e=>!e.duration && exKey(e.name)===exId)){
       const clone=structuredClone(b);
       bump(clone);
@@ -6504,7 +6581,7 @@ function init(){
   document.body.dataset.compact=DB.settings.compact?'1':'';
   grantMonthlyFreeze();
   autoConsumeFreeze();
-  setTimeout(()=>{ checkPlanImportUrl(); checkBuddyInviteUrl(); if(!FB.user && !FB.ready){ maybeStartOnboarding(); } },800);
+  setTimeout(()=>{ checkPlanImportUrl(); checkBuddyInviteUrl(); checkResumeActiveWorkout(); if(!FB.user && !FB.ready){ maybeStartOnboarding(); } },800);
   const m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', DB.settings.theme==='light'?'#eef1f5':'#0B0E13');
   history.replaceState({view:'auth'},'');
   show('auth',false);
