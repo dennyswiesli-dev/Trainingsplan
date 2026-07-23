@@ -1480,8 +1480,13 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
    zeigt aber immer nur die LETZTE Meldung an - bei mehreren Fehlern nacheinander
    überschreibt sich das gegenseitig. Dieses Panel sammelt stattdessen ALLE console.*-
    Aufrufe und Fehler sichtbar und nacheinander auf dem Bildschirm. */
+/* Das Panel ist nur in der nativen App aktiv - dort gibt es ohne Mac/Android-Studio
+   sonst keine Möglichkeit, Laufzeitfehler zu sehen. Im normalen Web-Browser stehen
+   die Entwicklertools zur Verfügung, daher bleibt das Panel dort aus. */
+const _dbgEnabled = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 let _dbgPanel=null, _dbgBody=null; const _dbgLines=[];
 function dbgLog(prefix, args){
+  if(!_dbgEnabled) return;
   try{
     const parts=Array.prototype.map.call(args, function(a){
       if(a instanceof Error) return a.message+(a.stack?(' | '+a.stack):'');
