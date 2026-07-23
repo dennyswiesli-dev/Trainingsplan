@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>BARWORK · Calisthenics Trainingspläne</title>
 <meta name="description" content="Geführte Calisthenics- und Street-Workout-Trainingspläne mit Timer, Runden und Pausen. Offline nutzbar, installierbar auf dem Home-Bildschirm.">
 <meta name="theme-color" content="#0B0E13">
@@ -47,8 +47,13 @@
   --rest:#e56a15; --rest-ink:#fff;
   --shadow:0 10px 28px rgba(30,45,70,.14);
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0}
+/* touch-action:manipulation entfernt den Doppeltipp-zum-Zoomen sowie die ~300ms
+   Tap-Verzögerung mancher mobiler Browser, ohne (anders als user-scalable=no)
+   Pinch-Zoom für Barrierefreiheit komplett zu unterbinden. overscroll-behavior
+   unterbindet den elastischen "Rubber-Band"-Bounce am Seitenrand, der wie eine
+   Website statt wie eine native App wirkt. */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{margin:0;padding:0;overscroll-behavior:none}
 body{
   background:var(--ink); color:var(--chalk); font-family:var(--font-b);
   font-size:16px; line-height:1.45; -webkit-font-smoothing:antialiased;
@@ -1457,9 +1462,65 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
   <div class="sheet-body" id="sheet-body"></div>
 </div>
 
+<!-- Lokal gebündelte native Plugins/SDKs, klassisch synchron geladen (kein dynamisches
+     import() - das ist in iOS WKWebView unzuverlässig). 404s hier sind unkritisch:
+     der App-Code hat CDN-/Web-API-Fallbacks für den Fall, dass die Bundles fehlen
+     (z. B. beim direkten Öffnen von index.html ohne vorherigen `npm run build:vendor`). -->
+<!-- crossorigin="anonymous": ohne dieses Attribut liefert WKWebView bei Laufzeitfehlern aus
+     per src geladenen Scripts nur "Script error." an window.onerror statt der echten Meldung. -->
+<script src="./vendor/firebase-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: firebase-bundle.js nicht geladen')"></script>
+<script src="./vendor/geolocation-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: geolocation-bundle.js nicht geladen')"></script>
+<script src="./vendor/notifications-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: notifications-bundle.js nicht geladen')"></script>
+<script src="./vendor/googleauth-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: googleauth-bundle.js nicht geladen')"></script>
+<script src="./vendor/haptics-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: haptics-bundle.js nicht geladen')"></script>
 <script>
 "use strict";
 (function(){
+/* Ohne Mac/Android-Studio-Zugriff bleiben Laufzeitfehler sonst unsichtbar. authStatus()
+   zeigt aber immer nur die LETZTE Meldung an - bei mehreren Fehlern nacheinander
+   überschreibt sich das gegenseitig. Dieses Panel sammelt stattdessen ALLE console.*-
+   Aufrufe und Fehler sichtbar und nacheinander auf dem Bildschirm. */
+let _dbgPanel=null, _dbgBody=null; const _dbgLines=[];
+function dbgLog(prefix, args){
+  try{
+    const parts=Array.prototype.map.call(args, function(a){
+      if(a instanceof Error) return a.message+(a.stack?(' | '+a.stack):'');
+      if(a && typeof a==='object'){ try{ return JSON.stringify(a); }catch(_){ return String(a); } }
+      return String(a);
+    });
+    _dbgLines.push('['+new Date().toISOString().slice(11,19)+'] '+prefix+' '+parts.join(' '));
+    if(_dbgLines.length>200) _dbgLines.shift();
+    if(!_dbgPanel && document.body){
+      _dbgPanel=document.createElement('div');
+      _dbgPanel.style.cssText='position:fixed;top:0;left:0;right:0;max-height:45vh;overflow-y:auto;background:rgba(0,0,0,.94);color:#0f0;font:10px/1.4 monospace;padding:8px;z-index:2147483647;white-space:pre-wrap;word-break:break-all;border-bottom:2px solid #0f0;';
+      const closeBtn=document.createElement('div');
+      closeBtn.textContent='✕ Debug-Log schließen';
+      closeBtn.style.cssText='color:#ff0;text-align:right;margin-bottom:4px;font-weight:bold;';
+      closeBtn.addEventListener('click', function(){ _dbgPanel.remove(); _dbgPanel=null; });
+      _dbgBody=document.createElement('div');
+      _dbgPanel.appendChild(closeBtn);
+      _dbgPanel.appendChild(_dbgBody);
+      document.body.appendChild(_dbgPanel);
+    }
+    if(_dbgBody){ _dbgBody.textContent=_dbgLines.join('\n'); _dbgPanel.scrollTop=_dbgPanel.scrollHeight; }
+  }catch(_){}
+}
+['log','warn','error'].forEach(function(level){
+  const orig=console[level] ? console[level].bind(console) : function(){};
+  console[level]=function(){ orig.apply(console, arguments); dbgLog(level.toUpperCase()+':', arguments); };
+});
+window.addEventListener('error', function(e){
+  let msg=(e.error&&e.error.message)||e.message||'unbekannt';
+  if(e.filename) msg+=' ('+e.filename+':'+e.lineno+':'+e.colno+')';
+  dbgLog('WINDOW-ERROR:', [msg, (e.error&&e.error.stack)||'']);
+  try{ authStatus('JS-Fehler: '+msg, false); }catch(_){}
+});
+window.addEventListener('unhandledrejection', function(e){
+  const reason=e.reason;
+  const msg=(reason&&reason.message)?reason.message:String(reason);
+  dbgLog('UNHANDLED-REJECTION:', [msg, (reason&&reason.stack)||'']);
+  try{ authStatus('Promise-Fehler: '+msg, false); }catch(_){}
+});
 /* ========================= ICONS ========================= */
 const I = {
   gear:'<path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H2a2 2 0 110-4h.09A1.65 1.65 0 003.6 8a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H8a1.65 1.65 0 001-1.51V2a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V8a1.65 1.65 0 001.51 1H22a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>',
@@ -2232,19 +2293,42 @@ function mergeDb(local, remote){
     updatedAt: Math.max(lTs, rTs)
   };
 }
-async function initFirebase(){
+async function loadFirebaseSdk(){
+  /* Lokal gebündeltes SDK wird als klassisches <script> synchron vor diesem
+     Code geladen (window.BARWORK_FIREBASE_SDK) - zuverlässiger als dynamisches
+     import() in iOS WKWebView / Android WebView. CDN nur als Fallback, falls
+     kein lokaler Build vorhanden ist (z. B. reiner Browser/PWA-Test ohne
+     `npm run build:vendor`). */
+  if(window.BARWORK_FIREBASE_SDK) return window.BARWORK_FIREBASE_SDK;
+  console.warn('BARWORK: lokales Firebase-Bundle nicht verfügbar, versuche CDN-Fallback');
+  const appMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js');
+  const authMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js');
+  const fsMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
+  return {...appMod,...authMod,...fsMod};
+}
+async function initFirebase(attempt){
+  attempt = attempt||1;
   try{
-    const appMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js');
-    const authMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js');
-    const fsMod=await import('https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js');
-    FIRE={...appMod,...authMod,...fsMod};
+    FIRE = await loadFirebaseSdk();
     const app=FIRE.initializeApp(firebaseConfig);
-    FB.auth=FIRE.getAuth(app); FB.db=FIRE.getFirestore(app);
+    /* getAuth()'s default persistence probes IndexedDB first, which is known to hang
+       (never resolve, never reject) in some WKWebView/iOS configurations - the app then
+       looks "broken" with zero errors anywhere, since nothing ever throws. Forcing
+       localStorage-based persistence avoids that IndexedDB probe entirely. */
+    try{ FB.auth=FIRE.initializeAuth(app, { persistence: FIRE.browserLocalPersistence }); }
+    catch(e){ FB.auth=FIRE.getAuth(app); }
+    FB.db=FIRE.getFirestore(app);
     FB.googleProvider=new FIRE.GoogleAuthProvider();
     FB.googleProvider.setCustomParameters({ prompt:'select_account' });
     FB.ready=true;
     FIRE.onAuthStateChanged(FB.auth, async (user)=>{ FB.user=user; if(user) FB.lastError=''; if(user){ await loadCloudDb(); show('home',true); toast('Eingeloggt: '+userLabel()); } else if(!FB.localMode){ show('auth',false); renderAuth(); } renderSettings(); });
-  }catch(err){ FB.lastError=err.message||String(err); authStatus('Firebase konnte nicht geladen werden. Du kannst lokal weitertrainieren.',false); renderAuth(); }
+  }catch(err){
+    FB.lastError=err.message||String(err);
+    console.error('BARWORK: Firebase-Init fehlgeschlagen (Versuch '+attempt+')', err);
+    if(attempt<3){ setTimeout(()=>initFirebase(attempt+1), 1500*attempt); return; }
+    authStatus('Firebase konnte nicht geladen werden. Prüfe deine Internetverbindung und versuche es erneut, oder trainiere lokal weiter.',false);
+    renderAuth();
+  }
 }
 function userDocRef(){ return FIRE.doc(FB.db,'users',FB.user.uid,'barwork','state'); }
 async function loadCloudDb(){
@@ -2320,25 +2404,74 @@ async function cloudSaveNow(silent){
   finally{ FB.syncing=false; if(currentView==='settings') renderSettings(); }
 }
 async function doAuth(mode){ if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.',false); return; } const email=$('#auth-email').value.trim(); const pass=$('#auth-pass').value; if(!email||!pass){ authStatus('Bitte E-Mail und Passwort eingeben.',false); return; } if(pass.length<6){ authStatus('Das Passwort muss mindestens 6 Zeichen haben.',false); return; } authStatus(mode==='register'?'Konto wird erstellt...':'Login läuft...',true); try{ if(mode==='register') await FIRE.createUserWithEmailAndPassword(FB.auth,email,pass); else await FIRE.signInWithEmailAndPassword(FB.auth,email,pass); FB.localMode=false; authStatus('',true); }catch(err){ authStatus(firebaseErrorText(err),false); } }
+function isNativeApp(){ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
+/* Plugin-Bundle wird als klassisches <script> synchron geladen (window.BARWORK_GOOGLEAUTH_SDK).
+   WICHTIG: bewusst KEINE async function - der native Capacitor-Plugin-Proxy fängt jeden
+   Property-Zugriff ab und liefert dafür eine aufrufbare Funktion zurück, auch für "then".
+   Würde man dieses Objekt awaiten (z.B. indem eine async function es zurückgibt), hält die
+   JS-Promise-Auflösung es fälschlich für ein Thenable und ruft proxy.then(...) auf - das
+   erzeugt exakt den Fehler "GoogleAuth.then() is not implemented on android/ios". */
+function loadNativeGoogleAuth(){
+  if(!isNativeApp()) return null;
+  return (window.BARWORK_GOOGLEAUTH_SDK && window.BARWORK_GOOGLEAUTH_SDK.GoogleAuth) || null;
+}
 async function doGoogleLogin(){
   if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.', false); return; }
+  FB.localMode=false;
+  authStatus('Google Login wird geöffnet...', true);
+  if(isNativeApp()){
+    /* Firebase signInWithPopup/signInWithRedirect funktionieren nicht in nativen
+       WebViews (iOS WKWebView blockt window.open; Android's Redirect-Fallback
+       verlässt die WebView für den OAuth-Roundtrip und scheitert beim Zurück-
+       navigieren zu https://localhost mit einer 404-Fehlerseite). Native Google
+       Sign-In läuft stattdessen komplett über das Betriebssystem-SDK und liefert
+       ein ID-Token, das gegen Firebase eingetauscht wird - kein WebView-Redirect. */
+    try{
+      const plugin = loadNativeGoogleAuth();
+      if(!plugin) throw new Error('Google-Sign-In ist in dieser App nicht verfügbar.');
+      const googleUser = await plugin.signIn();
+      const idToken = googleUser && googleUser.authentication && googleUser.authentication.idToken;
+      if(!idToken) throw new Error('Kein ID-Token von Google erhalten.');
+      const credential = FIRE.GoogleAuthProvider.credential(idToken);
+      const result = await FIRE.signInWithCredential(FB.auth, credential);
+      authStatus('', true);
+      toast('Eingeloggt: '+(result.user.displayName || result.user.email || 'Google'));
+    }catch(err){
+      if(/cancel/i.test((err&&err.message)||'')){ authStatus('Google Login wurde abgebrochen.', false); return; }
+      const code = err && err.code;
+      if(code === 'auth/unauthorized-domain') authStatus('Google Login ist für diese App nicht freigegeben. Bitte E-Mail/Passwort verwenden oder Support kontaktieren.', false);
+      else{
+        /* err.code hier ist der native GoogleSignIn-Statuscode (z.B. Android ApiException.getStatusCode()) -
+           ohne Mac/adb ist das die einzige Möglichkeit, die genaue Ursache (z.B. 10=DEVELOPER_ERROR) zu sehen. */
+        const detail=(err&&err.message?err.message:'Google Login fehlgeschlagen.')+(code?(' [Code: '+code+']'):'');
+        authStatus(detail+' Falls Google Login weiterhin nicht klappt, nutze bitte E-Mail/Passwort.', false);
+      }
+    }
+    return;
+  }
   try{
-    FB.localMode=false;
-    authStatus('Google Login wird geöffnet...', true);
     const result = await FIRE.signInWithPopup(FB.auth, FB.googleProvider);
     authStatus('', true);
     toast('Eingeloggt: '+(result.user.displayName || result.user.email || 'Google'));
   }catch(err){
-    if(err && err.code === 'auth/popup-closed-by-user') authStatus('Google Login wurde abgebrochen.', false);
-    else if(err && (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request')) authStatus('Der Browser hat das Google-Popup blockiert. Bitte Popups für diese Seite erlauben und nochmals versuchen.', false);
-    else authStatus(firebaseErrorText(err), false);
+    const code = err && err.code;
+    if(code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request'){ authStatus('Google Login wurde abgebrochen.', false); return; }
+    if(code === 'auth/unauthorized-domain') authStatus('Google Login ist für diese App-Domain nicht freigegeben. Bitte E-Mail/Passwort verwenden oder Support kontaktieren.', false);
+    else authStatus(firebaseErrorText(err)+' Falls Google Login weiterhin nicht klappt, nutze bitte E-Mail/Passwort.', false);
   }
 }
 async function doPasswordReset(){ if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.',false); return; } const email=$('#auth-email').value.trim(); if(!email){ authStatus('Bitte zuerst die E-Mail-Adresse eingeben.',false); return; } try{ await FIRE.sendPasswordResetEmail(FB.auth,email); authStatus('Passwort-E-Mail wurde gesendet.',true); }catch(err){ authStatus(firebaseErrorText(err),false); } }
 async function logout(){
   try{
     await cloudSaveNow(true);
+    const isGoogleUser = FB.user && FB.user.providerData && FB.user.providerData.some(p=>p.providerId==='google.com');
     if(FB.auth) await FIRE.signOut(FB.auth);
+    if(isGoogleUser){
+      /* Native Google-Session ebenfalls beenden, sonst zeigt der nächste
+         Login-Versuch keine Kontoauswahl mehr, sondern loggt still denselben Account ein. */
+      const plugin = loadNativeGoogleAuth();
+      if(plugin) plugin.signOut().catch(()=>{});
+    }
     FB.localMode = false;
     try{ localStorage.removeItem(KEY); }catch(e){}
     DB = structuredClone(DEFAULTS);
@@ -2997,19 +3130,71 @@ function exportCSV(){
 }
 
 
-/* Training reminders via Notification API */
-function notifSupported(){ return 'Notification' in window && 'serviceWorker' in navigator; }
+/* Training reminders: natives Capacitor-Plugin in der App, Web Notification API + Service Worker im Browser/PWA.
+   Web-Notifications funktionieren in der nativen App nicht: iOS-WKWebView hat gar keine Service Worker,
+   Android-WebView implementiert die Notification-API grundsätzlich nicht. */
+/* Plugin-Bundle wird als klassisches <script> synchron geladen (window.BARWORK_NOTIF_SDK).
+   Bewusst KEINE async function - siehe loadNativeGoogleAuth() weiter oben: der native
+   Capacitor-Plugin-Proxy fängt jeden Property-Zugriff ab (auch "then"); würde man ihn
+   awaiten, hielte die Promise-Auflösung ihn fälschlich für ein Thenable. */
+function loadNativeNotif(){
+  if(!isNativeApp()) return null;
+  return (window.BARWORK_NOTIF_SDK && window.BARWORK_NOTIF_SDK.LocalNotifications) || null;
+}
+function notifSupported(){ return isNativeApp() || ('Notification' in window && 'serviceWorker' in navigator); }
 async function requestNotifPermission(){
+  if(isNativeApp()){
+    const plugin=loadNativeNotif();
+    if(!plugin) return 'unsupported';
+    const res=await plugin.requestPermissions().catch(()=>({display:'denied'}));
+    return res.display==='granted'?'granted':'denied';
+  }
   if(!notifSupported()) return 'unsupported';
   if(Notification.permission==='granted') return 'granted';
   if(Notification.permission==='denied') return 'denied';
   return await Notification.requestPermission();
 }
-/* Zeigt eine System-Benachrichtigung über den Service Worker.
-   Wichtig: `new Notification(...)` wirft in installierten PWAs auf Android/Chrome
-   einen Fehler ("Illegal constructor") – dort ist showNotification() über die
-   Service-Worker-Registrierung Pflicht, deshalb läuft alles über diesen Weg. */
+async function nativeNotifGranted(){
+  const plugin=loadNativeNotif();
+  if(!plugin) return false;
+  const perm=await plugin.checkPermissions().catch(()=>({display:'prompt'}));
+  return perm.display==='granted';
+}
+let _notifChannelReady=false;
+async function ensureNotifChannel(plugin){
+  /* Android 8+ braucht einen Notification-Channel; ohne expliziten Channel kann
+     die Systembenachrichtigung trotz erfolgreichem schedule() unsichtbar bleiben,
+     falls der implizite Default-Channel beim Nutzer deaktiviert/eingeschränkt ist. */
+  if(_notifChannelReady || !plugin.createChannel) return;
+  try{
+    await plugin.createChannel({ id:'barwork_default', name:'BARWORK Erinnerungen', description:'Trainings-Erinnerungen und Hinweise', importance:5, visibility:1, vibration:true, sound:'default' });
+  }catch(e){}
+  _notifChannelReady=true;
+}
+let _notifIdSeq=1;
+let _lastNotifError='';
+/* Zeigt sofort eine System-Benachrichtigung (native App: Capacitor LocalNotifications;
+   Browser/PWA: Service Worker, mit `new Notification()`-Fallback, da SW-lose PWAs sonst
+   "Illegal constructor" werfen können). */
 async function showAppNotification(title, opts){
+  opts=opts||{};
+  if(isNativeApp()){
+    const plugin=loadNativeNotif();
+    if(!plugin || !(await nativeNotifGranted())) return false;
+    try{
+      await ensureNotifChannel(plugin);
+      await plugin.schedule({ notifications:[{
+        id: Date.now()%2147483647 + (_notifIdSeq++),
+        title, body: opts.body||'',
+        channelId:'barwork_default',
+        /* Mindestens ~2s Vorlauf: bei near-instant Zeitpunkten kann der native
+           Bridge-Roundtrip die Zielzeit schon überschritten haben, wodurch die
+           Benachrichtigung von der Plattform stillschweigend verworfen wird. */
+        schedule:{ at:new Date(Date.now()+2000), allowWhileIdle:true }
+      }]});
+      return true;
+    }catch(e){ _lastNotifError=e&&(e.message||String(e)); console.error('BARWORK: Notification schedule fehlgeschlagen', e); return false; }
+  }
   if(!notifSupported() || Notification.permission!=='granted') return false;
   const options=Object.assign({ icon:'icon-192.png', badge:'icon-192.png' }, opts);
   try{
@@ -3020,11 +3205,32 @@ async function showAppNotification(title, opts){
     try{ new Notification(title, options); return true; }catch(e2){ return false; }
   }
 }
-function scheduleNextReminder(){
-  if(!DB.settings.reminderEnabled || !notifSupported() || Notification.permission!=='granted') return;
-  const now=new Date();
+const REMINDER_NOTIF_ID_BASE=90000;
+async function scheduleNextReminder(){
+  if(!DB.settings.reminderEnabled || !notifSupported()) return;
   const [hh,mm]=(DB.settings.reminderTime||'18:00').split(':').map(x=>+x);
   const days = DB.settings.reminderDays || [1,2,3,4,5];
+  if(isNativeApp()){
+    /* Nativ als OS-verwaltete, wöchentlich wiederkehrende Benachrichtigungen je Wochentag -
+       läuft zuverlässig auch wenn die App geschlossen ist (anders als setTimeout). */
+    const plugin=loadNativeNotif();
+    if(!plugin || !(await nativeNotifGranted())) return;
+    try{
+      await ensureNotifChannel(plugin);
+      const ids=days.map(d=>REMINDER_NOTIF_ID_BASE+d);
+      await plugin.cancel({ notifications: ids.map(id=>({id})) }).catch(()=>{});
+      await plugin.schedule({ notifications: days.map(d=>({
+        id: REMINDER_NOTIF_ID_BASE+d,
+        title:'🔥 Zeit für Training!',
+        body:'Zeit für BARWORK!',
+        channelId:'barwork_default',
+        schedule:{ on:{ weekday:d===0?1:d+1, hour:hh, minute:mm }, allowWhileIdle:true }
+      })) });
+    }catch(e){}
+    return;
+  }
+  if(Notification.permission!=='granted') return;
+  const now=new Date();
   /* find next matching day within 8 days */
   let target=null;
   for(let offset=0;offset<8;offset++){
@@ -3038,7 +3244,7 @@ function scheduleNextReminder(){
   window._barworkReminderTimer = setTimeout(fireReminder, delay);
 }
 function fireReminder(){
-  if(!notifSupported() || Notification.permission!=='granted') return;
+  if(!notifSupported()) return;
   const today=dayKey(new Date());
   const trainedToday=(DB.history||[]).some(h=>dayKey(h.date)===today);
   if(!trainedToday){
@@ -3486,12 +3692,71 @@ function weatherVerdict(temp, rainProb){
   if(rainProb>=30) return 'Wechselhaft – schnell trainieren, bevor es regnet.';
   return '✨ Perfektes Wetter für Outdoor-Training!';
 }
+async function getCurrentPositionCompat(){
+  /* Im nativen WebView (v.a. Android) ist navigator.geolocation ohne
+     zusätzliche Konfiguration unzuverlässig - das native Capacitor-Plugin
+     nutzt stattdessen die echte Standort-API des Betriebssystems inkl.
+     Berechtigungsdialog. Im normalen Browser/PWA bleibt navigator.geolocation.
+     Das Plugin-Bundle wird als klassisches <script> synchron geladen
+     (window.BARWORK_GEO_SDK) statt per dynamischem import(). */
+  if(isNativeApp()){
+    const NATIVE_GEO=window.BARWORK_GEO_SDK && window.BARWORK_GEO_SDK.Geolocation;
+    if(NATIVE_GEO){
+      const perm=await NATIVE_GEO.checkPermissions().catch(()=>({location:'prompt'}));
+      if(perm.location!=='granted'){
+        const req=await NATIVE_GEO.requestPermissions().catch(()=>({location:'denied'}));
+        if(req.location!=='granted') throw Object.assign(new Error('Standort verweigert'),{code:1});
+      }
+      const pos=await NATIVE_GEO.getCurrentPosition({enableHighAccuracy:false,timeout:10000,maximumAge:600000});
+      return pos;
+    }
+  }
+  if(!navigator.geolocation) throw Object.assign(new Error('Geolocation nicht verfügbar'),{code:2});
+  return new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,{timeout:10000,maximumAge:600000}));
+}
+/* CapacitorHttp ist Teil des Core-Runtimes (kein separates Plugin/Bundle nötig) und macht
+   die Anfrage über native Netzwerk-Bibliotheken (NSURLSession/OkHttp) statt über das
+   fetch() der WebView - das umgeht WebView-spezifische CORS-Eigenheiten, an denen die
+   Overpass-Suche bislang nur in der nativen App (nicht in Browser/PWA) gescheitert ist.
+   Bewusst keine async function - siehe loadNativeGoogleAuth() weiter oben. */
+function loadNativeHttp(){
+  if(!isNativeApp()) return null;
+  return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp) || null;
+}
+async function postFormOnce(url, body){
+  const http=loadNativeHttp();
+  if(http){
+    const r=await http.post({ url, headers:{'Content-Type':'application/x-www-form-urlencoded'}, data:body });
+    if(r.status<200||r.status>=300) throw new Error('Server antwortete mit HTTP '+r.status);
+    return typeof r.data==='string' ? JSON.parse(r.data) : r.data;
+  }
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+  if(!res.ok) throw new Error('Server antwortete mit HTTP '+res.status);
+  return res.json();
+}
+/* Der öffentliche overpass-api.de-Server ist bekanntermaßen manchmal überlastet/träge (HTTP 504)
+   und braucht dann auch mal 2-3 Versuche, auch im Browser/PWA (dort half bisher nur manuelles
+   Verlassen und erneutes Öffnen der Seite). onRetry(attempt) informiert die UI zwischendurch. */
+async function postFormCompat(url, body, onRetry){
+  const delays=[1500,3000];
+  for(let attempt=0; ; attempt++){
+    try{ return await postFormOnce(url, body); }
+    catch(err){
+      if(attempt>=delays.length) throw err;
+      console.warn('BARWORK: Anfrage fehlgeschlagen (Versuch '+(attempt+1)+'), versuche erneut', err);
+      if(onRetry) onRetry(attempt+2, delays.length+1);
+      await new Promise(r=>setTimeout(r,delays[attempt]));
+    }
+  }
+}
 async function renderParks(){
   const bi=$('#parks-back-ic'); if(bi) bi.innerHTML=svg('left');
   const m=$('#parks-main'); if(!m) return;
   m.innerHTML=`<div id="weather-slot"></div><div class="section-label">🗺️ Calisthenics-Parks & Outdoor-Gyms</div><div id="parks-status" style="text-align:center;padding:30px 20px;color:var(--muted)">${svg('target')}<p style="margin-top:12px">Standort wird ermittelt...</p></div>`;
-  if(!navigator.geolocation){ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Geolocation nicht verfügbar</h3></div>`; return; }
-  navigator.geolocation.getCurrentPosition(async pos=>{
+  let pos;
+  try{ pos=await getCurrentPositionCompat(); }
+  catch(err){ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Standort verweigert</h3><p>Bitte erlaube den Standort-Zugriff.</p></div>`; return; }
+  (async pos=>{
     const lat=pos.coords.latitude, lng=pos.coords.longitude;
     /* Wetter */
     fetchWeather(lat,lng).then(w=>{
@@ -3505,15 +3770,22 @@ async function renderParks(){
     $('#parks-status').innerHTML=`<p style="color:var(--muted)">Suche im Umkreis von 15 km...</p>`;
     try{
       const query=`[out:json][timeout:20];(node["leisure"="fitness_station"](around:15000,${lat},${lng});way["leisure"="fitness_station"](around:15000,${lat},${lng});node["sport"="calisthenics"](around:15000,${lat},${lng});way["sport"="calisthenics"](around:15000,${lat},${lng});node["leisure"="outdoor_fitness"](around:15000,${lat},${lng}););out center;`;
-      const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(query)});
-      const data=await res.json();
+      console.log('BARWORK: Parks-Suche um', lat, lng, isNativeApp()?'(native HTTP)':'(fetch)');
+      /* Overpass antwortet bei Überlast/Rate-Limit/Timeout oft trotzdem mit HTTP 200,
+         aber leerem "elements" und einer erklärenden "remark" - ohne diese Prüfung
+         sieht das identisch zu "wirklich keine Spots hier" aus. */
+      const data=await postFormCompat('https://overpass-api.de/api/interpreter', 'data='+encodeURIComponent(query), (attempt,total)=>{
+        $('#parks-status').innerHTML=`<p style="color:var(--muted)">Server antwortet langsam, Versuch ${attempt}/${total}...</p>`;
+      });
+      if(data.remark) throw new Error('Overpass: '+data.remark);
+      console.log('BARWORK: Overpass-Antwort', (data.elements||[]).length, 'Elemente');
       const parks=(data.elements||[]).map(el=>{
         const plat=el.lat||(el.center&&el.center.lat); const plng=el.lon||(el.center&&el.center.lon); if(plat==null||plng==null) return null;
         const name=(el.tags&&(el.tags.name||el.tags['name:de']))||'Fitness-Station';
         const type=(el.tags&&el.tags.sport)||(el.tags&&el.tags.leisure)||'';
         return {id:el.id, name, type, lat:plat, lng:plng, dist:haversine(lat,lng,plat,plng)};
       }).filter(Boolean).sort((a,b)=>{ const fa=isParkFav(a.id)?-100:0, fb=isParkFav(b.id)?-100:0; return (a.dist+fa)-(b.dist+fb); }).slice(0,30);
-      if(!parks.length){ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Keine Spots gefunden</h3><p>Trage neue Spots auf <a href="https://www.openstreetmap.org" target="_blank" style="color:var(--accent)">OpenStreetMap</a> ein!</p></div>`; return; }
+      if(!parks.length){ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Keine Spots gefunden</h3><p>Im Umkreis von 15 km um ${lat.toFixed(4)}, ${lng.toFixed(4)} sind noch keine Calisthenics-Spots auf OpenStreetMap eingetragen. Trage neue Spots auf <a href="https://www.openstreetmap.org" target="_blank" style="color:var(--accent)">OpenStreetMap</a> ein!</p></div>`; return; }
       const listHTML=parks.map(p=>{
         const distStr=p.dist<1?Math.round(p.dist*1000)+' m':p.dist.toFixed(1)+' km';
         const navUrl=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
@@ -3525,7 +3797,7 @@ async function renderParks(){
       m.insertAdjacentHTML('beforeend',`<div class="section-label" style="margin-top:8px">📍 ${parks.length} Spots (Favoriten oben)</div><div class="park-list">${listHTML}</div><div class="hint" style="text-align:center;margin-top:16px">Daten von <a href="https://www.openstreetmap.org" target="_blank" style="color:var(--accent)">OpenStreetMap</a> · Wetter von <a href="https://open-meteo.com" target="_blank" style="color:var(--accent)">Open-Meteo</a>.</div>`);
       $$('#parks-main [data-pfav]').forEach(b=>b.addEventListener('click',(e)=>{ e.stopPropagation(); toggleParkFav(b.dataset.pfav); renderParks(); }));
     }catch(err){ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Suche fehlgeschlagen</h3><p>${esc(err.message||'Netzwerkfehler')}</p></div>`; }
-  }, ()=>{ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Standort verweigert</h3><p>Bitte erlaube den Standort-Zugriff.</p></div>`; }, {timeout:10000,maximumAge:600000});
+  })(pos);
 }
 /* ========================= WEEKLY REPORT BANNER ========================= */
 function computeMonthlyReport(){
@@ -4745,8 +5017,8 @@ function savePlan(){
 /* ========================= WORKOUT ENGINE ========================= */
 let W=null, audioCtx=null;
 function ac(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return audioCtx; }
-function beep(freq,dur,vol,type){
-  if(!DB.settings.sound) return; const c=ac(); if(!c) return;
+function beep(freq,dur,vol,type,force){
+  if(!force && !DB.settings.sound) return; const c=ac(); if(!c) return;
   try{ if(c.state==='suspended') c.resume();
     const o=c.createOscillator(),g=c.createGain();
     o.type=type||'sine'; o.frequency.value=freq; o.connect(g); g.connect(c.destination);
@@ -4756,7 +5028,23 @@ function beep(freq,dur,vol,type){
     o.start(t); o.stop(t+(dur||0.09)+0.03);
   }catch(e){}
 }
-function vibe(p){ if(DB.settings.vibrate&&navigator.vibrate){ try{navigator.vibrate(p);}catch(e){} } }
+/* Bewusst KEINE async function - siehe loadNativeGoogleAuth() weiter oben. */
+function loadNativeHaptics(){
+  if(!isNativeApp()) return null;
+  return (window.BARWORK_HAPTICS_SDK && window.BARWORK_HAPTICS_SDK.Haptics) || null;
+}
+function vibe(p,force){
+  if(!force && !DB.settings.vibrate) return;
+  if(isNativeApp()){
+    /* navigator.vibrate() existiert in Safari/WKWebView auf iOS grundsätzlich nicht (Apple
+       hat die Web-Vibration-API dort nie implementiert) - native Haptics laufen stattdessen
+       über die Taptic Engine und funktionieren dort auch im Stummodus. */
+    const haptics=loadNativeHaptics();
+    if(haptics) haptics.vibrate({ duration: Array.isArray(p)?p.reduce((a,b)=>a+b,0):p }).catch(()=>{});
+    return;
+  }
+  if(navigator.vibrate){ try{navigator.vibrate(p);}catch(e){} }
+}
 
 function buildSteps(p){
   const steps=[]; const n=p.exercises.length; const prep=DB.settings.prepare||0;
@@ -5575,7 +5863,7 @@ function renderSettings(){
   $('#set-back-ic').innerHTML=svg('left');
   const s=DB.settings;
   const hiddenBuiltins=BUILTINS.filter(b=>DB.hidden.includes(b.id));
-  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  const standalone = isStandalone();
   const m=$('#settings-main');
   m.innerHTML=`
     <div class="set-note">Konto & Sync</div>
@@ -5594,8 +5882,10 @@ function renderSettings(){
     <div class="set-note">Während des Trainings</div>
     <div class="set-group">
       ${switchRow('sound','Ton','Signale beim Wechsel der Übung',s.sound)}
+      <div class="set-row"><button class="btn btn-soft btn-block" id="btn-test-sound">🔊 Ton testen</button></div>
       ${switchRow('beeps','Countdown-Piepen','Bei den letzten 3 Sekunden',s.beeps)}
       ${switchRow('vibrate','Vibration','Haptisches Feedback',s.vibrate)}
+      <div class="set-row"><button class="btn btn-soft btn-block" id="btn-test-vibrate">📳 Vibration testen</button></div>
       ${switchRow('wakeLock','Display anlassen','Bildschirm bleibt beim Training an',s.wakeLock)}
       ${switchRow('trackReps','Wiederholungen erfassen','Tatsächliche Wdh. beim Training eingeben',s.trackReps)}
       ${switchRow('askRpe','Belastung abfragen','Nach dem Training bewerten',s.askRpe)}
@@ -5738,11 +6028,16 @@ function renderSettings(){
   const bw=$('#set-bw'); if(bw) bw.addEventListener('change',()=>{ DB.settings.bodyWeightKg=Math.max(30,Math.min(200,+bw.value||75)); save(); });
   const ro=$$('#settings-main [data-action="restart-onboarding"]'); ro.forEach(r=>r.addEventListener('click',()=>{ DB.flags.onboarded=false; save(); toast('Onboarding wird gestartet...'); setTimeout(()=>{ show('home',true); startOnboarding(); },300); }));
   const rt=$('#set-remtime'); if(rt) rt.addEventListener('change',()=>{ s.reminderTime=rt.value||'18:00'; save(); scheduleNextReminder(); });
+  const ts=$('#btn-test-sound'); if(ts) ts.addEventListener('click', ()=>{ beep(880,0.14,0.2,'sine',true); });
+  const tv=$('#btn-test-vibrate'); if(tv) tv.addEventListener('click', ()=>{
+    vibe(isNativeApp()?200:[0,150],true);
+    if(isNativeApp() && !loadNativeHaptics()) toast('Haptik-Plugin nicht verfügbar');
+  });
   const tn=$('#btn-test-notif'); if(tn) tn.addEventListener('click', async ()=>{
     const p=await requestNotifPermission();
     if(p==='granted'){
       const ok=await showAppNotification('🏋️ BARWORK Test', { body:'So sehen deine Benachrichtigungen aus.', tag:'barwork-test' });
-      toast(ok?'Test-Benachrichtigung gesendet':'Benachrichtigung konnte nicht angezeigt werden');
+      toast(ok?'Test-Benachrichtigung gesendet (in ~2 Sek. sichtbar)':'Fehler: '+(_lastNotifError||'Benachrichtigung konnte nicht angezeigt werden'));
     } else if(p==='denied'){ toast('Benachrichtigungen sind blockiert – bitte in den Browser-/App-Einstellungen erlauben'); }
     else if(p==='unsupported'){ toast('Nicht unterstützt in diesem Browser'); }
   });
@@ -5821,7 +6116,9 @@ let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; renderInstallBanner(); renderInstallSlot(); });
 window.addEventListener('appinstalled',()=>{ deferredPrompt=null; toast('BARWORK installiert'); renderInstallBanner(); });
 function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream; }
-function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; }
+/* isNativeApp() zählt bewusst als "standalone": in der Capacitor-App soll der Zum-Home-
+   Bildschirm-Hinweis (Einstellungen + Banner) nie erscheinen, nur in Browser/PWA. */
+function isStandalone(){ return isNativeApp() || window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; }
 function renderInstallSlot(){
   const slot=$('#install-slot'); if(!slot) return;
   if(deferredPrompt){ slot.innerHTML='<button class="btn btn-primary btn-sm" id="do-install">'+svg('plus')+' Installieren</button>';
@@ -6587,10 +6884,29 @@ function init(){
   show('auth',false);
   scheduleNextReminder();
   initFirebase();
+  if(isNativeApp()){
+    // Eigener, komplett isolierter Fehlerfang: darf unter keinen Umständen
+    // initFirebase()/dessen Retry-Logik beeinflussen, egal was hier schiefgeht.
+    (async()=>{
+      try{
+        const plugin=loadNativeGoogleAuth();
+        if(plugin) await plugin.initialize();
+      }catch(err){
+        console.warn('BARWORK: GoogleAuth.initialize() fehlgeschlagen', err);
+        try{ authStatus('GoogleAuth-Init-Fehler: '+(err&&err.message||String(err)), false); }catch(_){}
+      }
+    })();
+  }
   // service worker
   if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
 }
-init();
+try{ init(); }catch(err){
+  /* Ein hier lokal gefangener Fehler behält die volle Meldung/den Stack, unabhängig
+     davon ob window.onerror ihn (z.B. bei einem Fehler aus einem nativen Bridge-
+     Callback) nur als redigiertes "Script error." melden würde. */
+  console.error('BARWORK: init() fehlgeschlagen', err);
+  try{ authStatus('Start-Fehler: '+(err&&(err.stack||err.message)||String(err)), false); }catch(_){}
+}
 })();
 </script>
 </body>
