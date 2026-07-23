@@ -3727,6 +3727,15 @@ async function getCurrentPositionCompat(){
   if(!navigator.geolocation) throw Object.assign(new Error('Geolocation nicht verfügbar'),{code:2});
   return new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,{timeout:10000,maximumAge:600000}));
 }
+/* Fragt die Standort-Berechtigung an, ohne (wie getCurrentPositionCompat) gleich eine
+   GPS-Position abzurufen - nur für den proaktiven Berechtigungs-Dialog beim App-Start. */
+async function requestLocationPermission(){
+  if(!isNativeApp()) return;
+  const NATIVE_GEO=window.BARWORK_GEO_SDK && window.BARWORK_GEO_SDK.Geolocation;
+  if(!NATIVE_GEO) return;
+  const perm=await NATIVE_GEO.checkPermissions().catch(()=>({location:'prompt'}));
+  if(perm.location!=='granted') await NATIVE_GEO.requestPermissions().catch(()=>{});
+}
 /* CapacitorHttp ist Teil des Core-Runtimes (kein separates Plugin/Bundle nötig) und macht
    die Anfrage über native Netzwerk-Bibliotheken (NSURLSession/OkHttp) statt über das
    fetch() der WebView - das umgeht WebView-spezifische CORS-Eigenheiten, an denen die
@@ -6908,6 +6917,15 @@ function init(){
         console.warn('BARWORK: GoogleAuth.initialize() fehlgeschlagen', err);
         try{ authStatus('GoogleAuth-Init-Fehler: '+(err&&err.message||String(err)), false); }catch(_){}
       }
+    })();
+    /* Berechtigungen direkt nach der Installation abfragen statt erst, wenn der Nutzer
+       zufällig Parks öffnet oder den Test-Button drückt - z.B. wenn Trainings-Erinnerungen
+       schon über einen Cloud-Sync aktiviert sind, bevor die Push-Berechtigung je erteilt
+       wurde. requestPermissions() fragt nur, wenn der Status noch nicht entschieden ist -
+       bei bereits erteilter/verweigerter Berechtigung passiert hier still gar nichts. */
+    (async()=>{
+      try{ await requestNotifPermission(); }catch(err){ console.warn('BARWORK: Notification-Berechtigung fehlgeschlagen', err); }
+      try{ await requestLocationPermission(); }catch(err){ console.warn('BARWORK: Standort-Berechtigung fehlgeschlagen', err); }
     })();
   }
   // service worker
