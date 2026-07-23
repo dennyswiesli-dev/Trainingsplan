@@ -2314,9 +2314,17 @@ async function initFirebase(attempt){
     /* getAuth()'s default persistence probes IndexedDB first, which is known to hang
        (never resolve, never reject) in some WKWebView/iOS configurations - the app then
        looks "broken" with zero errors anywhere, since nothing ever throws. Forcing
-       localStorage-based persistence avoids that IndexedDB probe entirely. */
-    try{ FB.auth=FIRE.initializeAuth(app, { persistence: FIRE.browserLocalPersistence }); }
-    catch(e){ FB.auth=FIRE.getAuth(app); }
+       localStorage-based persistence avoids that IndexedDB probe entirely.
+       WICHTIG: initializeAuth() bindet - anders als getAuth() - keinen Standard-
+       popupRedirectResolver ein. Ohne den wirft signInWithPopup() im Web sofort
+       "auth/argument-error". Der IndexedDB-Hang betrifft nur native WebViews, daher
+       bleibt das Web weiterhin bei getAuth(), das den Resolver automatisch mitbringt. */
+    if(isNativeApp()){
+      try{ FB.auth=FIRE.initializeAuth(app, { persistence: FIRE.browserLocalPersistence }); }
+      catch(e){ FB.auth=FIRE.getAuth(app); }
+    }else{
+      FB.auth=FIRE.getAuth(app);
+    }
     FB.db=FIRE.getFirestore(app);
     FB.googleProvider=new FIRE.GoogleAuthProvider();
     FB.googleProvider.setCustomParameters({ prompt:'select_account' });
