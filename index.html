@@ -178,7 +178,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .ex-reps small{display:block;font-family:var(--font-b);font-size:10.5px;font-weight:700;color:var(--muted2);letter-spacing:1px}
 
 /* ============ WORKOUT ============ */
-#view-workout{position:fixed;inset:0;z-index:40;
+#view-workout{position:fixed;inset:0;z-index:40;overflow-y:auto;-webkit-overflow-scrolling:touch;
   background:
     radial-gradient(120% 80% at 50% -10%, color-mix(in srgb,var(--accent) 12%,transparent), transparent 60%),
     var(--ink);
@@ -389,6 +389,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
   padding:12px 18px;font-weight:700;font-size:14px;z-index:90;opacity:0;pointer-events:none;
   transition:.25s;box-shadow:var(--shadow);max-width:86vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+#offline-banner{position:fixed;top:0;left:0;right:0;background:#8a5a00;color:#fff;
+  font-weight:700;font-size:12.5px;text-align:center;padding:calc(env(safe-area-inset-top) + 8px) 14px 8px;z-index:95;
+  transform:translateY(-120%);transition:transform .25s}
+#offline-banner.show{transform:translateY(0)}
 
 
 /* ============ V2 / V3 FEATURES ============ */
@@ -468,6 +472,20 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .skill-stage:active{transform:scale(.97)}
 .skill-stage.done{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .skill-stage.current{border-color:var(--accent);color:var(--chalk)}
+
+.skills-mode-toggle{display:flex;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.skills-mode-toggle button{border:0;background:transparent;color:var(--muted);font-size:11px;font-weight:800;padding:6px 10px;border-radius:7px;cursor:pointer}
+.skills-mode-toggle button.active{background:var(--accent);color:var(--accent-ink)}
+.skill-tree-wrap{overflow-x:auto;margin-bottom:8px}
+.skill-tree-legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:11px;font-weight:700;margin:2px 0 12px}
+.skill-tree-legend span{display:inline-flex;align-items:center;gap:5px}
+.skill-tree-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.skill-node{cursor:pointer}
+.skill-node rect{transition:.14s}
+.skill-node:active rect{opacity:.8}
+.skill-node text{font-family:var(--font-b);pointer-events:none}
+.skill-node .snm{font-weight:800}
+.skill-node .sst{font-weight:600}
 
 .pr-list{background:var(--panel);border:1px solid color-mix(in srgb,var(--work) 40%,var(--line));border-radius:14px;padding:12px 14px;margin:14px 0}
 .pr-list .pr-head{display:flex;align-items:center;gap:8px;color:var(--work);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
@@ -669,6 +687,15 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .park-btn svg{width:13px;height:13px}
 .park-fav-btn{width:32px;height:32px;flex:none;border-radius:9px;background:transparent;color:var(--muted2);border:1px solid var(--line);display:grid;place-items:center}
 .park-fav-btn.on{background:#f0c419;color:#0e1705;border-color:#f0c419}
+.park-item{flex-wrap:wrap}
+.park-item.custom{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.park-main-row{display:flex;align-items:center;gap:12px;width:100%}
+.park-equip{display:flex;gap:5px;flex-wrap:wrap;width:100%;margin-top:2px}
+.park-equip-tag{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:10.5px;font-weight:700;color:var(--muted)}
+.park-equip-tag.custom-badge{background:color-mix(in srgb,var(--accent) 18%,var(--panel2));color:var(--accent);border-color:var(--accent)}
+.equip-picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.equip-picker button{padding:8px 12px;border-radius:10px;background:var(--panel2);border:2px solid var(--line);font-weight:700;font-size:12.5px;color:var(--muted);cursor:pointer}
+.equip-picker button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel2));color:var(--chalk)}
 .weather-box{background:linear-gradient(135deg,color-mix(in srgb,#4aa8ff 15%,var(--panel)),var(--panel));border:1px solid color-mix(in srgb,#4aa8ff 40%,var(--line));border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
 .weather-emoji{font-size:36px;line-height:1}
 .weather-info{flex:1;min-width:0}
@@ -732,6 +759,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .ob-choice .de{color:var(--muted);font-size:12px;font-weight:600;margin-top:1px}
 .ob-actions{display:flex;gap:10px;margin-top:8px}
 .ob-actions button{flex:1;padding:14px;border-radius:12px;font-weight:800;font-size:14.5px}
+.tour-emoji{font-size:52px;line-height:1;margin-bottom:14px}
+.tour-dots{display:flex;gap:6px;justify-content:center;margin:16px 0 4px}
+.tour-dots i{width:7px;height:7px;border-radius:50%;background:var(--line2);display:block}
+.tour-dots i.on{background:var(--accent);width:18px;border-radius:4px}
 /* Music/Media */
 .media-mini{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:8px;font-size:12px;font-weight:700;color:var(--muted)}
 .media-mini svg{width:14px;height:14px;color:var(--accent)}
@@ -1335,7 +1366,10 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
     <div class="view-head">
       <button class="back-btn" data-nav="home"><span id="skills-back-ic"></span>Zurück</button>
       <h2>Skill-Tracker</h2>
-      <span style="width:44px"></span>
+      <div class="skills-mode-toggle" id="skills-mode-toggle">
+        <button data-skmode="list" class="active">Liste</button>
+        <button data-skmode="tree">Baum</button>
+      </div>
     </div>
     <main class="home-main" id="skills-main"></main>
   </div>
@@ -1434,7 +1468,7 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
     <div class="view-head">
       <button class="back-btn" data-nav="home"><span id="parks-back-ic"></span>Zurück</button>
       <h2>Parks in der Nähe</h2>
-      <span style="width:44px"></span>
+      <button class="back-btn" id="parks-add-btn" style="width:44px;justify-content:center" aria-label="Eigenen Spot hinzufügen"><span id="parks-add-ic"></span></button>
     </div>
     <main class="home-main" id="parks-main"></main>
   </div>
@@ -1451,6 +1485,7 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
   </div>
 </section>
 
+<div id="offline-banner">📡 Offline – Training funktioniert weiter, Änderungen werden synchronisiert, sobald du wieder online bist.</div>
 <div id="toast"></div>
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet">
@@ -1471,61 +1506,12 @@ body[data-compact="1"] .plan-card .pc-menu{width:30px;height:30px}
 <script src="./vendor/firebase-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: firebase-bundle.js nicht geladen')"></script>
 <script src="./vendor/geolocation-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: geolocation-bundle.js nicht geladen')"></script>
 <script src="./vendor/notifications-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: notifications-bundle.js nicht geladen')"></script>
-<script src="./vendor/googleauth-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: googleauth-bundle.js nicht geladen')"></script>
+<script src="./vendor/sociallogin-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: sociallogin-bundle.js nicht geladen')"></script>
 <script src="./vendor/haptics-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: haptics-bundle.js nicht geladen')"></script>
+<script src="./vendor/app-bundle.js" crossorigin="anonymous" onerror="console.warn('BARWORK: app-bundle.js nicht geladen')"></script>
 <script>
 "use strict";
 (function(){
-/* Ohne Mac/Android-Studio-Zugriff bleiben Laufzeitfehler sonst unsichtbar. authStatus()
-   zeigt aber immer nur die LETZTE Meldung an - bei mehreren Fehlern nacheinander
-   überschreibt sich das gegenseitig. Dieses Panel sammelt stattdessen ALLE console.*-
-   Aufrufe und Fehler sichtbar und nacheinander auf dem Bildschirm. */
-/* Das Panel ist nur in der nativen App aktiv - dort gibt es ohne Mac/Android-Studio
-   sonst keine Möglichkeit, Laufzeitfehler zu sehen. Im normalen Web-Browser stehen
-   die Entwicklertools zur Verfügung, daher bleibt das Panel dort aus. */
-const _dbgEnabled = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
-let _dbgPanel=null, _dbgBody=null; const _dbgLines=[];
-function dbgLog(prefix, args){
-  if(!_dbgEnabled) return;
-  try{
-    const parts=Array.prototype.map.call(args, function(a){
-      if(a instanceof Error) return a.message+(a.stack?(' | '+a.stack):'');
-      if(a && typeof a==='object'){ try{ return JSON.stringify(a); }catch(_){ return String(a); } }
-      return String(a);
-    });
-    _dbgLines.push('['+new Date().toISOString().slice(11,19)+'] '+prefix+' '+parts.join(' '));
-    if(_dbgLines.length>200) _dbgLines.shift();
-    if(!_dbgPanel && document.body){
-      _dbgPanel=document.createElement('div');
-      _dbgPanel.style.cssText='position:fixed;top:0;left:0;right:0;max-height:45vh;overflow-y:auto;background:rgba(0,0,0,.94);color:#0f0;font:10px/1.4 monospace;padding:8px;z-index:2147483647;white-space:pre-wrap;word-break:break-all;border-bottom:2px solid #0f0;';
-      const closeBtn=document.createElement('div');
-      closeBtn.textContent='✕ Debug-Log schließen';
-      closeBtn.style.cssText='color:#ff0;text-align:right;margin-bottom:4px;font-weight:bold;';
-      closeBtn.addEventListener('click', function(){ _dbgPanel.remove(); _dbgPanel=null; });
-      _dbgBody=document.createElement('div');
-      _dbgPanel.appendChild(closeBtn);
-      _dbgPanel.appendChild(_dbgBody);
-      document.body.appendChild(_dbgPanel);
-    }
-    if(_dbgBody){ _dbgBody.textContent=_dbgLines.join('\n'); _dbgPanel.scrollTop=_dbgPanel.scrollHeight; }
-  }catch(_){}
-}
-['log','warn','error'].forEach(function(level){
-  const orig=console[level] ? console[level].bind(console) : function(){};
-  console[level]=function(){ orig.apply(console, arguments); dbgLog(level.toUpperCase()+':', arguments); };
-});
-window.addEventListener('error', function(e){
-  let msg=(e.error&&e.error.message)||e.message||'unbekannt';
-  if(e.filename) msg+=' ('+e.filename+':'+e.lineno+':'+e.colno+')';
-  dbgLog('WINDOW-ERROR:', [msg, (e.error&&e.error.stack)||'']);
-  try{ authStatus('JS-Fehler: '+msg, false); }catch(_){}
-});
-window.addEventListener('unhandledrejection', function(e){
-  const reason=e.reason;
-  const msg=(reason&&reason.message)?reason.message:String(reason);
-  dbgLog('UNHANDLED-REJECTION:', [msg, (reason&&reason.stack)||'']);
-  try{ authStatus('Promise-Fehler: '+msg, false); }catch(_){}
-});
 /* ========================= ICONS ========================= */
 const I = {
   gear:'<path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H2a2 2 0 110-4h.09A1.65 1.65 0 003.6 8a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H8a1.65 1.65 0 001-1.51V2a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V8a1.65 1.65 0 001.51 1H22a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>',
@@ -2204,6 +2190,9 @@ function load(){
     if(!DB.parks||typeof DB.parks!=='object') DB.parks={favorites:[],notes:{}};
     if(!Array.isArray(DB.parks.favorites)) DB.parks.favorites=[];
     if(!DB.parks.notes||typeof DB.parks.notes!=='object') DB.parks.notes={};
+    if(!DB.parks.equipment||typeof DB.parks.equipment!=='object') DB.parks.equipment={};
+    if(!Array.isArray(DB.parks.custom)) DB.parks.custom=[];
+    if(!Array.isArray(DB.incomingSharedPlans)) DB.incomingSharedPlans=[];
     if(!DB.exerciseNotes||typeof DB.exerciseNotes!=='object') DB.exerciseNotes={};
     if(!Array.isArray(DB.buddies)) DB.buddies=[];
     if(!DB.lastReport||typeof DB.lastReport!=='object') DB.lastReport={weekKey:'',dismissedAt:0};
@@ -2241,6 +2230,15 @@ const firebaseConfig = {
   messagingSenderId: "409722949417",
   appId: "1:409722949417:web:f55e8bebaad6ac44d0b138",
   measurementId: "G-WD8Z1Y4WD7"
+};
+/* OAuth-Client-IDs sind (anders als Client-Secrets) nicht geheim, unterscheiden sich aber
+   pro Plattform/Firebase-Projekt - die Platzhalter werden von der CI vor dem cap sync aus
+   den GitHub Secrets GOOGLE_SERVER_CLIENT_ID (build-android.yml) bzw. GOOGLE_IOS_CLIENT_ID
+   (build-ios.yml) ersetzt. Jede native Plattform liest nur ihr eigenes Feld, das jeweils
+   andere bleibt als Platzhalter-Text stehen und wird ignoriert. */
+const GOOGLE_SIGNIN_CONFIG = {
+  webClientId: '__GOOGLE_WEB_CLIENT_ID__',
+  iOSClientId: '__GOOGLE_IOS_CLIENT_ID__'
 };
 let FB={ ready:false, user:null, auth:null, db:null, googleProvider:null, lastError:'', syncing:false, localMode:false, saveTimer:null };
 let FIRE=null;
@@ -2285,7 +2283,7 @@ function mergeDb(local, remote){
     customChallenges:mergeUniqueById(l.customChallenges,r.customChallenges),
     streakFreeze:{ tokens:Math.max(sfL.tokens||0,sfR.tokens||0), lastGranted:Math.max(sfL.lastGranted||0,sfR.lastGranted||0), usedThisMonth:Math.max(sfL.usedThisMonth||0,sfR.usedThisMonth||0), monthKey:sfL.monthKey||sfR.monthKey||'', appliedWeeks:Array.from(new Set([...(sfL.appliedWeeks||[]),...(sfR.appliedWeeks||[])])) },
     deloadDismissedAt:Math.max(l.deloadDismissedAt||0,r.deloadDismissedAt||0),
-    parks:{ favorites:Array.from(new Set([...((r.parks&&r.parks.favorites)||[]),...((l.parks&&l.parks.favorites)||[])])), notes:Object.assign({}, remoteNewer?((l.parks&&l.parks.notes)||{}):((r.parks&&r.parks.notes)||{}), remoteNewer?((r.parks&&r.parks.notes)||{}):((l.parks&&l.parks.notes)||{})) },
+    parks:{ favorites:Array.from(new Set([...((r.parks&&r.parks.favorites)||[]),...((l.parks&&l.parks.favorites)||[])])), notes:Object.assign({}, remoteNewer?((l.parks&&l.parks.notes)||{}):((r.parks&&r.parks.notes)||{}), remoteNewer?((r.parks&&r.parks.notes)||{}):((l.parks&&l.parks.notes)||{})), equipment:Object.assign({}, remoteNewer?((l.parks&&l.parks.equipment)||{}):((r.parks&&r.parks.equipment)||{}), remoteNewer?((r.parks&&r.parks.equipment)||{}):((l.parks&&l.parks.equipment)||{})), custom:mergeUniqueById((l.parks&&l.parks.custom), (r.parks&&r.parks.custom)) },
     exerciseNotes:Object.assign({}, remoteNewer?(l.exerciseNotes||{}):(r.exerciseNotes||{}), remoteNewer?(r.exerciseNotes||{}):(l.exerciseNotes||{})),
     /* Warm-up/Cool-down-Pläne: Neuer gewinnt */
     warmupPlan: pickNewer(l.warmupPlan, r.warmupPlan),
@@ -2400,6 +2398,7 @@ async function loadCloudDb(){
           await processPendingBuddyInvite(code);
         }
         await fetchIncomingBuddyRequests();
+        await fetchIncomingSharedPlans();
       }catch(e){}
     }, 1200);
   }catch(err){
@@ -2407,7 +2406,11 @@ async function loadCloudDb(){
     toast('Cloud-Sync fehlgeschlagen');
   }
 }
-function cloudScheduleSave(){ if(!FB.ready||!FB.user||FB.syncing) return; clearTimeout(FB.saveTimer); FB.saveTimer=setTimeout(()=>cloudSaveNow(false),900); }
+/* Automatischer Hintergrund-Sync nach jeder lokalen Änderung (save()) - läuft ständig,
+   auch mehrmals pro Sekunde während eines Trainings. Immer silent:true, sonst würde jeder
+   Offline-Moment eine "Cloud-Sync fehlgeschlagen"-Toast-Flut auslösen. Der manuelle
+   "Jetzt synchronisieren"-Button in den Einstellungen ruft cloudSaveNow(false) selbst auf. */
+function cloudScheduleSave(){ if(!FB.ready||!FB.user||FB.syncing) return; clearTimeout(FB.saveTimer); FB.saveTimer=setTimeout(()=>cloudSaveNow(true),900); }
 async function cloudSaveNow(silent){
   if(!FB.ready||!FB.user) return;
   FB.syncing=true; FB.lastError='';
@@ -2418,15 +2421,15 @@ async function cloudSaveNow(silent){
 }
 async function doAuth(mode){ if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.',false); return; } const email=$('#auth-email').value.trim(); const pass=$('#auth-pass').value; if(!email||!pass){ authStatus('Bitte E-Mail und Passwort eingeben.',false); return; } if(pass.length<6){ authStatus('Das Passwort muss mindestens 6 Zeichen haben.',false); return; } authStatus(mode==='register'?'Konto wird erstellt...':'Login läuft...',true); try{ if(mode==='register') await FIRE.createUserWithEmailAndPassword(FB.auth,email,pass); else await FIRE.signInWithEmailAndPassword(FB.auth,email,pass); FB.localMode=false; authStatus('',true); }catch(err){ authStatus(firebaseErrorText(err),false); } }
 function isNativeApp(){ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()); }
-/* Plugin-Bundle wird als klassisches <script> synchron geladen (window.BARWORK_GOOGLEAUTH_SDK).
+/* Plugin-Bundle wird als klassisches <script> synchron geladen (window.BARWORK_SOCIALLOGIN_SDK).
    WICHTIG: bewusst KEINE async function - der native Capacitor-Plugin-Proxy fängt jeden
    Property-Zugriff ab und liefert dafür eine aufrufbare Funktion zurück, auch für "then".
    Würde man dieses Objekt awaiten (z.B. indem eine async function es zurückgibt), hält die
    JS-Promise-Auflösung es fälschlich für ein Thenable und ruft proxy.then(...) auf - das
-   erzeugt exakt den Fehler "GoogleAuth.then() is not implemented on android/ios". */
-function loadNativeGoogleAuth(){
+   erzeugt exakt den Fehler "SocialLogin.then() is not implemented on android/ios". */
+function loadNativeSocialLogin(){
   if(!isNativeApp()) return null;
-  return (window.BARWORK_GOOGLEAUTH_SDK && window.BARWORK_GOOGLEAUTH_SDK.GoogleAuth) || null;
+  return (window.BARWORK_SOCIALLOGIN_SDK && window.BARWORK_SOCIALLOGIN_SDK.SocialLogin) || null;
 }
 async function doGoogleLogin(){
   if(!FB.ready){ authStatus('Firebase ist noch nicht bereit. Bitte kurz warten.', false); return; }
@@ -2440,10 +2443,17 @@ async function doGoogleLogin(){
        Sign-In läuft stattdessen komplett über das Betriebssystem-SDK und liefert
        ein ID-Token, das gegen Firebase eingetauscht wird - kein WebView-Redirect. */
     try{
-      const plugin = loadNativeGoogleAuth();
+      const plugin = loadNativeSocialLogin();
       if(!plugin) throw new Error('Google-Sign-In ist in dieser App nicht verfügbar.');
-      const googleUser = await plugin.signIn();
-      const idToken = googleUser && googleUser.authentication && googleUser.authentication.idToken;
+      /* style:'bottom' schaltet die Android-Seite von GetSignInWithGoogleOption auf
+         GetGoogleIdOption um (siehe GoogleProvider.java: options.getString("style")=="bottom").
+         GetSignInWithGoogleOption ist die neuere, aber laut mehreren Upstream-Issues
+         (Cap-go/capacitor-social-login#199, flutter/flutter#184918) anfällige Variante für
+         "[16] Account reauth failed" (CommonStatusCodes.CANCELED beim Reauth-Schritt nach
+         Kontoauswahl) - GetGoogleIdOption ist der ausgereiftere Credential-Manager-Pfad.
+         iOS ignoriert unbekannte Options-Keys, betrifft also nur Android. */
+      const loginRes = await plugin.login({ provider:'google', options:{ style:'bottom' } });
+      const idToken = loginRes && loginRes.result && loginRes.result.idToken;
       if(!idToken) throw new Error('Kein ID-Token von Google erhalten.');
       const credential = FIRE.GoogleAuthProvider.credential(idToken);
       const result = await FIRE.signInWithCredential(FB.auth, credential);
@@ -2454,8 +2464,9 @@ async function doGoogleLogin(){
       const code = err && err.code;
       if(code === 'auth/unauthorized-domain') authStatus('Google Login ist für diese App nicht freigegeben. Bitte E-Mail/Passwort verwenden oder Support kontaktieren.', false);
       else{
-        /* err.code hier ist der native GoogleSignIn-Statuscode (z.B. Android ApiException.getStatusCode()) -
-           ohne Mac/adb ist das die einzige Möglichkeit, die genaue Ursache (z.B. 10=DEVELOPER_ERROR) zu sehen. */
+        /* err.code/err.message hier kommt aus dem nativen Credential-Manager (Android) bzw.
+           GoogleSignIn-SDK (iOS) - ohne Mac/adb ist das die einzige Möglichkeit, die genaue
+           Fehlerursache zu sehen. */
         const detail=(err&&err.message?err.message:'Google Login fehlgeschlagen.')+(code?(' [Code: '+code+']'):'');
         authStatus(detail+' Falls Google Login weiterhin nicht klappt, nutze bitte E-Mail/Passwort.', false);
       }
@@ -2482,8 +2493,8 @@ async function logout(){
     if(isGoogleUser){
       /* Native Google-Session ebenfalls beenden, sonst zeigt der nächste
          Login-Versuch keine Kontoauswahl mehr, sondern loggt still denselben Account ein. */
-      const plugin = loadNativeGoogleAuth();
-      if(plugin) plugin.signOut().catch(()=>{});
+      const plugin = loadNativeSocialLogin();
+      if(plugin) plugin.logout({ provider:'google' }).catch(()=>{});
     }
     FB.localMode = false;
     try{ localStorage.removeItem(KEY); }catch(e){}
@@ -2847,8 +2858,11 @@ function renderStats(){
   `;
   $$('#pr-list .top-ex-row').forEach((row,i)=>{ const k=prArr[i]&&prArr[i][0]; if(k){ row.style.cursor='pointer'; row.addEventListener('click',()=>openPrTimeline(k)); }});
 }
+let _skillsMode='list';
 function renderSkills(){
   $('#skills-back-ic').innerHTML=svg('left');
+  $$('#skills-mode-toggle button').forEach(b=>b.classList.toggle('active', b.dataset.skmode===_skillsMode));
+  if(_skillsMode==='tree') return renderSkillTree();
   const m=$('#skills-main'); if(!m) return;
   const renderCard=(sk)=>{
     const cur=(DB.skills[sk.id]&&DB.skills[sk.id].stage)||0;
@@ -2861,7 +2875,7 @@ function renderSkills(){
     const pct=Math.round(cur/total*100);
     const lbl=cur>=total?'Alle Stufen erreicht 🎉':(cur>0?`Stufe ${cur} / ${total}`:'Noch nicht begonnen');
     const lockMsg=!unlocked?`<div class="skill-locked-msg">${svg('eyeoff')} Voraussetzung: ${esc(skillPrereqLabel(sk))}</div>`:'';
-    return `<div class="skill-card ${!unlocked?'locked':''}"><div class="skill-head"><div class="skill-ic">${svg(sk.icon)}</div><div class="skill-info"><div class="skill-nm">${esc(sk.name)}</div><div class="skill-stage-lbl">${lbl}</div></div></div><div class="skill-progress"><i style="width:${pct}%"></i></div><div class="skill-stages">${stagesHTML}</div>${lockMsg}</div>`;
+    return `<div class="skill-card ${!unlocked?'locked':''}" data-skill="${esc(sk.id)}"><div class="skill-head"><div class="skill-ic">${svg(sk.icon)}</div><div class="skill-info"><div class="skill-nm">${esc(sk.name)}</div><div class="skill-stage-lbl">${lbl}</div></div></div><div class="skill-progress"><i style="width:${pct}%"></i></div><div class="skill-stages">${stagesHTML}</div>${lockMsg}</div>`;
   };
   const basics=SKILL_CATALOG.filter(s=>s.category==='basic'||!s.category);
   const advanced=SKILL_CATALOG.filter(s=>s.category==='advanced');
@@ -2874,6 +2888,70 @@ function renderSkills(){
     save(); renderSkills();
   }));
 }
+/* Visualisiert SKILL_CATALOG als Abhängigkeitsgraph (Grundübungen -> Skills, die sie
+   freischalten), statt der reinen Liste. Als SVG mit fest berechneten Koordinaten gebaut,
+   damit keine DOM-Layout-Messung nach dem Rendern nötig ist. */
+function skillNodeState(sk){
+  const cur=(DB.skills[sk.id]&&DB.skills[sk.id].stage)||0;
+  const total=sk.stages.length;
+  if(!skillIsUnlocked(sk)) return 'locked';
+  if(cur>=total) return 'mastered';
+  if(cur>0) return 'progress';
+  return 'open';
+}
+function renderSkillTree(){
+  const m=$('#skills-main'); if(!m) return;
+  const basics=SKILL_CATALOG.filter(s=>s.category==='basic'||!s.category);
+  const advanced=SKILL_CATALOG.filter(s=>s.category==='advanced');
+  const colX=[24,260], nodeW=210, nodeH=64, rowGap=90, topPad=20;
+  const idxOf=(arr,id)=>arr.findIndex(s=>s.id===id);
+  const posOf=(sk)=>{
+    const col = sk.category==='advanced' ? 1 : 0;
+    const row = idxOf(col?advanced:basics, sk.id);
+    return { x:colX[col], y:topPad+row*rowGap, col, row };
+  };
+  const rows=Math.max(basics.length, advanced.length);
+  const svgH=topPad*2+rows*rowGap;
+  const svgW=colX[1]+nodeW+24;
+  const stateColor={locked:'var(--muted2)', open:'var(--muted)', progress:'#4aa8ff', mastered:'var(--accent)'};
+  let lines='', nodes='';
+  SKILL_CATALOG.forEach(sk=>{
+    const p=posOf(sk);
+    const state=skillNodeState(sk);
+    const cur=(DB.skills[sk.id]&&DB.skills[sk.id].stage)||0;
+    const total=sk.stages.length;
+    (sk.requires||[]).forEach(r=>{
+      const from=SKILL_CATALOG.find(x=>x.id===r.skill); if(!from) return;
+      const fp=posOf(from);
+      const x1=fp.x+nodeW, y1=fp.y+nodeH/2, x2=p.x, y2=p.y+nodeH/2;
+      const mid=(x1+x2)/2;
+      lines+=`<path d="M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2},${y2}" fill="none" stroke="${state==='locked'?'var(--line2)':'var(--accent)'}" stroke-width="2" opacity="${state==='locked'?'.4':'.7'}"/>`;
+    });
+    nodes+=`<g class="skill-node" data-skill="${esc(sk.id)}" transform="translate(${p.x},${p.y})">
+      <rect width="${nodeW}" height="${nodeH}" rx="12" fill="var(--panel)" stroke="${stateColor[state]}" stroke-width="2"/>
+      <rect x="6" y="${nodeH-12}" width="${(nodeW-12)*Math.min(1,cur/total)}" height="5" rx="2.5" fill="${stateColor[state]}"/>
+      <text x="14" y="24" class="snm" font-size="13" fill="var(--chalk)">${esc(sk.name)}</text>
+      <text x="14" y="42" class="sst" font-size="11" fill="var(--muted)">${state==='locked'?'🔒 gesperrt':(cur>=total?'🎉 gemeistert':`Stufe ${cur} / ${total}`)}</text>
+    </g>`;
+  });
+  m.innerHTML=`<div class="skill-tree-legend">
+      <span><i style="background:var(--muted2)"></i>Gesperrt</span>
+      <span><i style="background:var(--muted)"></i>Offen</span>
+      <span><i style="background:#4aa8ff"></i>In Arbeit</span>
+      <span><i style="background:var(--accent)"></i>Gemeistert</span>
+    </div>
+    <div class="skill-tree-wrap"><svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">${lines}${nodes}</svg></div>`;
+  $$('#skills-main .skill-node').forEach(el=>el.addEventListener('click',()=>{
+    const sk=SKILL_CATALOG.find(s=>s.id===el.dataset.skill); if(!sk) return;
+    if(!skillIsUnlocked(sk)){ toast('Voraussetzung: '+skillPrereqLabel(sk)); return; }
+    _skillsMode='list'; renderSkills();
+    setTimeout(()=>{ const card=$(`#skills-main .skill-card[data-skill="${sk.id}"]`); if(card) card.scrollIntoView({behavior:'smooth',block:'center'}); },50);
+  }));
+}
+$('#skills-mode-toggle').addEventListener('click', e=>{
+  const b=e.target.closest('[data-skmode]'); if(!b) return;
+  _skillsMode=b.dataset.skmode; renderSkills();
+});
 /* History: List <-> Calendar toggle */
 let _histMode='list';
 let _calCursor = new Date();
@@ -3147,7 +3225,7 @@ function exportCSV(){
    Web-Notifications funktionieren in der nativen App nicht: iOS-WKWebView hat gar keine Service Worker,
    Android-WebView implementiert die Notification-API grundsätzlich nicht. */
 /* Plugin-Bundle wird als klassisches <script> synchron geladen (window.BARWORK_NOTIF_SDK).
-   Bewusst KEINE async function - siehe loadNativeGoogleAuth() weiter oben: der native
+   Bewusst KEINE async function - siehe loadNativeSocialLogin() weiter oben: der native
    Capacitor-Plugin-Proxy fängt jeden Property-Zugriff ab (auch "then"); würde man ihn
    awaiten, hielte die Promise-Auflösung ihn fälschlich für ein Thenable. */
 function loadNativeNotif(){
@@ -3256,28 +3334,108 @@ async function scheduleNextReminder(){
   clearTimeout(window._barworkReminderTimer);
   window._barworkReminderTimer = setTimeout(fireReminder, delay);
 }
-function fireReminder(){
+/* Native Erinnerungen sind Tage im Voraus als wiederkehrende OS-Benachrichtigungen geplant
+   (siehe scheduleNextReminder) und können daher keinen Live-Wetter-Hinweis enthalten. Beim
+   Zurückkehren in den Vordergrund wird deshalb - falls die heutige Erinnerung noch nicht
+   gefeuert hat - nur die heutige Instanz mit aktuellem Wetter neu geplant. */
+async function refreshTodayReminderWeather(){
+  if(!isNativeApp() || !DB.settings.reminderEnabled || !notifSupported()) return;
+  const days = DB.settings.reminderDays || [1,2,3,4,5];
+  const now=new Date();
+  if(!days.includes(now.getDay())) return;
+  const [hh,mm]=(DB.settings.reminderTime||'18:00').split(':').map(x=>+x);
+  const target=new Date(now); target.setHours(hh,mm,0,0);
+  if(target<=now) return;
+  const today=dayKey(now);
+  if((DB.history||[]).some(h=>dayKey(h.date)===today)) return;
+  const weatherHint=await getGoodWeatherHint();
+  if(!weatherHint) return;
+  const plugin=loadNativeNotif();
+  if(!plugin || !(await nativeNotifGranted())) return;
+  const id=REMINDER_NOTIF_ID_BASE+now.getDay();
+  try{
+    await plugin.cancel({ notifications:[{id}] }).catch(()=>{});
+    await plugin.schedule({ notifications:[{
+      id, title:'🔥 Zeit für Training!', body:weatherHint, channelId:'barwork_default',
+      schedule:{ at:target, allowWhileIdle:true }
+    }] });
+  }catch(e){}
+}
+async function fireReminder(){
   if(!notifSupported()) return;
   const today=dayKey(new Date());
   const trainedToday=(DB.history||[]).some(h=>dayKey(h.date)===today);
   if(!trainedToday){
+    const weatherHint=await getGoodWeatherHint();
     showAppNotification('🔥 Zeit für Training!', {
-      body:'Du warst heute noch nicht aktiv. Zeit für BARWORK!',
+      body: weatherHint || 'Du warst heute noch nicht aktiv. Zeit für BARWORK!',
       tag:'barwork-reminder'
     });
   }
   scheduleNextReminder();
 }
-/* Benachrichtigung wenn eine Pause vorbei ist, während die App im Hintergrund ist */
-function notifyPauseEnd(st){
-  if(!DB.settings.notifyPauseEnd || !document.hidden) return;
-  const name = st.ex && st.ex.name;
-  showAppNotification('⏱️ Pause vorbei!', {
-    body: name ? ('Weiter geht\'s mit: '+name) : 'Zeit für die nächste Übung.',
-    tag:'barwork-pause',
-    renotify:true,
-    vibrate:[0,150]
-  });
+/* ===== Background-Workout-Benachrichtigungen =====
+   Hintergrund: iOS-WKWebView und Android-WebView drosseln/suspendieren setInterval/setTimeout
+   UND die Web-Audio-AudioContext, sobald die App nicht im Vordergrund ist. Der Workout-Tick-Loop
+   (startLoop()/tick()) läuft dadurch im Hintergrund kaum noch - beep()/vibe() feuern effektiv
+   erst wieder, wenn die App zurück in den Vordergrund kommt (dann alle auf einmal, "nachgeholt").
+   Ein rein reaktiver Ansatz (Aufruf aus goTo()) hat exakt dasselbe Problem, weil goTo() selbst
+   nur läuft, wenn der gedrosselte Tick-Loop feuert.
+   Lösung: beim Wechsel in den Hintergrund alle bevorstehenden Übergänge des restlichen Trainings
+   als native, vom Betriebssystem selbst (unabhängig von der WebView-JS-Drosselung) ausgelöste
+   LocalNotifications mit absoluten Zeitstempeln vorplanen. Beim Zurückkehren in den Vordergrund
+   werden sie storniert, da der Live-Loop ab dann wieder selbst beep()/vibe() übernimmt. */
+const BG_NOTIF_ID_BASE=80000;
+let _bgNotifIdSeq=0;
+function bgNotif(atMs, title, body){
+  const id = BG_NOTIF_ID_BASE + (_bgNotifIdSeq++ % 1000);
+  return { id, title, body:body||'', channelId:'barwork_default',
+    schedule:{ at:new Date(Math.max(Date.now()+1500, atMs)), allowWhileIdle:true } };
+}
+async function scheduleBackgroundWorkoutNotifications(){
+  if(!W || W.paused || W.done) return;
+  /* Verallgemeinerung der ehemaligen "Push bei Pausenende"-Option: dieselbe Einstellung
+     steuert jetzt alle proaktiv geplanten Hintergrund-Benachrichtigungen. */
+  if(!DB.settings.notifyPauseEnd) return;
+  if(!isNativeApp()) return; /* Web Notification API kann keine zukünftigen Benachrichtigungen planen */
+  const plugin=loadNativeNotif();
+  if(!plugin || !(await nativeNotifGranted())) return;
+  await cancelBackgroundWorkoutNotifications(); /* nie IDs über mehrere Hintergrund-Wechsel hinweg anhäufen */
+  try{ await ensureNotifChannel(plugin); }catch(e){}
+  const st0=currentStep(); if(!st0) return;
+  const notifications=[];
+  let ts=Date.now()+Math.max(0,W.remaining);
+  let prevKind=st0.kind;
+  for(let i=W.idx+1; i<W.steps.length && notifications.length<40; i++){
+    const st=W.steps[i];
+    let dur;
+    if(st.kind==='exercise') dur=st.ex.duration||0;
+    else if(st.kind==='warmupEx'||st.kind==='cooldownEx') dur=(st.ex&&st.ex.duration)||30;
+    else dur=st.dur||0;
+    const pauseEnded=PAUSE_KINDS.includes(prevKind);
+    if((st.kind==='exercise'||st.kind==='warmupEx'||st.kind==='cooldownEx') && pauseEnded){
+      const name=st.ex&&st.ex.name;
+      notifications.push(bgNotif(ts, '⏱️ Pause vorbei!', name?('Weiter geht\'s mit: '+name):'Zeit für die nächste Übung.'));
+    } else if(st.kind==='rest'){
+      notifications.push(bgNotif(ts, '💪 Übung geschafft!', st.nextEx?('Kurze Pause. Als Nächstes: '+st.nextEx.name):'Kurze Pause.'));
+    } else if(st.kind==='cycleRest'){
+      notifications.push(bgNotif(ts, '🔁 Runde geschafft!', 'Rundenpause. Runde '+(st.nextCycle)+' kommt.'));
+    }
+    prevKind=st.kind;
+    ts += dur*1000;
+  }
+  if(!notifications.length) return;
+  W._bgNotifIds = notifications.map(n=>n.id);
+  try{ await plugin.schedule({ notifications }); }
+  catch(e){ _lastNotifError=e&&(e.message||String(e)); console.error('BARWORK: Background-Notifications fehlgeschlagen', e); }
+}
+async function cancelBackgroundWorkoutNotifications(){
+  if(!W || !W._bgNotifIds || !W._bgNotifIds.length) return;
+  const ids=W._bgNotifIds; W._bgNotifIds=[];
+  if(!isNativeApp()) return;
+  const plugin=loadNativeNotif();
+  if(!plugin) return;
+  try{ await plugin.cancel({ notifications: ids.map(id=>({id})) }); }catch(e){}
 }
 
 /* ========================= WARM-UP / COOL-DOWN PLAN EDITOR ========================= */
@@ -3684,6 +3842,18 @@ function renderChallenges(){
   $$('#chal-main [data-cdel]').forEach(b=>b.addEventListener('click',()=>deleteCustomChallenge(b.dataset.cdel)));
 }
 /* ========================= PARK FINDER ========================= */
+const EQUIPMENT_TAGS=[
+  {id:'bars',em:'🪝',label:'Klimmzugstangen'},
+  {id:'parallettes',em:'〰️',label:'Barren'},
+  {id:'rings',em:'⭕',label:'Ringe'},
+  {id:'dip',em:'💪',label:'Dip-Station'},
+  {id:'wallbars',em:'🪜',label:'Sprossenwand'},
+  {id:'bench',em:'🪑',label:'Bank'},
+  {id:'monkeybars',em:'🐒',label:'Affenschaukel'},
+  {id:'pole',em:'🕳️',label:'Stange/Pole'}
+];
+function equipTagLabel(id){ const t=EQUIPMENT_TAGS.find(x=>x.id===id); return t?(t.em+' '+t.label):id; }
+function equipTagsHTML(ids){ return (ids||[]).map(id=>`<span class="park-equip-tag">${esc(equipTagLabel(id))}</span>`).join(''); }
 function haversine(lat1,lon1,lat2,lon2){ const R=6371,tR=x=>x*Math.PI/180; const dLat=tR(lat2-lat1),dLon=tR(lon2-lon1); const a=Math.sin(dLat/2)**2+Math.cos(tR(lat1))*Math.cos(tR(lat2))*Math.sin(dLon/2)**2; return 2*R*Math.asin(Math.sqrt(a)); }
 function isParkFav(pid){ return ((DB.parks&&DB.parks.favorites)||[]).includes(String(pid)); }
 function toggleParkFav(pid){ if(!DB.parks) DB.parks={favorites:[],notes:{}}; const s=String(pid); const i=DB.parks.favorites.indexOf(s); if(i>=0){DB.parks.favorites.splice(i,1); toast('Favorit entfernt');} else {DB.parks.favorites.push(s); toast('Als Favorit markiert');} save(); }
@@ -3704,6 +3874,30 @@ function weatherVerdict(temp, rainProb){
   if(temp>28) return 'Heiß – genug trinken und schattig trainieren.';
   if(rainProb>=30) return 'Wechselhaft – schnell trainieren, bevor es regnet.';
   return '✨ Perfektes Wetter für Outdoor-Training!';
+}
+function isGoodWeather(temp, rainProb){ return temp>=8 && temp<=28 && rainProb<30; }
+/* Fragt NIE nach der Standort-Berechtigung - liefert nur dann einen Wetter-Hinweis für
+   Trainings-Erinnerungen, wenn der Nutzer den Zugriff bereits (z.B. über den Park-Finder)
+   erlaubt hat. So bleibt die Erinnerung auch ohne Standortfreigabe funktionsfähig. */
+async function getGoodWeatherHint(){
+  try{
+    if(isNativeApp()){
+      const NATIVE_GEO=window.BARWORK_GEO_SDK && window.BARWORK_GEO_SDK.Geolocation;
+      if(!NATIVE_GEO) return null;
+      const perm=await NATIVE_GEO.checkPermissions().catch(()=>({location:'prompt'}));
+      if(perm.location!=='granted') return null;
+    } else if(navigator.permissions && navigator.permissions.query){
+      const perm=await navigator.permissions.query({name:'geolocation'}).catch(()=>null);
+      if(!perm || perm.state!=='granted') return null;
+    } else return null;
+    const pos=await getCurrentPositionCompat();
+    const lat=pos.coords.latitude, lng=pos.coords.longitude;
+    const w=await fetchWeather(lat,lng);
+    if(!w || !w.current) return null;
+    const temp=Math.round(w.current.temperature_2m);
+    const rainProb=(w.hourly&&w.hourly.precipitation_probability&&w.hourly.precipitation_probability[0])||0;
+    return isGoodWeather(temp,rainProb) ? `${weatherEmoji(w.current.weather_code)} Perfektes Wetter für dein Outdoor-Training heute (${temp}°C)!` : null;
+  }catch(e){ return null; }
 }
 async function getCurrentPositionCompat(){
   /* Im nativen WebView (v.a. Android) ist navigator.geolocation ohne
@@ -3740,7 +3934,7 @@ async function requestLocationPermission(){
    die Anfrage über native Netzwerk-Bibliotheken (NSURLSession/OkHttp) statt über das
    fetch() der WebView - das umgeht WebView-spezifische CORS-Eigenheiten, an denen die
    Overpass-Suche bislang nur in der nativen App (nicht in Browser/PWA) gescheitert ist.
-   Bewusst keine async function - siehe loadNativeGoogleAuth() weiter oben. */
+   Bewusst keine async function - siehe loadNativeSocialLogin() weiter oben. */
 function loadNativeHttp(){
   if(!isNativeApp()) return null;
   return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp) || null;
@@ -3801,26 +3995,105 @@ async function renderParks(){
       });
       if(data.remark) throw new Error('Overpass: '+data.remark);
       console.log('BARWORK: Overpass-Antwort', (data.elements||[]).length, 'Elemente');
-      const parks=(data.elements||[]).map(el=>{
+      const osmParks=(data.elements||[]).map(el=>{
         const plat=el.lat||(el.center&&el.center.lat); const plng=el.lon||(el.center&&el.center.lon); if(plat==null||plng==null) return null;
         const name=(el.tags&&(el.tags.name||el.tags['name:de']))||'Fitness-Station';
         const type=(el.tags&&el.tags.sport)||(el.tags&&el.tags.leisure)||'';
-        return {id:el.id, name, type, lat:plat, lng:plng, dist:haversine(lat,lng,plat,plng)};
-      }).filter(Boolean).sort((a,b)=>{ const fa=isParkFav(a.id)?-100:0, fb=isParkFav(b.id)?-100:0; return (a.dist+fa)-(b.dist+fb); }).slice(0,30);
-      if(!parks.length){ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Keine Spots gefunden</h3><p>Im Umkreis von 15 km um ${lat.toFixed(4)}, ${lng.toFixed(4)} sind noch keine Calisthenics-Spots auf OpenStreetMap eingetragen. Trage neue Spots auf <a href="https://www.openstreetmap.org" target="_blank" style="color:var(--accent)">OpenStreetMap</a> ein!</p></div>`; return; }
+        return {id:String(el.id), name, type, lat:plat, lng:plng, dist:haversine(lat,lng,plat,plng), custom:false};
+      }).filter(Boolean);
+      const customParks=(DB.parks.custom||[]).map(c=>({id:c.id, name:c.name, type:'Eigener Spot', lat:c.lat, lng:c.lng, dist:haversine(lat,lng,c.lat,c.lng), custom:true}));
+      const parks=osmParks.concat(customParks).sort((a,b)=>{ const fa=(isParkFav(a.id)?-100:0)+(a.custom?-50:0), fb=(isParkFav(b.id)?-100:0)+(b.custom?-50:0); return (a.dist+fa)-(b.dist+fb); }).slice(0,40);
+      if(!parks.length){ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Keine Spots gefunden</h3><p>Im Umkreis von 15 km um ${lat.toFixed(4)}, ${lng.toFixed(4)} sind noch keine Calisthenics-Spots auf OpenStreetMap eingetragen. Trage neue Spots auf <a href="https://www.openstreetmap.org" target="_blank" style="color:var(--accent)">OpenStreetMap</a> ein oder füge einen eigenen Spot hinzu (oben rechts).</p></div>`; return; }
       const listHTML=parks.map(p=>{
         const distStr=p.dist<1?Math.round(p.dist*1000)+' m':p.dist.toFixed(1)+' km';
         const navUrl=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
         const mapUrl=`https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=18/${p.lat}/${p.lng}`;
         const fav=isParkFav(p.id);
-        return `<div class="park-item ${fav?'fav':''}"><div class="park-ic">${svg('target')}</div><div class="park-info"><div class="park-nm">${esc(p.name)}</div><div class="park-sub">${esc(p.type||'Fitness-Station')} · ${distStr}</div></div><button class="park-fav-btn ${fav?'on':''}" data-pfav="${esc(p.id)}" aria-label="Favorit">${fav?svgFill('starFill'):svg('star')}</button><div style="display:flex;flex-direction:column;gap:6px;flex:none"><a class="park-btn" href="${navUrl}" target="_blank" rel="noopener">${svg('right')} Route</a><a class="park-btn" href="${mapUrl}" target="_blank" rel="noopener">${svg('list')} Karte</a></div></div>`;
+        const equip=(DB.parks.equipment&&DB.parks.equipment[p.id])||[];
+        const equipHTML=equipTagsHTML(equip) + (p.custom?`<span class="park-equip-tag custom-badge">⭐ Eigener Spot</span>`:'');
+        return `<div class="park-item ${fav?'fav':''} ${p.custom?'custom':''}">
+          <div class="park-main-row" data-pinfo="${esc(p.id)}" style="cursor:pointer">
+            <div class="park-ic">${svg('target')}</div>
+            <div class="park-info"><div class="park-nm">${esc(p.name)}</div><div class="park-sub">${esc(p.type||'Fitness-Station')} · ${distStr}</div></div>
+            <button class="park-fav-btn ${fav?'on':''}" data-pfav="${esc(p.id)}" aria-label="Favorit">${fav?svgFill('starFill'):svg('star')}</button>
+          </div>
+          ${equipHTML?`<div class="park-equip">${equipHTML}</div>`:''}
+          <div style="display:flex;gap:8px;width:100%;margin-top:2px">
+            <a class="park-btn" style="flex:1;justify-content:center" href="${navUrl}" target="_blank" rel="noopener">${svg('right')} Route</a>
+            <a class="park-btn" style="flex:1;justify-content:center" href="${mapUrl}" target="_blank" rel="noopener">${svg('list')} Karte</a>
+          </div>
+        </div>`;
       }).join('');
       $('#parks-status').style.display='none';
-      m.insertAdjacentHTML('beforeend',`<div class="section-label" style="margin-top:8px">📍 ${parks.length} Spots (Favoriten oben)</div><div class="park-list">${listHTML}</div><div class="hint" style="text-align:center;margin-top:16px">Daten von <a href="https://www.openstreetmap.org" target="_blank" style="color:var(--accent)">OpenStreetMap</a> · Wetter von <a href="https://open-meteo.com" target="_blank" style="color:var(--accent)">Open-Meteo</a>.</div>`);
+      m.insertAdjacentHTML('beforeend',`<div class="section-label" style="margin-top:8px">📍 ${parks.length} Spots (Favoriten & eigene Spots oben)</div><div class="park-list">${listHTML}</div><div class="hint" style="text-align:center;margin-top:16px">Daten von <a href="https://www.openstreetmap.org" target="_blank" style="color:var(--accent)">OpenStreetMap</a> · Wetter von <a href="https://open-meteo.com" target="_blank" style="color:var(--accent)">Open-Meteo</a>.</div>`);
       $$('#parks-main [data-pfav]').forEach(b=>b.addEventListener('click',(e)=>{ e.stopPropagation(); toggleParkFav(b.dataset.pfav); renderParks(); }));
-    }catch(err){ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Suche fehlgeschlagen</h3><p>${esc(err.message||'Netzwerkfehler')}</p></div>`; }
+      $$('#parks-main [data-pinfo]').forEach(el=>el.addEventListener('click',(e)=>{
+        if(e.target.closest('[data-pfav]')) return;
+        const p=parks.find(x=>x.id===el.dataset.pinfo); if(p) openParkDetailSheet(p);
+      }));
+    }catch(err){ $('#parks-status').innerHTML=`<div class="empty">${svg('eyeoff')}<h3>Suche fehlgeschlagen</h3><p>${navigator.onLine?esc(err.message||'Netzwerkfehler'):'Du bist offline - der Park-Finder braucht eine Internetverbindung. Deine gespeicherten Favoriten & eigenen Spots findest du wieder, sobald du online bist.'}</p></div>`; }
   })(pos);
 }
+/* Bearbeitungs-Sheet für Ausstattung/Notiz eines Spots (OSM oder eigener) */
+function openParkDetailSheet(p){
+  const equip=(DB.parks.equipment&&DB.parks.equipment[p.id])||[];
+  const note=(DB.parks.notes&&DB.parks.notes[p.id])||'';
+  const body=`<p style="color:var(--muted);font-weight:600;margin:2px 0 12px">Markiere die Ausstattung, die du vor Ort gesehen hast.</p>
+    <div class="equip-picker" id="pd-equip">${EQUIPMENT_TAGS.map(t=>`<button data-eq="${t.id}" class="${equip.includes(t.id)?'on':''}">${t.em} ${esc(t.label)}</button>`).join('')}</div>
+    <textarea id="pd-note" placeholder="Eigene Notiz (z.B. Beleuchtung, Untergrund, beste Zeit...)" style="width:100%;min-height:80px;padding:10px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);color:var(--chalk);font:inherit;resize:vertical">${esc(note)}</textarea>
+    <div style="height:14px"></div>
+    <button class="btn btn-primary btn-block btn-lg" id="pd-save">${svg('save')} Speichern</button>
+    ${p.custom?`<div style="height:8px"></div><button class="btn btn-ghost btn-block" id="pd-delete">${svg('trash')} Eigenen Spot löschen</button>`:''}`;
+  openSheet(p.name, body);
+  const picked=new Set(equip);
+  $$('#pd-equip [data-eq]').forEach(b=>b.addEventListener('click',()=>{
+    const id=b.dataset.eq;
+    if(picked.has(id)){ picked.delete(id); b.classList.remove('on'); } else { picked.add(id); b.classList.add('on'); }
+  }));
+  $('#pd-save').addEventListener('click',()=>{
+    if(!DB.parks.equipment) DB.parks.equipment={};
+    if(!DB.parks.notes) DB.parks.notes={};
+    DB.parks.equipment[p.id]=Array.from(picked);
+    const noteVal=$('#pd-note').value.trim();
+    if(noteVal) DB.parks.notes[p.id]=noteVal; else delete DB.parks.notes[p.id];
+    save(); closeSheet(); toast('Gespeichert'); renderParks();
+  });
+  const del=$('#pd-delete'); if(del) del.addEventListener('click',()=>{
+    DB.parks.custom=(DB.parks.custom||[]).filter(c=>c.id!==p.id);
+    if(DB.parks.equipment) delete DB.parks.equipment[p.id];
+    if(DB.parks.notes) delete DB.parks.notes[p.id];
+    save(); closeSheet(); toast('Spot gelöscht'); renderParks();
+  });
+}
+/* Eigenen Spot am aktuellen Standort anlegen - für Calisthenics-Ausstattung, die (noch)
+   nicht auf OpenStreetMap eingetragen ist. */
+async function openAddCustomSpotSheet(){
+  let pos;
+  try{ pos=await getCurrentPositionCompat(); }
+  catch(err){ toast('Standort nicht verfügbar'); return; }
+  const body=`<p style="color:var(--muted);font-weight:600;margin:2px 0 12px">Der Spot wird an deinem aktuellen Standort gespeichert.</p>
+    <input type="text" id="acs-name" placeholder="Name des Spots" style="width:100%;padding:12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);color:var(--chalk);font:inherit;margin-bottom:12px">
+    <div class="equip-picker" id="acs-equip">${EQUIPMENT_TAGS.map(t=>`<button data-eq="${t.id}">${t.em} ${esc(t.label)}</button>`).join('')}</div>
+    <div style="height:14px"></div>
+    <button class="btn btn-primary btn-block btn-lg" id="acs-save">${svg('save')} Spot speichern</button>`;
+  openSheet('Eigenen Spot hinzufügen', body);
+  const picked=new Set();
+  $$('#acs-equip [data-eq]').forEach(b=>b.addEventListener('click',()=>{
+    const id=b.dataset.eq;
+    if(picked.has(id)){ picked.delete(id); b.classList.remove('on'); } else { picked.add(id); b.classList.add('on'); }
+  }));
+  $('#acs-save').addEventListener('click',()=>{
+    const name=$('#acs-name').value.trim();
+    if(!name){ toast('Bitte einen Namen eingeben'); return; }
+    const id='custom_'+uid();
+    if(!DB.parks.custom) DB.parks.custom=[];
+    if(!DB.parks.equipment) DB.parks.equipment={};
+    DB.parks.custom.push({id, name, lat:pos.coords.latitude, lng:pos.coords.longitude, createdAt:Date.now()});
+    DB.parks.equipment[id]=Array.from(picked);
+    save(); closeSheet(); toast('Spot gespeichert'); renderParks();
+  });
+}
+$('#parks-add-btn').addEventListener('click', openAddCustomSpotSheet);
 /* ========================= WEEKLY REPORT BANNER ========================= */
 function computeMonthlyReport(){
   const now=new Date(); const y=now.getFullYear(), m=now.getMonth();
@@ -3887,11 +4160,15 @@ function sharePlanLink(planId){
   const p=findPlan(planId); if(!p) return;
   const code=encodePlan(p);
   const url=location.origin+location.pathname+'#plan='+code;
+  const buddies=DB.buddies||[];
+  const buddyListHTML=buddies.length?`<div class="section-label" style="margin-top:16px">Direkt an Buddy senden</div>
+    <div class="ob-choices" id="sp-buddies">${buddies.map(b=>`<button class="ob-choice" data-spbuddy="${esc(b.code)}"><div class="em">🤝</div><div class="info"><div class="nm">${esc(b.nickname)}</div><div class="de">Plan direkt in die App des Buddys senden</div></div></button>`).join('')}</div>`:'';
   const body=`<p style="color:var(--muted);font-weight:600;margin:2px 0 12px">Teile diesen Link mit anderen BARWORK-Nutzern – ein Klick reicht zum Importieren.</p>
     <div class="code-box"><div class="lbl">Import-Link</div><div class="code long">${esc(url)}</div></div>
     <button class="btn btn-primary btn-block btn-lg" id="sp-copy">${svg('copy')} Link kopieren</button>
     <div style="height:8px"></div>
-    ${navigator.share?`<button class="btn btn-soft btn-block" id="sp-share">${svg('share2')} Teilen</button>`:''}`;
+    ${navigator.share?`<button class="btn btn-soft btn-block" id="sp-share">${svg('share2')} Teilen</button>`:''}
+    ${buddyListHTML}`;
   openSheet('Plan teilen', body);
   $('#sp-copy').addEventListener('click',()=>{
     navigator.clipboard.writeText(url).then(()=>toast('Link kopiert'));
@@ -3899,6 +4176,58 @@ function sharePlanLink(planId){
   if($('#sp-share')) $('#sp-share').addEventListener('click',async()=>{
     try{ await navigator.share({title:'BARWORK Plan',text:'Trainiere mit meinem Plan: '+p.name,url}); }catch(e){}
   });
+  $$('#sp-buddies [data-spbuddy]').forEach(b=>b.addEventListener('click',()=>sharePlanToBuddy(p, b.dataset.spbuddy, b)));
+}
+/* Legt den Plan im Firestore-'incoming'-Fach des Buddys ab, analog zu den bestehenden
+   Buddy-Requests (buddies/{code}/incoming) - der Buddy holt ihn beim nächsten App-Start ab. */
+async function sharePlanToBuddy(plan, buddyCode, btnEl){
+  if(!FB.ready || !FB.db || !FIRE){ toast('Dafür musst du eingeloggt sein'); return; }
+  if(btnEl) btnEl.disabled=true;
+  try{
+    const nick=(DB.settings.nickname||'Buddy').slice(0,20);
+    const ref=FIRE.doc(FB.db, 'buddies', buddyCode, 'sharedPlans', uid());
+    await FIRE.setDoc(ref, {
+      fromCode: DB.buddyCode||'', fromNickname: nick,
+      planName: plan.name||'Plan', planData: encodePlan(plan),
+      createdAt: FIRE.serverTimestamp()
+    });
+    toast('🎉 Plan gesendet!');
+    closeSheet();
+  }catch(err){ toast('Senden fehlgeschlagen'); if(btnEl) btnEl.disabled=false; }
+}
+/* Holt Pläne ab, die Buddies über sharePlanToBuddy im eigenen Fach hinterlassen haben,
+   und legt sie zur Bestätigung in DB.incomingSharedPlans ab (siehe renderBuddiesView). */
+async function fetchIncomingSharedPlans(){
+  if(!FB.ready || !FB.user || !DB.buddyCode || !FIRE) return;
+  try{
+    const colRef=FIRE.collection(FB.db, 'buddies', DB.buddyCode, 'sharedPlans');
+    const snap=await FIRE.getDocs(colRef);
+    if(snap.empty) return;
+    if(!Array.isArray(DB.incomingSharedPlans)) DB.incomingSharedPlans=[];
+    let added=0;
+    for(let i=0;i<snap.docs.length;i++){
+      const docSnap=snap.docs[i]; const d=docSnap.data();
+      if(d && d.planData && !DB.incomingSharedPlans.some(x=>x.planData===d.planData)){
+        DB.incomingSharedPlans.push({ id:docSnap.id, fromNickname:d.fromNickname||'Buddy', planName:d.planName||'Plan', planData:d.planData, receivedAt:Date.now() });
+        added++;
+      }
+      try{ await FIRE.deleteDoc(docSnap.ref); }catch(e){}
+    }
+    if(added){ save(); toast('📥 '+added+' geteilte'+(added===1?'r Plan':'e Pläne')+' erhalten'); if(currentView==='buddies') renderBuddiesView(); }
+  }catch(err){ /* silent */ }
+}
+function importIncomingSharedPlan(id){
+  const item=(DB.incomingSharedPlans||[]).find(x=>x.id===id); if(!item) return;
+  const p=decodePlan(item.planData);
+  if(!p||!p.name){ toast('Ungültiger Plan'); return; }
+  const copy=structuredClone(p); copy.id=uid(); copy.builtin=false;
+  DB.customPlans.push(copy);
+  DB.incomingSharedPlans=(DB.incomingSharedPlans||[]).filter(x=>x.id!==id);
+  save(); toast('Plan importiert: '+copy.name); renderBuddiesView(); renderHome();
+}
+function dismissIncomingSharedPlan(id){
+  DB.incomingSharedPlans=(DB.incomingSharedPlans||[]).filter(x=>x.id!==id);
+  save(); renderBuddiesView();
 }
 function checkPlanImportUrl(){
   const hash=location.hash||'';
@@ -4004,7 +4333,7 @@ function renderOnboarding(){
   $$('[data-obfreq]',el).forEach(b=>b.addEventListener('click',()=>{ s.freq=+b.dataset.obfreq; renderOnboarding(); }));
   const nx=$('#ob-next',el); if(nx) nx.addEventListener('click',()=>{ if((s.step===1&&s.level)||(s.step===2&&s.goal)||(s.step===3&&s.freq)){ s.step++; renderOnboarding(); }});
   const bk=$('#ob-back',el); if(bk) bk.addEventListener('click',()=>{ s.step--; renderOnboarding(); });
-  const sk=$('#ob-skip',el); if(sk) sk.addEventListener('click',()=>{ if(!DB.flags) DB.flags={}; DB.flags.onboarded=true; save(); el.remove(); });
+  const sk=$('#ob-skip',el); if(sk) sk.addEventListener('click',()=>{ if(!DB.flags) DB.flags={}; DB.flags.onboarded=true; save(); el.remove(); startAppTour(); });
   const fn=$('#ob-finish',el); if(fn) fn.addEventListener('click',()=>{
     if(!DB.flags) DB.flags={};
     DB.settings.weeklyGoal=s.freq||3;
@@ -4017,6 +4346,47 @@ function renderOnboarding(){
     el.remove();
     toast('🎉 '+recs.length+' Pläne als Favoriten markiert!');
     renderHome();
+    startAppTour();
+  });
+}
+/* ========================= APP-TOUR ========================= */
+const APP_TOUR_STEPS=[
+  {em:'🏋️', title:'Training starten', text:'Auf der Startseite siehst du dein Training des Tages oder deine Favoriten. Ein Tap auf einen Plan startet direkt das Live-Workout mit Timer.'},
+  {em:'✏️', title:'Eigene Pläne bauen', text:'Im Plan-Editor stellst du Übungen frei zusammen, inklusive Warmup/Cooldown, Zyklen und Pausen - ganz nach deinem Level.'},
+  {em:'📈', title:'Skills verfolgen', text:'Der Skill-Tracker zeigt deinen Fortschritt bei Klimmzügen, Muscle Ups, Handstand & Co. - als Liste oder als Baum, der zeigt, welche Grundübungen welche Skills freischalten.'},
+  {em:'🔥', title:'Streak & Achievements', text:'Trainierst du regelmäßig, baust du eine Streak auf und schaltest Achievements frei. Streak-Joker retten dich, falls du mal einen Tag verpasst.'},
+  {em:'🤝', title:'Mit Buddies vergleichen', text:'Füge Freunde über ihren Buddy-Code hinzu und vergleicht eure Wochen-Workouts, Trainingszeit und Streaks miteinander.'},
+  {em:'🗺️', title:'Outdoor-Spots finden', text:'Der Park-Finder zeigt dir Calisthenics-Parks & Outdoor-Gyms in deiner Nähe, inklusive aktuellem Wetter fürs Training.'},
+  {em:'⚙️', title:'Alles einstellbar', text:'In den Einstellungen passt du Erinnerungen, Wochenziel und Tracking-Optionen an. Dieses Tutorial findest du dort jederzeit wieder.'}
+];
+let _tourStep=0;
+function startAppTour(){
+  if(DB.flags && DB.flags.tourSeen) return;
+  _tourStep=0;
+  renderAppTour();
+}
+function renderAppTour(){
+  const existing=$('#tour-scrim'); if(existing) existing.remove();
+  const step=APP_TOUR_STEPS[_tourStep];
+  const isLast=_tourStep===APP_TOUR_STEPS.length-1;
+  const dots=APP_TOUR_STEPS.map((_,i)=>`<i class="${i===_tourStep?'on':''}"></i>`).join('');
+  const content=`<div class="tour-emoji">${step.em}</div>
+    <div class="ob-title">${esc(step.title)}</div>
+    <div class="ob-sub">${esc(step.text)}</div>
+    <div class="tour-dots">${dots}</div>
+    <div class="ob-actions">
+      ${_tourStep===0?'<button class="btn btn-ghost" id="tour-skip">Überspringen</button>':'<button class="btn btn-ghost" id="tour-back">Zurück</button>'}
+      <button class="btn btn-primary" id="tour-next">${isLast?"Los geht's! 🚀":'Weiter'}</button>
+    </div>`;
+  const el=document.createElement('div'); el.className='ob-scrim'; el.id='tour-scrim';
+  el.innerHTML=`<div class="ob-card">${content}</div>`;
+  document.body.appendChild(el);
+  const finish=()=>{ if(!DB.flags) DB.flags={}; DB.flags.tourSeen=true; save(); el.remove(); };
+  const sk=$('#tour-skip',el); if(sk) sk.addEventListener('click', finish);
+  const bk=$('#tour-back',el); if(bk) bk.addEventListener('click',()=>{ _tourStep=Math.max(0,_tourStep-1); renderAppTour(); });
+  $('#tour-next',el).addEventListener('click',()=>{
+    if(isLast){ finish(); return; }
+    _tourStep++; renderAppTour();
   });
 }
 /* ========================= PR TIMELINE SHEET ========================= */
@@ -4295,6 +4665,15 @@ function renderBuddiesView(){
   if(!nick){
     html += '<div class="banner" style="margin-bottom:14px"><div class="banner-ic">'+svg('edit')+'</div><div class="grow"><b>Nickname fehlt</b><span>Setze oben einen Nickname, damit Buddies dich erkennen.</span></div></div>';
   }
+  /* 2b. Eingegangene, geteilte Pläne von Buddies */
+  const inbox = DB.incomingSharedPlans||[];
+  if(inbox.length){
+    html += '<div class="section-label">📥 Geteilte Pläne (' + inbox.length + ')</div>';
+    html += inbox.map(function(item){
+      return '<div class="set-row"><div class="grow"><div class="st-title">'+esc(item.planName)+'</div><div class="st-sub">von '+esc(item.fromNickname)+'</div></div>'
+        + '<div class="pc-actions" style="margin:0;flex:none"><button class="btn btn-primary btn-sm" data-spimport="'+esc(item.id)+'">'+svg('save')+' Importieren</button><button class="btn btn-ghost btn-sm" data-spdismiss="'+esc(item.id)+'">'+svg('close')+'</button></div></div>';
+    }).join('');
+  }
   /* 3. Aktionen */
   html += '<div class="pc-actions" style="margin-bottom:8px"><button class="btn btn-primary" style="flex:1" id="bv-invite">'+svg('share2')+' Freund einladen</button></div>';
   html += '<div class="pc-actions" style="margin-bottom:14px"><button class="btn btn-soft" style="flex:1" id="bv-add">'+svg('plus')+' Code eingeben</button><button class="btn btn-ghost" style="flex:1" id="bv-lb">'+svg('trophy')+' Leaderboard</button></div>';
@@ -4333,6 +4712,8 @@ function renderBuddiesView(){
       save(); renderBuddiesView(); toast('Entfernt');
     });
   }); });
+  $$('#buddies-main [data-spimport]').forEach(function(b){ b.addEventListener('click',function(){ importIncomingSharedPlan(b.dataset.spimport); }); });
+  $$('#buddies-main [data-spdismiss]').forEach(function(b){ b.addEventListener('click',function(){ dismissIncomingSharedPlan(b.dataset.spdismiss); }); });
 }
 /* ========================= BUDDY INVITE LINKS ========================= */
 function buddyInviteUrl(){
@@ -5050,7 +5431,7 @@ function beep(freq,dur,vol,type,force){
     o.start(t); o.stop(t+(dur||0.09)+0.03);
   }catch(e){}
 }
-/* Bewusst KEINE async function - siehe loadNativeGoogleAuth() weiter oben. */
+/* Bewusst KEINE async function - siehe loadNativeSocialLogin() weiter oben. */
 function loadNativeHaptics(){
   if(!isNativeApp()) return null;
   return (window.BARWORK_HAPTICS_SDK && window.BARWORK_HAPTICS_SDK.Haptics) || null;
@@ -5261,7 +5642,6 @@ function goTo(idx, initial){
     else if(st.kind==='cycleRest'){ beep(400,0.2,0.15); vibe([0,60,60,60]); speak('Rundenpause. Runde '+(st.nextCycle)+' kommt.'); }
     else if(st.kind==='prepare'){ speak('Bereit machen'); }
     else if((st.kind==='warmupEx'||st.kind==='cooldownEx') && pauseEnded){ longBeep(); vibe([0,150]); }
-    if(pauseEnded && (st.kind==='exercise'||st.kind==='warmupEx'||st.kind==='cooldownEx')) notifyPauseEnd(st);
   }
   renderStep();
   persistActiveWorkout();
@@ -5571,6 +5951,7 @@ function adjustTime(delta){
 }
 function finishWorkout(){
   stopLoop(); W.done=true; releaseWake(); clearMediaSession(); clearActiveWorkoutSnapshot();
+  cancelBackgroundWorkoutNotifications();
   /* Leaderboard-Update anstoßen (silent) */
   if(DB.settings.leaderboardOptIn) setTimeout(()=>{ pushLeaderboardEntry(); pushBuddyProfile(); }, 500);
   const early = arguments[0]===true;
@@ -5680,6 +6061,7 @@ function askRpeSheet(when, dur){
 }
 function teardownWorkout(silent){
   stopLoop(); releaseWake(); clearMediaSession(); clearActiveWorkoutSnapshot();
+  cancelBackgroundWorkoutNotifications();
   if(W && !W.done){
     const doneEx=exercisesCompleted();
     if(doneEx>0){
@@ -5735,7 +6117,38 @@ async function requestWake(){
 function releaseWake(){ if(wakeLock){ try{wakeLock.release();}catch(e){} wakeLock=null; } }
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible' && currentView==='workout' && W && !W.done){ requestWake(); }
+  if(document.visibilityState==='hidden'){
+    /* App geht in den Hintergrund: Tick-Loop wird von der WebView gedrosselt/suspendiert -
+       bevorstehende Übergänge proaktiv als native OS-Benachrichtigungen vorplanen. */
+    if(W && !W.done && !W.paused) scheduleBackgroundWorkoutNotifications();
+  } else if(document.visibilityState==='visible'){
+    /* Zurück im Vordergrund: Live-Loop übernimmt Sound/Vibration wieder selbst -
+       geplante Hintergrund-Benachrichtigungen stornieren, damit nichts doppelt feuert. */
+    cancelBackgroundWorkoutNotifications();
+  }
 });
+/* document.visibilitychange allein ist in iOS-WKWebView unzuverlässig - es kann beim
+   Wechsel in den Hintergrund (Home-Taste/App-Switcher) spät oder gar nicht feuern, wodurch
+   scheduleBackgroundWorkoutNotifications() nie aufgerufen wurde. @capacitor/app liefert dafür
+   ein natives, garantiert zuverlässiges Lifecycle-Event - zusätzlich zum visibilitychange-
+   Listener oben verdrahtet (beide rufen dieselben, idempotenten Funktionen auf). */
+function loadNativeApp(){
+  if(!isNativeApp()) return null;
+  return (window.BARWORK_APP_SDK && window.BARWORK_APP_SDK.App) || null;
+}
+(function(){
+  const appPlugin=loadNativeApp();
+  if(!appPlugin) return;
+  appPlugin.addListener('appStateChange', ({isActive})=>{
+    if(isActive){
+      if(currentView==='workout' && W && !W.done) requestWake();
+      cancelBackgroundWorkoutNotifications();
+      refreshTodayReminderWeather();
+    } else {
+      if(W && !W.done && !W.paused) scheduleBackgroundWorkoutNotifications();
+    }
+  }).catch(()=>{});
+})();
 
 /* ========================= HISTORY ========================= */
 function deleteHistoryEntry(idx){
@@ -5969,6 +6382,7 @@ function renderSettings(){
     <div class="set-group">
       <div class="set-row" data-action="ai-plan" style="cursor:pointer"><div class="grow"><div class="st-title">🤖 KI-Plan-Generator</div><div class="st-sub">Automatischer Trainingsplan nach deinen Vorgaben</div></div><span class="set-ic">${svg('bolt')}</span></div>
       <div class="set-row" data-action="restart-onboarding" style="cursor:pointer"><div class="grow"><div class="st-title">Onboarding erneut anzeigen</div><div class="st-sub">Empfehlungen neu setzen</div></div><span class="set-ic">${svg('play')}</span></div>
+      <div class="set-row" data-action="restart-tour" style="cursor:pointer"><div class="grow"><div class="st-title">Tutorial erneut ansehen</div><div class="st-sub">Kurzer Rundgang durch die App-Funktionen</div></div><span class="set-ic">${svg('play')}</span></div>
     </div>
     <div class="set-note">Erinnerungen</div>
     <div class="set-group">
@@ -6049,6 +6463,7 @@ function renderSettings(){
   $$('#def-plan-color [data-defcol]').forEach(el=>el.addEventListener('click',()=>{ DB.settings.defaultPlanColor=el.dataset.defcol; save(); renderSettings(); toast('Standardfarbe gespeichert'); }));
   const bw=$('#set-bw'); if(bw) bw.addEventListener('change',()=>{ DB.settings.bodyWeightKg=Math.max(30,Math.min(200,+bw.value||75)); save(); });
   const ro=$$('#settings-main [data-action="restart-onboarding"]'); ro.forEach(r=>r.addEventListener('click',()=>{ DB.flags.onboarded=false; save(); toast('Onboarding wird gestartet...'); setTimeout(()=>{ show('home',true); startOnboarding(); },300); }));
+  const rtour=$$('#settings-main [data-action="restart-tour"]'); rtour.forEach(r=>r.addEventListener('click',()=>{ if(!DB.flags) DB.flags={}; DB.flags.tourSeen=false; save(); toast('Tutorial wird gestartet...'); setTimeout(()=>{ show('home',true); _tourStep=0; renderAppTour(); },300); }));
   const rt=$('#set-remtime'); if(rt) rt.addEventListener('change',()=>{ s.reminderTime=rt.value||'18:00'; save(); scheduleNextReminder(); });
   const ts=$('#btn-test-sound'); if(ts) ts.addEventListener('click', ()=>{ beep(880,0.14,0.2,'sine',true); });
   const tv=$('#btn-test-vibrate'); if(tv) tv.addEventListener('click', ()=>{
@@ -6886,15 +7301,28 @@ function openAltPicker(){
 let _onboardingChecked=false;
 function maybeStartOnboarding(){
   if(_onboardingChecked) return;
-  if(DB.flags && DB.flags.onboarded) { _onboardingChecked=true; return; }
-  if((DB.history||[]).length>0){ _onboardingChecked=true; return; }
-  if((DB.customPlans||[]).length>0){ _onboardingChecked=true; return; }
-  if((DB.favorites||[]).length>0){ _onboardingChecked=true; return; }
+  if(DB.flags && DB.flags.onboarded){
+    _onboardingChecked=true;
+    /* Bestandsnutzer, die den Ziel-Wizard schon vor Einführung der App-Tour
+       durchlaufen (oder übersprungen) haben, bekommen die Tour einmalig nachgereicht. */
+    startAppTour();
+    return;
+  }
+  if((DB.history||[]).length>0){ _onboardingChecked=true; startAppTour(); return; }
+  if((DB.customPlans||[]).length>0){ _onboardingChecked=true; startAppTour(); return; }
+  if((DB.favorites||[]).length>0){ _onboardingChecked=true; startAppTour(); return; }
   _onboardingChecked=true;
   startOnboarding();
 }
+function updateOfflineBanner(){
+  const el=$('#offline-banner'); if(!el) return;
+  el.classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', ()=>{ updateOfflineBanner(); toast('✅ Wieder online'); cloudScheduleSave(); });
+window.addEventListener('offline', updateOfflineBanner);
 function init(){
   load();
+  updateOfflineBanner();
   document.body.dataset.theme=DB.settings.theme||'dark';
   document.body.dataset.accent=DB.settings.accent||'green';
   document.body.dataset.compact=DB.settings.compact?'1':'';
@@ -6905,17 +7333,22 @@ function init(){
   history.replaceState({view:'auth'},'');
   show('auth',false);
   scheduleNextReminder();
+  refreshTodayReminderWeather();
   initFirebase();
   if(isNativeApp()){
     // Eigener, komplett isolierter Fehlerfang: darf unter keinen Umständen
     // initFirebase()/dessen Retry-Logik beeinflussen, egal was hier schiefgeht.
     (async()=>{
       try{
-        const plugin=loadNativeGoogleAuth();
-        if(plugin) await plugin.initialize();
+        const plugin=loadNativeSocialLogin();
+        if(plugin) await plugin.initialize({ google: {
+          webClientId: GOOGLE_SIGNIN_CONFIG.webClientId,
+          iOSClientId: GOOGLE_SIGNIN_CONFIG.iOSClientId,
+          mode: 'online'
+        } });
       }catch(err){
-        console.warn('BARWORK: GoogleAuth.initialize() fehlgeschlagen', err);
-        try{ authStatus('GoogleAuth-Init-Fehler: '+(err&&err.message||String(err)), false); }catch(_){}
+        console.warn('BARWORK: SocialLogin.initialize() fehlgeschlagen', err);
+        try{ authStatus('Google-Login-Init-Fehler: '+(err&&err.message||String(err)), false); }catch(_){}
       }
     })();
     /* Berechtigungen direkt nach der Installation abfragen statt erst, wenn der Nutzer
